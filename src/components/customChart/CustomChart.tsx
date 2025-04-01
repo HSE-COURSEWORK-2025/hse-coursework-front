@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Box, Card, CardContent, Typography, Button } from "@mui/material";
+import { Box, Card, CardContent, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import {
   Chart,
@@ -54,47 +54,12 @@ export const CustomChart = ({
   const theme = useTheme();
   const chartRef = useRef<HTMLCanvasElement | null>(null);
   const chartInstance = useRef<Chart | null>(null);
-  const [isZoomed, setIsZoomed] = useState(false);
-  const [zoomRange, setZoomRange] = useState({ start: "", end: "" });
   const [selection, setSelection] = useState<{
     start: number;
     end: number;
   } | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
 
-  // Исправление 1: Вернули оригинальную логику масштабирования
-  const applyZoom = () => {
-    if (chartInstance.current && zoomRange.start && zoomRange.end) {
-      const startYear = Math.max(2000, parseInt(zoomRange.start));
-      const endYear = Math.min(2050, parseInt(zoomRange.end));
-
-      if (startYear < endYear) {
-        chartInstance.current.zoomScale("x", {
-          min: startYear,
-          max: endYear,
-        });
-        setIsZoomed(true);
-      }
-    }
-  };
-
-  const resetZoom = () => {
-    if (chartInstance.current) {
-      chartInstance.current.resetZoom();
-      setZoomRange({ start: "", end: "" });
-      setIsZoomed(false);
-    }
-  };
-
-  const handleRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setZoomRange((prev) => ({
-      ...prev,
-      [name]: value.replace(/[^0-9]/g, "").slice(0, 4),
-    }));
-  };
-
-  // Исправление 2: Вернули оригинальную логику обработки мыши
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (chartInstance.current) {
       const xAxis = chartInstance.current.scales.x;
@@ -160,11 +125,6 @@ export const CustomChart = ({
           min: clampedStart,
           max: clampedEnd,
         });
-        setIsZoomed(true);
-        setZoomRange({
-          start: String(clampedStart),
-          end: String(clampedEnd),
-        });
       }
     }
     setIsSelecting(false);
@@ -200,7 +160,6 @@ export const CustomChart = ({
           chartInstance.current.destroy();
         }
 
-        // Исправление 3: Вернули оригинальные настройки плагина zoom
         const annotations = [
           ...highlightIntervals.map((interval, idx) => ({
             type: "box" as const,
@@ -280,14 +239,12 @@ export const CustomChart = ({
                     backgroundColor: `${theme.palette.primary.main}30`,
                   },
                   mode: "x",
-                  onZoomComplete: ({ chart }) => setIsZoomed(true),
                 },
                 pan: {
                   enabled: true,
                   mode: "x",
                   modifierKey: "alt",
                 },
-                // Исправление 4: Вернули оригинальные лимиты
                 limits: {
                   x: { min: 2000, max: 2050, minRange: 5 },
                 },
@@ -330,7 +287,11 @@ export const CustomChart = ({
           drawSelection(this);
         };
 
-        const handleDoubleClick = () => resetZoom();
+        const handleDoubleClick = () => {
+          if (chartInstance.current) {
+            chartInstance.current.resetZoom();
+          }
+        };
         ctx.canvas.ondblclick = handleDoubleClick;
         ctx.canvas.oncontextmenu = (e) => e.preventDefault();
       }
@@ -354,77 +315,6 @@ export const CustomChart = ({
         <Typography variant="h6" gutterBottom>
           {title}
         </Typography>
-
-        <Box
-          sx={{
-            display: "flex",
-            gap: 1,
-            mb: 2,
-            flexWrap: "wrap",
-            "& > *": {
-              height: 36,
-              fontSize: "0.875rem",
-              borderRadius: "4px",
-              border: `1px solid ${theme.palette.divider}`,
-              padding: "0 8px",
-            },
-          }}
-        >
-          <input
-            type="text"
-            name="start"
-            value={zoomRange.start}
-            onChange={handleRangeChange}
-            placeholder="Начальный год"
-            style={{ width: 120 }}
-          />
-          <input
-            type="text"
-            name="end"
-            value={zoomRange.end}
-            onChange={handleRangeChange}
-            placeholder="Конечный год"
-            style={{ width: 120 }}
-          />
-          <Button
-            onClick={applyZoom}
-            sx={{
-              bgcolor: theme.palette.primary.main,
-              color: theme.palette.primary.contrastText,
-              "&:hover": { bgcolor: theme.palette.primary.dark },
-            }}
-          >
-            Применить
-          </Button>
-          <Button
-            onClick={resetZoom}
-            sx={{
-              bgcolor: theme.palette.error.main,
-              color: theme.palette.error.contrastText,
-              "&:hover": { bgcolor: theme.palette.error.dark },
-            }}
-          >
-            Сбросить
-          </Button>
-        </Box>
-
-        {isZoomed && (
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{
-              position: "absolute",
-              right: 16,
-              top: 16,
-              backgroundColor: theme.palette.background.default,
-              px: 1,
-              borderRadius: 1,
-              boxShadow: 1,
-            }}
-          >
-            Двойной клик для сброса
-          </Typography>
-        )}
 
         <Box
           sx={{
@@ -455,7 +345,6 @@ export const CustomChart = ({
               Единицы измерения: {unit}
             </Typography>
           )}
-          {/* Исправление 5: Вернули оригинальный формат подписи */}
           <Typography variant="caption" color="text.secondary">
             {`${data.length} точек данных (2000-2050)`}
           </Typography>
