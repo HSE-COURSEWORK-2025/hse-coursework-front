@@ -1,173 +1,355 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from "react";
+import { Box, Card, CardContent, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
+  Chart,
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  Title,
+  CategoryScale,
   Tooltip,
-  ReferenceLine,
-  ReferenceArea,
-  ResponsiveContainer,
-} from 'recharts';
-import { Paper, Typography, useTheme, Box, IconButton } from '@mui/material';
-import ZoomOutMapIcon from '@mui/icons-material/ZoomOutMap';
+  Legend,
+} from "chart.js";
+import zoomPlugin from "chartjs-plugin-zoom";
+import annotationPlugin from "chartjs-plugin-annotation";
 
-// Типы данных
-interface ChartData {
-  x: number | string;
-  y: number;
+Chart.register(
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Title,
+  Tooltip,
+  Legend,
+  zoomPlugin,
+  annotationPlugin
+);
+
+interface DataPoint {
+  year: string;
+  value: number;
 }
 
-interface ChartProps {
-  data: ChartData[];
+interface MetricCardProps {
   title: string;
-  xLabel?: string;
-  yLabel?: string;
-  highlightArea?: { x1: number | string; x2: number | string };
-  verticalLines?: { x: number | string; label?: string }[];
+  data: DataPoint[];
+  unit?: string;
+  verticalLines?: string[];
+  highlightIntervals?: {
+    start: string;
+    end: string;
+  }[];
 }
 
 export const CustomChart = ({
-  data,
   title,
-  xLabel,
-  yLabel,
-  highlightArea,
+  data,
+  unit,
   verticalLines = [],
-}: ChartProps) => {
+  highlightIntervals = [],
+}: MetricCardProps) => {
   const theme = useTheme();
-  const [isZoomed, setIsZoomed] = useState(false);
+  const chartRef = useRef<HTMLCanvasElement | null>(null);
+  const chartInstance = useRef<Chart | null>(null);
+  const [selection, setSelection] = useState<{
+    start: number;
+    end: number;
+  } | null>(null);
+  const [isSelecting, setIsSelecting] = useState(false);
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (chartInstance.current) {
+      const xAxis = chartInstance.current.scales.x;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+
+      const rawIndex = xAxis.getValueForPixel(x);
+      if (rawIndex === undefined || rawIndex === null) return;
+
+      const index = Math.round(rawIndex);
+      if (index < 0 || index >= data.length) return;
+
+      const year = data[index].year;
+      const value = Number(year);
+
+      if (!isNaN(value)) {
+        setIsSelecting(true);
+        setSelection({ start: value, end: value });
+      }
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (isSelecting && chartInstance.current) {
+      const xAxis = chartInstance.current.scales.x;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+
+      const rawIndex = xAxis.getValueForPixel(x);
+      if (rawIndex === undefined || rawIndex === null) return;
+
+      const index = Math.round(rawIndex);
+      if (index < 0 || index >= data.length) return;
+
+      const year = data[index].year;
+      const value = Number(year);
+
+      if (!isNaN(value)) {
+        setSelection((prev) => {
+          if (!prev) return null;
+          return { ...prev, end: value };
+        });
+      }
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (isSelecting && selection && chartInstance.current) {
+      const minDistance = 1;
+      const [start, end] = [
+        Math.min(selection.start, selection.end),
+        Math.max(selection.start, selection.end),
+      ];
+
+      const firstYear = Number(data[0].year);
+      const lastYear = Number(data[data.length - 1].year);
+
+      const clampedStart = Math.max(firstYear, start);
+      const clampedEnd = Math.min(lastYear, end);
+
+      if (Math.abs(clampedEnd - clampedStart) >= minDistance) {
+        chartInstance.current.zoomScale("x", {
+          min: clampedStart,
+          max: clampedEnd,
+        });
+      }
+    }
+    setIsSelecting(false);
+    setSelection(null);
+  };
+
+  const drawSelection = (chart: Chart) => {
+    if (!selection || !isSelecting) return;
+
+    const { ctx } = chart;
+    const { top, bottom } = chart.chartArea;
+    const xAxis = chart.scales.x;
+
+    const start = xAxis.getPixelForValue(selection.start);
+    const end = xAxis.getPixelForValue(selection.end);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle = `${theme.palette.primary.main}30`;
+    ctx.fillRect(start, top, end - start, bottom - top);
+    ctx.strokeStyle = theme.palette.primary.main;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    ctx.strokeRect(start, top, end - start, bottom - top);
+    ctx.restore();
+  };
+
+  useEffect(() => {
+    if (chartRef.current) {
+      const ctx = chartRef.current.getContext("2d");
+      if (ctx) {
+        if (chartInstance.current) {
+          chartInstance.current.destroy();
+        }
+
+        const annotations = [
+          ...highlightIntervals.map((interval, idx) => ({
+            type: "box" as const,
+            xMin: Number(interval.start),
+            xMax: Number(interval.end),
+            backgroundColor: `${theme.palette.error.main}33`,
+            borderColor: theme.palette.error.main,
+            borderWidth: 1,
+            label: {
+              content: `Interval ${idx + 1}`,
+              display: true,
+              position: "start" as const,
+              color: theme.palette.text.primary,
+              font: { size: 10 },
+            },
+          })),
+          ...verticalLines.map((line, idx) => ({
+            type: "line" as const,
+            xMin: Number(line),
+            xMax: Number(line),
+            borderColor: theme.palette.error.main,
+            borderWidth: 1.5,
+            borderDash: [5, 3],
+            label: {
+              content: `Event ${idx + 1}`,
+              position: "start" as const,
+              color: theme.palette.text.primary,
+              font: { size: 12 },
+            },
+          })),
+        ];
+
+        chartInstance.current = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: data.map((d) => d.year),
+            datasets: [
+              {
+                label: title,
+                data: data.map((d) => d.value),
+                borderColor: theme.palette.primary.main,
+                tension: 0.4,
+                borderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: theme.palette.primary.main,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            transitions: {
+              zoom: { animation: { duration: 300 } },
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: theme.palette.background.paper,
+                titleColor: theme.palette.text.primary,
+                bodyColor: theme.palette.text.secondary,
+                borderColor: theme.palette.divider,
+                borderWidth: 1,
+                callbacks: {
+                  title: (items) => `Год: ${items[0].label}`,
+                  label: (item) =>
+                    `${item.dataset.label}: ${item.formattedValue} ${unit}`,
+                },
+              },
+              zoom: {
+                zoom: {
+                  wheel: { enabled: true, modifierKey: "ctrl" },
+                  pinch: { enabled: true },
+                  drag: {
+                    enabled: true,
+                    modifierKey: undefined,
+                    backgroundColor: `${theme.palette.primary.main}30`,
+                  },
+                  mode: "x",
+                },
+                pan: {
+                  enabled: true,
+                  mode: "x",
+                  modifierKey: "alt",
+                },
+                limits: {
+                  x: { min: 2000, max: 2050, minRange: 5 },
+                },
+              },
+              annotation: { annotations },
+            },
+            scales: {
+              x: {
+                type: "linear",
+                title: { display: false },
+                grid: {
+                  color: theme.palette.divider,
+                  tickLength: 0,
+                },
+                ticks: {
+                  color: theme.palette.text.secondary,
+                  autoSkip: true,
+                  maxRotation: 0,
+                  callback: (value) => Number(value).toFixed(0),
+                },
+              },
+              y: {
+                title: { display: false },
+                grid: {
+                  color: theme.palette.divider,
+                  tickLength: 0,
+                },
+                ticks: {
+                  color: theme.palette.text.secondary,
+                  padding: 8,
+                },
+              },
+            },
+          },
+        });
+
+        const originalDraw = chartInstance.current.draw;
+        chartInstance.current.draw = function () {
+          originalDraw.call(this);
+          drawSelection(this);
+        };
+
+        const handleDoubleClick = () => {
+          if (chartInstance.current) {
+            chartInstance.current.resetZoom();
+          }
+        };
+        ctx.canvas.ondblclick = handleDoubleClick;
+        ctx.canvas.oncontextmenu = (e) => e.preventDefault();
+      }
+    }
+
+    return () => {
+      chartInstance.current?.destroy();
+    };
+  }, [data, theme, title, unit, verticalLines, highlightIntervals]);
 
   return (
-    <Paper
+    <Card
       sx={{
-        p: 3,
-        borderRadius: 4,
-        position: 'relative',
-        transition: theme.transitions.create('all'),
+        mb: 3,
+        borderRadius: 2,
+        "&:hover": { boxShadow: theme.shadows[4] },
+        position: "relative",
       }}
-      elevation={3}
     >
-      {/* Заголовок и элементы управления */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h6" component="div">
+      <CardContent>
+        <Typography variant="h6" gutterBottom>
           {title}
         </Typography>
-        <IconButton onClick={() => setIsZoomed(!isZoomed)} size="small">
-          <ZoomOutMapIcon fontSize="small" />
-        </IconButton>
-      </Box>
 
-      {/* Контейнер графика */}
-      <Box sx={{ height: isZoomed ? '70vh' : 400, transition: 'height 0.3s' }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={data}
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-          >
-            {/* Сетка */}
-            <CartesianGrid
-              stroke={theme.palette.divider}
-              strokeDasharray="3 3"
-            />
+        <Box
+          sx={{
+            height: 150,
+            position: "relative",
+            "&:hover": { cursor: "crosshair" },
+          }}
+        >
+          <canvas
+            ref={chartRef}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+          />
+        </Box>
 
-            {/* Оси */}
-            <XAxis
-              dataKey="x"
-              label={{
-                value: xLabel,
-                position: 'bottom',
-                fill: theme.palette.text.secondary,
-              }}
-              tick={{ fill: theme.palette.text.secondary }}
-            />
-            <YAxis
-              label={{
-                value: yLabel,
-                angle: -90,
-                position: 'left',
-                fill: theme.palette.text.secondary,
-              }}
-              tick={{ fill: theme.palette.text.secondary }}
-            />
-
-            {/* Выделенная область */}
-            {highlightArea && (
-              <ReferenceArea
-                x1={highlightArea.x1}
-                x2={highlightArea.x2}
-                fill={theme.palette.action.selected}
-                fillOpacity={0.3}
-              />
-            )}
-
-            {/* Вертикальные линии */}
-            {verticalLines.map((line, index) => (
-              <ReferenceLine
-                key={index}
-                x={line.x}
-                stroke={theme.palette.error.main}
-                strokeWidth={1.5}
-                strokeDasharray="5 5"
-                label={{
-                  value: line.label,
-                  fill: theme.palette.text.primary,
-                  position: 'top',
-                }}
-              />
-            ))}
-
-            {/* Всплывающая подсказка */}
-            <Tooltip
-              contentStyle={{
-                backgroundColor: theme.palette.background.paper,
-                border: `1px solid ${theme.palette.divider}`,
-                borderRadius: theme.shape.borderRadius,
-                boxShadow: theme.shadows[3],
-              }}
-            />
-
-            {/* Линия графика */}
-            <Line
-              type="monotone"
-              dataKey="y"
-              stroke={theme.palette.primary.main}
-              strokeWidth={2}
-              dot={{ fill: theme.palette.primary.dark, strokeWidth: 1 }}
-              activeDot={{
-                r: 6,
-                fill: theme.palette.primary.main,
-                stroke: theme.palette.background.paper,
-                strokeWidth: 2,
-              }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </Box>
-    </Paper>
+        <Box
+          sx={{
+            mt: 1,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          {unit && (
+            <Typography variant="caption" color="text.secondary">
+              Единицы измерения: {unit}
+            </Typography>
+          )}
+          <Typography variant="caption" color="text.secondary">
+            {`${data.length} точек данных (2000-2050)`}
+          </Typography>
+        </Box>
+      </CardContent>
+    </Card>
   );
 };
-
-// Пример использования
-const sampleData = [
-  { x: 'Jan', y: 4000 },
-  { x: 'Feb', y: 3000 },
-  { x: 'Mar', y: 5000 },
-  { x: 'Apr', y: 2780 },
-  { x: 'May', y: 1890 },
-];
-
-// export const ExampleChart = () => (
-//   <CustomChart
-//     title="Продажи за 2023 год"
-//     data={sampleData}
-//     xLabel="Месяц"
-//     yLabel="Продажи ($)"
-//     highlightArea={{ x1: 'Feb', x2: 'Apr' }}
-//     verticalLines={[
-//       { x: 'Mar', label: 'Пик продаж' },
-//       { x: 'May', label: 'Минимум' },
-//     ]}
-//   />
-// );
