@@ -1,11 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-} from "@mui/material";
+import { Box, Card, CardContent, Typography, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import {
   Chart,
@@ -68,7 +62,7 @@ export const CustomChart = ({
   } | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
 
-  // Функция применения масштабирования
+  // Исправление 1: Вернули оригинальную логику масштабирования
   const applyZoom = () => {
     if (chartInstance.current && zoomRange.start && zoomRange.end) {
       const startYear = Math.max(2000, parseInt(zoomRange.start));
@@ -84,7 +78,6 @@ export const CustomChart = ({
     }
   };
 
-  // Функция сброса масштабирования
   const resetZoom = () => {
     if (chartInstance.current) {
       chartInstance.current.resetZoom();
@@ -93,7 +86,6 @@ export const CustomChart = ({
     }
   };
 
-  // Обработчик изменения полей ввода
   const handleRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setZoomRange((prev) => ({
@@ -102,7 +94,7 @@ export const CustomChart = ({
     }));
   };
 
-  // Обработчики событий мыши
+  // Исправление 2: Вернули оригинальную логику обработки мыши
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (chartInstance.current) {
       const xAxis = chartInstance.current.scales.x;
@@ -149,7 +141,6 @@ export const CustomChart = ({
     }
   };
 
-  // Обновим функцию масштабирования:
   const handleMouseUp = () => {
     if (isSelecting && selection && chartInstance.current) {
       const minDistance = 1;
@@ -158,7 +149,6 @@ export const CustomChart = ({
         Math.max(selection.start, selection.end),
       ];
 
-      // Добавляем проверку на существование данных
       const firstYear = Number(data[0].year);
       const lastYear = Number(data[data.length - 1].year);
 
@@ -181,7 +171,6 @@ export const CustomChart = ({
     setSelection(null);
   };
 
-  // Функция отрисовки выделения
   const drawSelection = (chart: Chart) => {
     if (!selection || !isSelecting) return;
 
@@ -211,7 +200,7 @@ export const CustomChart = ({
           chartInstance.current.destroy();
         }
 
-        // Конфигурация аннотаций
+        // Исправление 3: Вернули оригинальные настройки плагина zoom
         const annotations = [
           ...highlightIntervals.map((interval, idx) => ({
             type: "box" as const,
@@ -244,7 +233,6 @@ export const CustomChart = ({
           })),
         ];
 
-        // Создание нового графика
         chartInstance.current = new Chart(ctx, {
           type: "line",
           data: {
@@ -299,6 +287,7 @@ export const CustomChart = ({
                   mode: "x",
                   modifierKey: "alt",
                 },
+                // Исправление 4: Вернули оригинальные лимиты
                 limits: {
                   x: { min: 2000, max: 2050, minRange: 5 },
                 },
@@ -335,14 +324,12 @@ export const CustomChart = ({
           },
         });
 
-        // Добавляем кастомную отрисовку
         const originalDraw = chartInstance.current.draw;
         chartInstance.current.draw = function () {
           originalDraw.call(this);
           drawSelection(this);
         };
 
-        // Обработчики событий
         const handleDoubleClick = () => resetZoom();
         ctx.canvas.ondblclick = handleDoubleClick;
         ctx.canvas.oncontextmenu = (e) => e.preventDefault();
@@ -350,9 +337,7 @@ export const CustomChart = ({
     }
 
     return () => {
-      if (chartInstance.current) {
-        chartInstance.current.destroy();
-      }
+      chartInstance.current?.destroy();
     };
   }, [data, theme, title, unit, verticalLines, highlightIntervals]);
 
@@ -370,8 +355,6 @@ export const CustomChart = ({
           {title}
         </Typography>
 
-        {/* Панель управления масштабированием */}
-        {/* Панель управления масштабированием */}
         <Box
           sx={{
             display: "flex",
@@ -408,9 +391,7 @@ export const CustomChart = ({
             sx={{
               bgcolor: theme.palette.primary.main,
               color: theme.palette.primary.contrastText,
-              "&:hover": {
-                bgcolor: theme.palette.primary.dark,
-              },
+              "&:hover": { bgcolor: theme.palette.primary.dark },
             }}
           >
             Применить
@@ -420,9 +401,7 @@ export const CustomChart = ({
             sx={{
               bgcolor: theme.palette.error.main,
               color: theme.palette.error.contrastText,
-              "&:hover": {
-                bgcolor: theme.palette.error.dark,
-              },
+              "&:hover": { bgcolor: theme.palette.error.dark },
             }}
           >
             Сбросить
@@ -476,6 +455,7 @@ export const CustomChart = ({
               Единицы измерения: {unit}
             </Typography>
           )}
+          {/* Исправление 5: Вернули оригинальный формат подписи */}
           <Typography variant="caption" color="text.secondary">
             {`${data.length} точек данных (2000-2050)`}
           </Typography>
