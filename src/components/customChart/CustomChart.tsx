@@ -74,7 +74,10 @@ export const CustomChart = ({
   const theme = useTheme();
   const chartRef = useRef<HTMLCanvasElement | null>(null);
   const chartInstance = useRef<Chart | null>(null);
-  const [selection, setSelection] = useState<{ start: number; end: number } | null>(null);
+  const [selection, setSelection] = useState<{
+    start: number;
+    end: number;
+  } | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -110,7 +113,6 @@ export const CustomChart = ({
         setSelection({ start: value, end: value });
       }
     }
-    // Панорамирование обрабатываем только через выделение (например, можно расширить, если понадобится)
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -284,8 +286,8 @@ export const CustomChart = ({
               x: {
                 type: "linear",
                 title: { display: false },
-                min: fullDataMin,
-                max: fullDataMax,
+                min: initialRange ? initialRange.min : fullDataMin,
+                max: initialRange ? initialRange.max : fullDataMax,
                 grid: {
                   color: theme.palette.divider,
                   tickLength: 0,
@@ -326,9 +328,13 @@ export const CustomChart = ({
           drawSelection(this);
         };
 
+        // При двойном клике масштабируем до полного диапазона (всех точек)
         const handleDoubleClick = () => {
           if (chartInstance.current) {
-            chartInstance.current.resetZoom();
+            chartInstance.current.zoomScale("x", {
+              min: fullDataMin,
+              max: fullDataMax,
+            });
           }
         };
         ctx.canvas.ondblclick = handleDoubleClick;
@@ -340,7 +346,15 @@ export const CustomChart = ({
         chartInstance.current.destroy();
       }
     };
-  }, [data, theme, title, unit, verticalLines, highlightIntervals, initialRange]);
+  }, [
+    data,
+    theme,
+    title,
+    unit,
+    verticalLines,
+    highlightIntervals,
+    initialRange,
+  ]);
 
   return (
     <Card
@@ -387,16 +401,20 @@ export const CustomChart = ({
         >
           <Box sx={{ p: 2 }}>
             <Typography variant="caption" display="flex" alignItems="center">
-              <ZoomInIcon fontSize="small" sx={{ mr: 0.5 }} /> Левой кнопкой мыши: выделение области для увеличения (зумирование).
+              <ZoomInIcon fontSize="small" sx={{ mr: 0.5 }} /> Левой кнопкой
+              мыши: выделение области для увеличения (зумирование).
             </Typography>
             <Typography variant="caption" display="flex" alignItems="center">
-              <PanToolIcon fontSize="small" sx={{ mr: 0.5 }} /> Правой кнопкой мыши: перетаскивание (панорамирование) графика влево/вправо.
+              <PanToolIcon fontSize="small" sx={{ mr: 0.5 }} /> Правой кнопкой
+              мыши: перетаскивание (панорамирование) графика влево/вправо.
             </Typography>
             <Typography variant="caption" display="flex" alignItems="center">
-              <MouseIcon fontSize="small" sx={{ mr: 0.5 }} /> Колёсико мыши (с зажатым Ctrl): зумирование колесиком.
+              <MouseIcon fontSize="small" sx={{ mr: 0.5 }} /> Колёсико мыши (с
+              зажатым Ctrl): зумирование колесиком.
             </Typography>
             <Typography variant="caption" display="flex" alignItems="center">
-              <RefreshIcon fontSize="small" sx={{ mr: 0.5 }} /> Двойной клик: сброс зума.
+              <RefreshIcon fontSize="small" sx={{ mr: 0.5 }} /> Двойной клик:
+              сброс зума.
             </Typography>
           </Box>
         </Popover>
