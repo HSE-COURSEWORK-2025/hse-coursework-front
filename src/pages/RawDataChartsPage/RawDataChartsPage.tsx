@@ -67,6 +67,7 @@ export const RawDataChartsPage = () => {
               { start: "1990", end: "1995" },
               { start: "1050", end: "1080" },
             ]}
+            initialRange={{min: 1950, max: 2000}}
           />
         </Box>
         <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>

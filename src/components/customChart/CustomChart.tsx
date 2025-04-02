@@ -1,5 +1,19 @@
 import { useState, useEffect, useRef } from "react";
-import { Box, Card, CardContent, Typography } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Typography,
+  IconButton,
+  Popover,
+  Box,
+} from "@mui/material";
+import {
+  ZoomIn as ZoomInIcon,
+  PanTool as PanToolIcon,
+  Mouse as MouseIcon,
+  Refresh as RefreshIcon,
+} from "@mui/icons-material";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { useTheme } from "@mui/material/styles";
 import {
   Chart,
@@ -42,6 +56,11 @@ interface MetricCardProps {
     start: string;
     end: string;
   }[];
+  // Проп для начального интервала
+  initialRange?: {
+    min: number;
+    max: number;
+  };
 }
 
 export const CustomChart = ({
@@ -50,24 +69,27 @@ export const CustomChart = ({
   unit,
   verticalLines = [],
   highlightIntervals = [],
+  initialRange,
 }: MetricCardProps) => {
   const theme = useTheme();
   const chartRef = useRef<HTMLCanvasElement | null>(null);
   const chartInstance = useRef<Chart | null>(null);
-  const [selection, setSelection] = useState<{
-    start: number;
-    end: number;
-  } | null>(null);
+  const [selection, setSelection] = useState<{ start: number; end: number } | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   // Состояния для панорамирования правой кнопкой мыши
   const [isPanning, setIsPanning] = useState(false);
   const [panStartPixel, setPanStartPixel] = useState<number | null>(null);
   const panStartRange = useRef<{ min: number; max: number } | null>(null);
 
+  const extendValsPercent = 0.02;
   const dataYears = data.map((d) => Number(d.year));
   const minYear = Math.min(...dataYears);
   const maxYear = Math.max(...dataYears);
+
+  const fullDataMin = minYear - minYear * extendValsPercent;
+  const fullDataMax = maxYear + maxYear * extendValsPercent;
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!chartInstance.current) return;
@@ -79,29 +101,16 @@ export const CustomChart = ({
     if (e.button === 0) {
       const rawIndex = xAxis.getValueForPixel(x);
       if (rawIndex === undefined || rawIndex === null) return;
-
       const index = Math.round(rawIndex);
       if (index < 0 || index >= data.length) return;
-
       const year = data[index].year;
       const value = Number(year);
-
       if (!isNaN(value)) {
         setIsSelecting(true);
         setSelection({ start: value, end: value });
       }
     }
-    // Если нажата правая кнопка мыши – начинаем панорамирование
-    else if (e.button === 2) {
-      e.preventDefault();
-      setIsPanning(true);
-      setPanStartPixel(x);
-      // Запоминаем текущий диапазон оси X
-      panStartRange.current = {
-        min: typeof xAxis.min === "number" ? xAxis.min : minYear,
-        max: typeof xAxis.max === "number" ? xAxis.max : maxYear,
-      };
-    }
+    // Панорамирование обрабатываем только через выделение (например, можно расширить, если понадобится)
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -110,17 +119,13 @@ export const CustomChart = ({
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
 
-    // Обработка выделения левой кнопкой мыши
     if (isSelecting) {
       const rawIndex = xAxis.getValueForPixel(x);
       if (rawIndex === undefined || rawIndex === null) return;
-
       const index = Math.round(rawIndex);
       if (index < 0 || index >= data.length) return;
-
       const year = data[index].year;
       const value = Number(year);
-
       if (!isNaN(value)) {
         setSelection((prev) => {
           if (!prev) return null;
@@ -128,45 +133,19 @@ export const CustomChart = ({
         });
       }
     }
-    // Обработка панорамирования правой кнопкой мыши
-    else if (isPanning && panStartPixel !== null && panStartRange.current) {
-      // Вычисляем разницу в пикселях от начала панорамирования
-      const deltaPixel = x - panStartPixel;
-      // Преобразуем разницу в пикселях в разницу по значению оси
-      const startValueAtPanStart = xAxis.getValueForPixel(panStartPixel);
-      const currentValue = xAxis.getValueForPixel(x);
-
-      if (startValueAtPanStart == null || currentValue == null) return;
-
-      const valueDelta = startValueAtPanStart - currentValue;
-
-      // Новый диапазон оси X
-      const newMin = panStartRange.current.min + valueDelta;
-      const newMax = panStartRange.current.max + valueDelta;
-
-      // Обновляем масштаб графика (панорамирование)
-      chartInstance.current.zoomScale("x", {
-        min: newMin,
-        max: newMax,
-      });
-    }
   };
 
   const handleMouseUp = (e?: React.MouseEvent<HTMLCanvasElement>) => {
-    // Завершаем выделение левой кнопкой мыши
     if (isSelecting && selection && chartInstance.current) {
       const minDistance = 1;
       const [start, end] = [
         Math.min(selection.start, selection.end),
         Math.max(selection.start, selection.end),
       ];
-
       const firstYear = Number(data[0].year);
       const lastYear = Number(data[data.length - 1].year);
-
       const clampedStart = Math.max(firstYear, start);
       const clampedEnd = Math.min(lastYear, end);
-
       if (Math.abs(clampedEnd - clampedStart) >= minDistance) {
         chartInstance.current.zoomScale("x", {
           min: clampedStart,
@@ -176,8 +155,6 @@ export const CustomChart = ({
     }
     setIsSelecting(false);
     setSelection(null);
-
-    // Завершаем панорамирование правой кнопкой мыши
     if (isPanning) {
       setIsPanning(false);
       setPanStartPixel(null);
@@ -187,14 +164,11 @@ export const CustomChart = ({
 
   const drawSelection = (chart: Chart) => {
     if (!selection || !isSelecting) return;
-
     const { ctx } = chart;
     const { top, bottom } = chart.chartArea;
     const xAxis = chart.scales.x;
-
     const start = xAxis.getPixelForValue(selection.start);
     const end = xAxis.getPixelForValue(selection.end);
-
     ctx.save();
     ctx.beginPath();
     ctx.fillStyle = `${theme.palette.primary.main}30`;
@@ -213,7 +187,6 @@ export const CustomChart = ({
         if (chartInstance.current) {
           chartInstance.current.destroy();
         }
-
         const annotations = [
           ...highlightIntervals.map((interval, idx) => ({
             type: "box" as const,
@@ -245,7 +218,6 @@ export const CustomChart = ({
             },
           })),
         ];
-
         chartInstance.current = new Chart(ctx, {
           type: "line",
           data: {
@@ -266,6 +238,7 @@ export const CustomChart = ({
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            // responsiveAnimationDuration: 0,
             transitions: {
               zoom: { animation: { duration: 300 } },
             },
@@ -283,7 +256,6 @@ export const CustomChart = ({
                     `${item.dataset.label}: ${item.formattedValue} ${unit}`,
                 },
               },
-              // Оставляем зумирование колесиком мыши (ctrl+wheel)
               zoom: {
                 zoom: {
                   wheel: { enabled: true, modifierKey: "ctrl" },
@@ -295,13 +267,15 @@ export const CustomChart = ({
                   },
                   mode: "x",
                 },
-                // Панорамирование по умолчанию не будет срабатывать на левую кнопку,
-                // так как мы реализуем его сами для правой кнопки мыши.
                 pan: {
                   enabled: false,
                 },
                 limits: {
-                  x: { min: minYear, max: maxYear, minRange: 3 },
+                  x: {
+                    min: fullDataMin,
+                    max: fullDataMax,
+                    minRange: 3,
+                  },
                 },
               },
               annotation: { annotations },
@@ -310,6 +284,8 @@ export const CustomChart = ({
               x: {
                 type: "linear",
                 title: { display: false },
+                min: fullDataMin,
+                max: fullDataMax,
                 grid: {
                   color: theme.palette.divider,
                   tickLength: 0,
@@ -336,33 +312,35 @@ export const CustomChart = ({
           },
         });
 
-        // Перехватываем метод draw для отрисовки выделения (при левой кнопке)
+        // Если задан начальный диапазон, устанавливаем его сразу после создания графика
+        if (initialRange) {
+          chartInstance.current.zoomScale("x", {
+            min: initialRange.min,
+            max: initialRange.max,
+          });
+        }
+
         const originalDraw = chartInstance.current.draw;
         chartInstance.current.draw = function () {
           originalDraw.call(this);
           drawSelection(this);
         };
 
-        // Обработчик двойного клика для сброса зума
         const handleDoubleClick = () => {
           if (chartInstance.current) {
             chartInstance.current.resetZoom();
           }
         };
         ctx.canvas.ondblclick = handleDoubleClick;
-        // Предотвращаем появление контекстного меню при правой кнопке мыши
         ctx.canvas.oncontextmenu = (e) => e.preventDefault();
       }
     }
-
     return () => {
-      chartInstance.current?.destroy();
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+      }
     };
-  }, [data, theme, title, unit, verticalLines, highlightIntervals]);
-
-  useEffect(() => {
-    if (selection) console.log("selection", selection);
-  }, [selection]);
+  }, [data, theme, title, unit, verticalLines, highlightIntervals, initialRange]);
 
   return (
     <Card
@@ -373,15 +351,61 @@ export const CustomChart = ({
         position: "relative",
       }}
     >
-      <CardContent>
+      <CardContent sx={{ position: "relative" }}>
         <Typography variant="h6" gutterBottom>
           {title}
         </Typography>
 
+        {/* Иконка для показа/скрытия всплывающего квадратика с подсказками */}
+        <IconButton
+          onClick={(e) => setAnchorEl(e.currentTarget)}
+          sx={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            bgcolor: theme.palette.background.paper,
+            "&:hover": { bgcolor: theme.palette.grey[300] },
+            zIndex: 1,
+          }}
+        >
+          <HelpOutlineIcon />
+        </IconButton>
+
+        {/* Всплывающий квадратик с подсказками */}
+        <Popover
+          open={Boolean(anchorEl)}
+          anchorEl={anchorEl}
+          onClose={() => setAnchorEl(null)}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+        >
+          <Box sx={{ p: 2 }}>
+            <Typography variant="caption" display="flex" alignItems="center">
+              <ZoomInIcon fontSize="small" sx={{ mr: 0.5 }} /> Левой кнопкой мыши: выделение области для увеличения (зумирование).
+            </Typography>
+            <Typography variant="caption" display="flex" alignItems="center">
+              <PanToolIcon fontSize="small" sx={{ mr: 0.5 }} /> Правой кнопкой мыши: перетаскивание (панорамирование) графика влево/вправо.
+            </Typography>
+            <Typography variant="caption" display="flex" alignItems="center">
+              <MouseIcon fontSize="small" sx={{ mr: 0.5 }} /> Колёсико мыши (с зажатым Ctrl): зумирование колесиком.
+            </Typography>
+            <Typography variant="caption" display="flex" alignItems="center">
+              <RefreshIcon fontSize="small" sx={{ mr: 0.5 }} /> Двойной клик: сброс зума.
+            </Typography>
+          </Box>
+        </Popover>
+
+        {/* Обёртка для графика */}
         <Box
           sx={{
-            height: 150,
             position: "relative",
+            height: 150,
             "&:hover": { cursor: "crosshair" },
           }}
         >
