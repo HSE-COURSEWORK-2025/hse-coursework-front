@@ -67,7 +67,7 @@ export const RawDataChartsPage = () => {
               { start: "1990", end: "1995" },
               { start: "1050", end: "1080" },
             ]}
-            initialRange={{min: 1950, max: 2000}}
+            initialRange={{ min: 1950, max: 2000 }}
           />
         </Box>
         <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
@@ -75,6 +75,7 @@ export const RawDataChartsPage = () => {
             title="Уровень кислорода в крови"
             data={chartData.oxygen}
             unit="SpO2%"
+            initialRange={{ min: 1950, max: 2000 }}
           />
         </Box>
         <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
@@ -82,6 +83,7 @@ export const RawDataChartsPage = () => {
             title="Оценка уровня стресса"
             data={chartData.stress}
             unit="баллы"
+            initialRange={{ min: 1950, max: 2000 }}
           />
         </Box>
         <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
@@ -89,10 +91,16 @@ export const RawDataChartsPage = () => {
             title="Частота дыхания"
             data={chartData.breathing}
             unit="дых/мин"
+            initialRange={{ min: 1950, max: 2000 }}
           />
         </Box>
         <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
-          <CustomChart title="Время сна" data={chartData.sleep} unit="часы" />
+          <CustomChart
+            title="Время сна"
+            data={chartData.sleep}
+            unit="часы"
+            initialRange={{ min: 1950, max: 2000 }}
+          />
         </Box>
       </Box>
     </Container>
