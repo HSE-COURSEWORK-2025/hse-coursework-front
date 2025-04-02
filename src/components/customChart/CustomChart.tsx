@@ -372,7 +372,10 @@ export const CustomChart = ({
 
         {/* Иконка для показа/скрытия всплывающего квадратика с подсказками */}
         <IconButton
-          onClick={(e) => setAnchorEl(e.currentTarget)}
+          onClick={(e) => {
+            e.stopPropagation(); // Предотвращаем всплытие события
+            setAnchorEl(e.currentTarget);
+          }}
           sx={{
             position: "absolute",
             top: 8,
@@ -390,6 +393,7 @@ export const CustomChart = ({
           open={Boolean(anchorEl)}
           anchorEl={anchorEl}
           onClose={() => setAnchorEl(null)}
+          disableEnforceFocus // Отключаем перехват фокуса
           anchorOrigin={{
             vertical: "bottom",
             horizontal: "right",

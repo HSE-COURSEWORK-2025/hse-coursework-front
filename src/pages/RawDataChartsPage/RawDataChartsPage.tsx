@@ -76,6 +76,8 @@ export const RawDataChartsPage = () => {
             data={chartData.oxygen}
             unit="SpO2%"
             initialRange={{ min: 1950, max: 2000 }}
+            verticalLines={[]}
+            highlightIntervals={[]}
           />
         </Box>
         <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
@@ -84,6 +86,8 @@ export const RawDataChartsPage = () => {
             data={chartData.stress}
             unit="баллы"
             initialRange={{ min: 1950, max: 2000 }}
+            verticalLines={[]}
+            highlightIntervals={[]}
           />
         </Box>
         <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
@@ -92,6 +96,8 @@ export const RawDataChartsPage = () => {
             data={chartData.breathing}
             unit="дых/мин"
             initialRange={{ min: 1950, max: 2000 }}
+            verticalLines={[]}
+            highlightIntervals={[]}
           />
         </Box>
         <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
@@ -100,6 +106,8 @@ export const RawDataChartsPage = () => {
             data={chartData.sleep}
             unit="часы"
             initialRange={{ min: 1950, max: 2000 }}
+            verticalLines={[]}
+            highlightIntervals={[]}
           />
         </Box>
       </Box>
