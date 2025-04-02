@@ -62,10 +62,10 @@ export const RawDataChartsPage = () => {
             title="Пульс"
             data={chartData.pulse}
             unit="уд/мин"
-            verticalLines={["2015", "2016"]}
+            verticalLines={["1980", "2016"]}
             highlightIntervals={[
-              { start: "2013", end: "2014" },
-              { start: "2015", end: "2016" },
+              { start: "1990", end: "1995" },
+              { start: "1050", end: "1080" },
             ]}
           />
         </Box>
