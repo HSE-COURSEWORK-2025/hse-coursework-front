@@ -39,11 +39,11 @@ export const RawDataChartsPage = () => {
 
   useEffect(() => {
     setChartData({
-      pulse: generateRandomData(2000, 2050, 60, 100, 0),
-      oxygen: generateRandomData(2000, 2050, 95, 100, 0),
-      stress: generateRandomData(2000, 2050, 2, 4, 1),
-      breathing: generateRandomData(2000, 2050, 12, 20, 0),
-      sleep: generateRandomData(2000, 2050, 4, 9, 1),
+      pulse: generateRandomData(1000, 2000, 60, 100, 0),
+      oxygen: generateRandomData(1000, 2000, 95, 100, 0),
+      stress: generateRandomData(1000, 2000, 2, 4, 1),
+      breathing: generateRandomData(1000, 2000, 12, 20, 0),
+      sleep: generateRandomData(1000, 2000, 4, 9, 1),
     });
   }, []);
 

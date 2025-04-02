@@ -60,6 +60,10 @@ export const CustomChart = ({
   } | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
 
+  const dataYears = data.map((d) => Number(d.year));
+  const minYear = Math.min(...dataYears);
+  const maxYear = Math.max(...dataYears);
+
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (chartInstance.current) {
       const xAxis = chartInstance.current.scales.x;
@@ -246,7 +250,7 @@ export const CustomChart = ({
                   modifierKey: "alt",
                 },
                 limits: {
-                  x: { min: 2000, max: 2050, minRange: 5 },
+                  x: { min: minYear, max: maxYear, minRange: 3 },
                 },
               },
               annotation: { annotations },
@@ -263,7 +267,7 @@ export const CustomChart = ({
                   color: theme.palette.text.secondary,
                   autoSkip: true,
                   maxRotation: 0,
-                  callback: (value) => Number(value).toFixed(0),
+                  callback: (value) => Number(value).toFixed(1),
                 },
               },
               y: {
@@ -301,6 +305,10 @@ export const CustomChart = ({
       chartInstance.current?.destroy();
     };
   }, [data, theme, title, unit, verticalLines, highlightIntervals]);
+
+  useEffect(() => {
+    if (selection) console.log("selection", selection);
+  }, [selection]);
 
   return (
     <Card
@@ -346,7 +354,7 @@ export const CustomChart = ({
             </Typography>
           )}
           <Typography variant="caption" color="text.secondary">
-            {`${data.length} точек данных (2000-2050)`}
+            {`${data.length} точек данных`}
           </Typography>
         </Box>
       </CardContent>
