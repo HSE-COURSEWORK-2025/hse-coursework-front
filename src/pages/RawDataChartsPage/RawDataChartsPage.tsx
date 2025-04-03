@@ -3,20 +3,20 @@ import { Container, Typography, Box } from "@mui/material";
 import { CustomChart } from "../../components/customChart/CustomChart";
 
 interface DataPoint {
-  year: string;
-  value: number;
+  x: string;
+  y: number;
 }
 
 const generateRandomData = (
-  startYear: number,
-  endYear: number,
+  startX: number,
+  endX: number,
   minValue: number,
   maxValue: number,
   precision: number = 0
 ): DataPoint[] => {
-  return Array.from({ length: endYear - startYear + 1 }, (_, i) => ({
-    year: String(startYear + i),
-    value: Number(
+  return Array.from({ length: endX - startX + 1 }, (_, i) => ({
+    x: String(startX + i),
+    y: Number(
       (Math.random() * (maxValue - minValue) + minValue).toFixed(precision)
     ),
   }));
@@ -24,11 +24,11 @@ const generateRandomData = (
 
 export const RawDataChartsPage = () => {
   const [chartData, setChartData] = useState<{
-    pulse: Array<{ year: string; value: number }>;
-    oxygen: Array<{ year: string; value: number }>;
-    stress: Array<{ year: string; value: number }>;
-    breathing: Array<{ year: string; value: number }>;
-    sleep: Array<{ year: string; value: number }>;
+    pulse: DataPoint[];
+    oxygen: DataPoint[];
+    stress: DataPoint[];
+    breathing: DataPoint[];
+    sleep: DataPoint[];
   }>({
     pulse: [],
     oxygen: [],
@@ -64,8 +64,8 @@ export const RawDataChartsPage = () => {
             unit="уд/мин"
             verticalLines={["1980", "2016"]}
             highlightIntervals={[
-              { start: "1990", end: "1995" },
-              { start: "1050", end: "1080" },
+              { start: 1990, end: 1995 },
+              { start: 1050, end: 1080 },
             ]}
             initialRange={{ min: 1950, max: 2000 }}
           />
@@ -86,7 +86,7 @@ export const RawDataChartsPage = () => {
             data={chartData.stress}
             unit="баллы"
             initialRange={{ min: 1950, max: 2000 }}
-            verticalLines={[]}
+            verticalLines={["123"]}
             highlightIntervals={[]}
           />
         </Box>

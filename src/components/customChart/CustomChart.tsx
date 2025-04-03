@@ -15,6 +15,7 @@ import {
 } from "@mui/icons-material";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { useTheme } from "@mui/material/styles";
+import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import {
   Chart,
   LineController,
@@ -43,8 +44,8 @@ Chart.register(
 );
 
 interface DataPoint {
-  year: string;
-  value: number;
+  x: string;
+  y: number;
 }
 
 interface MetricCardProps {
@@ -52,12 +53,12 @@ interface MetricCardProps {
   data: DataPoint[];
   unit?: string;
   verticalLines?: string[];
-  highlightIntervals?: {
-    start: string;
-    end: string;
+  highlightIntervals: {
+    start: number;
+    end: number;
   }[];
   // Проп для начального интервала
-  initialRange?: {
+  initialRange: {
     min: number;
     max: number;
   };
@@ -87,12 +88,12 @@ export const CustomChart = ({
   const panStartRange = useRef<{ min: number; max: number } | null>(null);
 
   const extendValsPercent = 0.02;
-  const dataYears = data.map((d) => Number(d.year));
-  const minYear = Math.min(...dataYears);
-  const maxYear = Math.max(...dataYears);
+  const dataX = data.map((d) => Number(d.x));
+  const minX = Math.min(...dataX);
+  const maxX = Math.max(...dataX);
 
-  const fullDataMin = minYear - minYear * extendValsPercent;
-  const fullDataMax = maxYear + maxYear * extendValsPercent;
+  const fullDataMin = minX - minX * extendValsPercent;
+  const fullDataMax = maxX + maxX * extendValsPercent;
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!chartInstance.current) return;
@@ -106,8 +107,8 @@ export const CustomChart = ({
       if (rawIndex === undefined || rawIndex === null) return;
       const index = Math.round(rawIndex);
       if (index < 0 || index >= data.length) return;
-      const year = data[index].year;
-      const value = Number(year);
+      const xValue = data[index].x;
+      const value = Number(xValue);
       if (!isNaN(value)) {
         setIsSelecting(true);
         setSelection({ start: value, end: value });
@@ -126,8 +127,8 @@ export const CustomChart = ({
       if (rawIndex === undefined || rawIndex === null) return;
       const index = Math.round(rawIndex);
       if (index < 0 || index >= data.length) return;
-      const year = data[index].year;
-      const value = Number(year);
+      const xValue = data[index].x;
+      const value = Number(xValue);
       if (!isNaN(value)) {
         setSelection((prev) => {
           if (!prev) return null;
@@ -144,10 +145,10 @@ export const CustomChart = ({
         Math.min(selection.start, selection.end),
         Math.max(selection.start, selection.end),
       ];
-      const firstYear = Number(data[0].year);
-      const lastYear = Number(data[data.length - 1].year);
-      const clampedStart = Math.max(firstYear, start);
-      const clampedEnd = Math.min(lastYear, end);
+      const firstX = Number(data[0].x);
+      const lastX = Number(data[data.length - 1].x);
+      const clampedStart = Math.max(firstX, start);
+      const clampedEnd = Math.min(lastX, end);
       if (Math.abs(clampedEnd - clampedStart) >= minDistance) {
         chartInstance.current.zoomScale("x", {
           min: clampedStart,
@@ -182,6 +183,32 @@ export const CustomChart = ({
     ctx.restore();
   };
 
+  // Обработка колёсика мыши при зажатом Shift для панорамирования
+  const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
+    if (e.shiftKey && chartInstance.current) {
+      e.preventDefault();
+      const xScale = chartInstance.current.scales.x;
+      const range = xScale.max - xScale.min;
+      // Коэффициент панорамирования: 5% от диапазона за каждые 100 единиц дельты
+      const panFactor = (range * 0.05 * e.deltaY) / 100;
+      let newMin = xScale.min + panFactor;
+      let newMax = xScale.max + panFactor;
+      // Ограничиваем диапазон, чтобы не выйти за пределы полного диапазона
+      if (newMin < fullDataMin) {
+        newMin = fullDataMin;
+        newMax = newMin + range;
+      }
+      if (newMax > fullDataMax) {
+        newMax = fullDataMax;
+        newMin = newMax - range;
+      }
+      chartInstance.current.zoomScale("x", {
+        min: newMin,
+        max: newMax,
+      });
+    }
+  };
+
   useEffect(() => {
     if (chartRef.current) {
       const ctx = chartRef.current.getContext("2d");
@@ -192,8 +219,8 @@ export const CustomChart = ({
         const annotations = [
           ...highlightIntervals.map((interval, idx) => ({
             type: "box" as const,
-            xMin: Number(interval.start),
-            xMax: Number(interval.end),
+            xMin: interval.start,
+            xMax: interval.end,
             backgroundColor: `${theme.palette.error.main}33`,
             borderColor: theme.palette.error.main,
             borderWidth: 1,
@@ -223,11 +250,11 @@ export const CustomChart = ({
         chartInstance.current = new Chart(ctx, {
           type: "line",
           data: {
-            labels: data.map((d) => d.year),
+            labels: data.map((d) => d.x),
             datasets: [
               {
                 label: title,
-                data: data.map((d) => d.value),
+                data: data.map((d) => d.y),
                 borderColor: theme.palette.primary.main,
                 tension: 0.4,
                 borderWidth: 2,
@@ -240,7 +267,6 @@ export const CustomChart = ({
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            // responsiveAnimationDuration: 0,
             transitions: {
               zoom: { animation: { duration: 300 } },
             },
@@ -253,7 +279,7 @@ export const CustomChart = ({
                 borderColor: theme.palette.divider,
                 borderWidth: 1,
                 callbacks: {
-                  title: (items) => `Год: ${items[0].label}`,
+                  title: (items) => `X: ${items[0].label}`,
                   label: (item) =>
                     `${item.dataset.label}: ${item.formattedValue} ${unit}`,
                 },
@@ -366,34 +392,66 @@ export const CustomChart = ({
       }}
     >
       <CardContent sx={{ position: "relative" }}>
-        <Typography variant="h6" gutterBottom>
-          {title}
-        </Typography>
-
-        {/* Иконка для показа/скрытия всплывающего квадратика с подсказками */}
-        <IconButton
-          onClick={(e) => {
-            e.stopPropagation(); // Предотвращаем всплытие события
-            setAnchorEl(e.currentTarget);
-          }}
+        <Box
           sx={{
-            position: "absolute",
-            top: 8,
-            right: 8,
-            bgcolor: theme.palette.background.paper,
-            "&:hover": { bgcolor: theme.palette.grey[300] },
-            zIndex: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            mb: 2,
+            position: "relative",
           }}
         >
-          <HelpOutlineIcon />
-        </IconButton>
-
-        {/* Всплывающий квадратик с подсказками */}
+          <Typography variant="h6" gutterBottom>
+            {title}
+          </Typography>
+          <Box
+            sx={{
+              bgcolor:
+                verticalLines?.length || highlightIntervals?.length
+                  ? theme.palette.error.light
+                  : theme.palette.success.light,
+              color:
+                verticalLines?.length || highlightIntervals?.length
+                  ? theme.palette.error.contrastText
+                  : theme.palette.success.contrastText,
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 1,
+              fontSize: "0.75rem",
+              fontWeight: 500,
+              lineHeight: 1.5,
+              display: "inline-flex",
+              alignItems: "center",
+              boxShadow: theme.shadows[1],
+              transition: "all 0.2s ease",
+            }}
+          >
+            {verticalLines?.length || highlightIntervals?.length
+              ? "не ОК"
+              : "ОК"}
+          </Box>
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation();
+              setAnchorEl(e.currentTarget);
+            }}
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              bgcolor: theme.palette.background.paper,
+              "&:hover": { bgcolor: theme.palette.grey[300] },
+              zIndex: 1,
+            }}
+          >
+            <HelpOutlineIcon />
+          </IconButton>
+        </Box>
         <Popover
           open={Boolean(anchorEl)}
           anchorEl={anchorEl}
           onClose={() => setAnchorEl(null)}
-          disableEnforceFocus // Отключаем перехват фокуса
+          disableEnforceFocus
           anchorOrigin={{
             vertical: "bottom",
             horizontal: "right",
@@ -420,10 +478,14 @@ export const CustomChart = ({
               <RefreshIcon fontSize="small" sx={{ mr: 0.5 }} /> Двойной клик:
               сброс зума.
             </Typography>
+            <Typography variant="caption" display="flex" alignItems="center">
+              <SwapHorizIcon fontSize="small" sx={{ mr: 0.5 }} /> При зажатом
+              Shift и кручении колесика мыши: перемещение выбранного диапазона
+              влево/вправо.
+            </Typography>
           </Box>
         </Popover>
 
-        {/* Обёртка для графика */}
         <Box
           sx={{
             position: "relative",
@@ -437,6 +499,7 @@ export const CustomChart = ({
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
+            onWheel={handleWheel}
           />
         </Box>
 
