@@ -79,18 +79,36 @@ export const CustomChart = ({
   const miniChartInstance = useRef<Chart | null>(null);
 
   // Состояния для выделения основного графика
-  const [selection, setSelection] = useState<{ start: number; end: number } | null>(null);
+  const [selection, setSelection] = useState<{
+    start: number;
+    end: number;
+  } | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   // Состояния для мини-графика (перетаскивание выделенного интервала)
-  const [miniSelection, setMiniSelection] = useState<{ start: number; end: number }>({
+  const [miniSelection, setMiniSelection] = useState<{
+    start: number;
+    end: number;
+  }>({
     start: initialRange.min,
     end: initialRange.max,
   });
   const [isDraggingMini, setIsDraggingMini] = useState(false);
   const miniDragStartX = useRef<number | null>(null);
-  const miniSelectionStartAtDrag = useRef<{ start: number; end: number } | null>(null);
+  const miniSelectionStartAtDrag = useRef<{
+    start: number;
+    end: number;
+  } | null>(null);
+
+  // Для ресайза одной из границ выделения
+  // Хранит: какая граница ("left" или "right"), начальную позицию мыши и исходное значение границы, а также значение другой границы
+  const resizingRef = useRef<{
+    boundary: "left" | "right";
+    initialX: number;
+    initialValue: number;
+    otherValue: number;
+  } | null>(null);
 
   const extendValsPercent = 0.02;
   const dataX = data.map((d) => Number(d.x));
@@ -301,7 +319,15 @@ export const CustomChart = ({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, theme, title, fullDataMin, fullDataMax, highlightIntervals, verticalLines]);
+  }, [
+    data,
+    theme,
+    title,
+    fullDataMin,
+    fullDataMax,
+    highlightIntervals,
+    verticalLines,
+  ]);
 
   // Обновление аннотации мини-графика при изменении miniSelection без полной перерисовки
   useEffect(() => {
@@ -316,59 +342,118 @@ export const CustomChart = ({
     }
   }, [miniSelection]);
 
-  // Реализуем логику перетаскивания прямоугольника мини-графика вручную
+  // Логика перетаскивания всего выделенного интервала или изменения отдельной его границы на мини-графике
   const handleMiniMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!miniChartInstance.current) return;
     const rect = miniChartRef.current!.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const xScale = miniChartInstance.current.scales.x;
     if (!xScale) return;
-    const clickedValue = xScale.getValueForPixel(x);
-    if (
-      clickedValue !== undefined &&
-      clickedValue >= miniSelection.start &&
-      clickedValue <= miniSelection.end
-    ) {
-      setIsDraggingMini(true);
-      miniDragStartX.current = x;
-      miniSelectionStartAtDrag.current = { ...miniSelection };
+    // Определяем пиксельные координаты левой и правой границы выделенного интервала
+    const leftPixel = xScale.getPixelForValue(miniSelection.start);
+    const rightPixel = xScale.getPixelForValue(miniSelection.end);
+    const threshold = 5; // в пикселях
+
+    // Если мышь рядом с левой границей – начинаем ресайз левой границы
+    if (Math.abs(x - leftPixel) <= threshold) {
+      resizingRef.current = {
+        boundary: "left",
+        initialX: x,
+        initialValue: miniSelection.start,
+        otherValue: miniSelection.end,
+      };
+      return;
     }
+    // Если мышь рядом с правой границей – начинаем ресайз правой границы
+    if (Math.abs(x - rightPixel) <= threshold) {
+      resizingRef.current = {
+        boundary: "right",
+        initialX: x,
+        initialValue: miniSelection.end,
+        otherValue: miniSelection.start,
+      };
+      return;
+    }
+    // Если не в зоне ресайза – начинаем перемещение всего выделенного интервала
+    setIsDraggingMini(true);
+    miniDragStartX.current = x;
+    miniSelectionStartAtDrag.current = { ...miniSelection };
   };
 
   const handleMiniMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (
-      !isDraggingMini ||
-      !miniChartInstance.current ||
-      !miniSelectionStartAtDrag.current
-    )
-      return;
+    if (!miniChartInstance.current) return;
     const rect = miniChartRef.current!.getBoundingClientRect();
     const x = e.clientX - rect.left;
-    const dx = x - (miniDragStartX.current || 0);
     const xScale = miniChartInstance.current.scales.x;
     if (!xScale) return;
-    const valueAtZero = xScale.getValueForPixel(0);
-    const valueAtDx = xScale.getValueForPixel(dx);
-    if (valueAtZero === undefined || valueAtDx === undefined) return;
-    const deltaValue = valueAtZero - valueAtDx;
-    let newStart = miniSelectionStartAtDrag.current.start + deltaValue;
-    let newEnd = miniSelectionStartAtDrag.current.end + deltaValue;
-    const range = newEnd - newStart;
-    const minRange = 1; // минимальная допустимая длина интервала
-    if (range < minRange) {
+    // Если идёт ресайз границы
+    if (resizingRef.current) {
+      const dx = x - resizingRef.current.initialX;
+      const valueAtZero = xScale.getValueForPixel(0);
+      const valueAtDx = xScale.getValueForPixel(dx);
+      if (valueAtZero === undefined || valueAtDx === undefined) return;
+      // Инвертированное вычисление смещения
+      const deltaValue = valueAtDx - valueAtZero;
+      const minRange = 1; // минимально допустимый интервал
+      if (resizingRef.current.boundary === "left") {
+        let newLeft = resizingRef.current.initialValue + deltaValue;
+        if (newLeft > resizingRef.current.otherValue - minRange) {
+          newLeft = resizingRef.current.otherValue - minRange;
+        }
+        if (newLeft < fullDataMin) {
+          newLeft = fullDataMin;
+        }
+        setMiniSelection({ start: newLeft, end: miniSelection.end });
+        if (mainChartInstance.current) {
+          mainChartInstance.current.zoomScale("x", {
+            min: newLeft,
+            max: miniSelection.end,
+          });
+        }
+      } else if (resizingRef.current.boundary === "right") {
+        let newRight = resizingRef.current.initialValue + deltaValue;
+        if (newRight < resizingRef.current.otherValue + minRange) {
+          newRight = resizingRef.current.otherValue + minRange;
+        }
+        if (newRight > fullDataMax) {
+          newRight = fullDataMax;
+        }
+        setMiniSelection({ start: miniSelection.start, end: newRight });
+        if (mainChartInstance.current) {
+          mainChartInstance.current.zoomScale("x", {
+            min: miniSelection.start,
+            max: newRight,
+          });
+        }
+      }
       return;
     }
-    if (newStart < fullDataMin) {
-      newStart = fullDataMin;
-      newEnd = newStart + range;
-    }
-    if (newEnd > fullDataMax) {
-      newEnd = fullDataMax;
-      newStart = newEnd - range;
-    }
-    setMiniSelection({ start: newStart, end: newEnd });
-    if (mainChartInstance.current) {
-      mainChartInstance.current.zoomScale("x", { min: newStart, max: newEnd });
+    // Если перетаскивание всего интервала
+    if (isDraggingMini && miniSelectionStartAtDrag.current) {
+      const dx = x - (miniDragStartX.current || 0);
+      const valueAtZero = xScale.getValueForPixel(0);
+      const valueAtDx = xScale.getValueForPixel(dx);
+      if (valueAtZero === undefined || valueAtDx === undefined) return;
+      // Инвертированное вычисление смещения
+      const deltaValue = valueAtDx - valueAtZero;
+      let newStart = miniSelectionStartAtDrag.current.start + deltaValue;
+      let newEnd = miniSelectionStartAtDrag.current.end + deltaValue;
+      const range = newEnd - newStart;
+      if (newStart < fullDataMin) {
+        newStart = fullDataMin;
+        newEnd = newStart + range;
+      }
+      if (newEnd > fullDataMax) {
+        newEnd = fullDataMax;
+        newStart = newEnd - range;
+      }
+      setMiniSelection({ start: newStart, end: newEnd });
+      if (mainChartInstance.current) {
+        mainChartInstance.current.zoomScale("x", {
+          min: newStart,
+          max: newEnd,
+        });
+      }
     }
   };
 
@@ -376,6 +461,7 @@ export const CustomChart = ({
     setIsDraggingMini(false);
     miniDragStartX.current = null;
     miniSelectionStartAtDrag.current = null;
+    resizingRef.current = null;
   };
 
   // Создаём основной график
