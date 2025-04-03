@@ -2,10 +2,17 @@ import React from "react";
 import "./App.css";
 import { Route, Routes, BrowserRouter } from "react-router-dom";
 import { Navigation } from "./components";
-import { TestPage, RawDataChartsPage, MainPage } from "./pages";
+import {
+  TestPage,
+  RawDataChartsPage,
+  MainPage,
+  DataWOutliersChartsPage,
+  NotificationsPage
+} from "./pages";
 import { Box } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import CodeIcon from "@mui/icons-material/Code";
+import BugReportIcon from "@mui/icons-material/BugReport";
 
 // Определяем тип для элементов навигации
 export interface INavigationItem {
@@ -20,12 +27,17 @@ export const App = () => {
     {
       text: "Главная",
       path: "/",
-      icon: <HomeIcon />
+      icon: <HomeIcon />,
     },
     {
       text: "Графики исходных данных",
       path: "/rawDataPage",
-      icon: <CodeIcon />
+      icon: <CodeIcon />,
+    },
+    {
+      text: "Графики данных с обнаруженными аномалиями",
+      path: "/dataWOutliersPage",
+      icon: <BugReportIcon />,
     }
   ];
 
@@ -33,12 +45,20 @@ export const App = () => {
     <BrowserRouter>
       <Box sx={{ display: "flex" }}>
         <Navigation items={menuItems} />
-        
+
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <Routes>
             <Route path="/" element={<MainPage />} />
             <Route path="/testpage" element={<TestPage />} />
             <Route path="/rawDataPage" element={<RawDataChartsPage />} />
+            <Route
+              path="/dataWOutliersPage"
+              element={<DataWOutliersChartsPage />}
+            />
+            <Route
+              path="/notificationsPage"
+              element={<NotificationsPage />}
+            />
           </Routes>
         </Box>
       </Box>

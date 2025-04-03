@@ -22,7 +22,7 @@ const generateRandomData = (
   }));
 };
 
-export const RawDataChartsPage: React.FC = () => {
+export const DataWOutliersChartsPage: React.FC = () => {
   const [chartData, setChartData] = useState<{
     pulse: DataPoint[];
     oxygen: DataPoint[];
@@ -71,7 +71,7 @@ export const RawDataChartsPage: React.FC = () => {
             initialRange={{ min: 1950, max: 2000 }}
             lineColor="#1565C0" // Глубокий синий
             selectionColor={selectionColor}
-            showStatus={false}
+            showStatus={true}
           />
         </Box>
         {/* Уровень кислорода */}
@@ -85,7 +85,7 @@ export const RawDataChartsPage: React.FC = () => {
             highlightIntervals={[]}
             lineColor="#00897B" // Яркий, насыщенный бирюзовый (teal)
             selectionColor={selectionColor}
-            showStatus={false}
+            showStatus={true}
           />
         </Box>
         {/* Стресс */}
@@ -99,7 +99,7 @@ export const RawDataChartsPage: React.FC = () => {
             highlightIntervals={[]}
             lineColor="#512DA8" // Глубокий фиолетовый
             selectionColor={selectionColor}
-            showStatus={false}
+            showStatus={true}
           />
         </Box>
         {/* Частота дыхания */}
@@ -113,7 +113,7 @@ export const RawDataChartsPage: React.FC = () => {
             highlightIntervals={[]}
             lineColor="#424242" // Тёмно-серый, контрастный с тёплыми оттенками
             selectionColor={selectionColor}
-            showStatus={false}
+            showStatus={true}
           />
         </Box>
         {/* Время сна */}
@@ -127,7 +127,7 @@ export const RawDataChartsPage: React.FC = () => {
             highlightIntervals={[]}
             lineColor="#00695C" // Тёмный бирюзовый/изумрудный
             selectionColor={selectionColor}
-            showStatus={false}
+            showStatus={true}
           />
         </Box>
       </Box>

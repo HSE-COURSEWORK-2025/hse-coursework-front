@@ -3,7 +3,7 @@ import logo from "../../logo.svg";
 import { CustomChart } from "../../components";
 
 
-export const TestPage = () => {
+export const TestPage: React.FC = () => {
   return (
     <div className="App">
       <header className="App-header">
