@@ -22,6 +22,7 @@ import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import { useTheme } from "@mui/material/styles";
 import {
   Chart,
+  ChartType,
   LineController,
   LineElement,
   PointElement,
@@ -33,6 +34,16 @@ import {
 } from "chart.js";
 import zoomPlugin from "chartjs-plugin-zoom";
 import annotationPlugin from "chartjs-plugin-annotation";
+
+declare module "chart.js" {
+  interface PluginOptionsByType<TType extends ChartType> {
+    resizeHandles?: {
+      size?: number;
+      fillStyle?: string;
+      strokeStyle?: string;
+    };
+  }
+}
 
 Chart.register(
   LineController,
@@ -126,6 +137,49 @@ export const CustomChart = ({
   const maxX = Math.max(...dataX);
   const fullDataMin = minX - minX * extendValsPercent;
   const fullDataMax = maxX + maxX * extendValsPercent;
+
+  const resizeHandlesPlugin = {
+    id: "resizeHandles",
+    afterDraw: (chart: Chart) => {
+      const ctx = chart.ctx;
+      const annotation = (
+        chart.options.plugins?.annotation?.annotations as Record<string, any>
+      )?.selectionBox;
+
+      if (!annotation) return;
+
+      const xScale = chart.scales.x;
+      const left = xScale.getPixelForValue(annotation.xMin);
+      const right = xScale.getPixelForValue(annotation.xMax);
+      const { top, bottom } = chart.chartArea;
+      const handleSize = chart.options.plugins?.resizeHandles?.size || 8;
+      const handleY = top + (bottom - top) / 2;
+
+      ctx.save();
+      ctx.fillStyle =
+        chart.options.plugins?.resizeHandles?.fillStyle ||
+        annotation.borderColor;
+      ctx.strokeStyle =
+        chart.options.plugins?.resizeHandles?.strokeStyle || "#ffffff";
+      ctx.lineWidth = 1.5;
+
+      // Left handle
+      ctx.beginPath();
+      ctx.arc(left, handleY, handleSize, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Right handle
+      ctx.beginPath();
+      ctx.arc(right, handleY, handleSize, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.restore();
+    },
+  };
+
+  Chart.register(resizeHandlesPlugin);
 
   const handleMiniClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!miniChartInstance.current || isDraggingMini || resizingRef.current)
@@ -371,6 +425,11 @@ export const CustomChart = ({
               annotation: {
                 annotations: miniAnnotations,
               },
+              resizeHandles: {
+                size: 8,
+                fillStyle: selectionColor,
+                strokeStyle: theme.palette.background.paper,
+              } as any,
             },
             scales: {
               x: {
