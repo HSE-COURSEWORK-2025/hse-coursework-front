@@ -17,7 +17,7 @@ import {
   Insights 
 } from '@mui/icons-material';
 
-export const MainPage = () => {
+export const MainPage: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Шапка */}

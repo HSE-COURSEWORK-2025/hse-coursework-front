@@ -1,5 +1,6 @@
+import React from "react";
 import {
-  Box, // Добавьте этот импорт
+  Box,
   Drawer,
   List,
   ListItem,
@@ -12,9 +13,12 @@ import {
   Avatar,
   Divider,
   Typography,
+  IconButton,
+  Badge,
 } from "@mui/material";
 import { INavigationItem } from "../type";
 import { Link, useLocation, LinkProps } from "react-router-dom";
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 
 interface NavigationProps {
   items: INavigationItem[];
@@ -56,6 +60,8 @@ export const Navigation = ({
   const theme = useTheme();
   const location = useLocation();
 
+  const hasUnread = true;
+
   return (
     <StyledDrawer variant="permanent" open={open} onClose={onClose}>
       {/* Header */}
@@ -63,23 +69,41 @@ export const Navigation = ({
         sx={{
           display: "flex",
           alignItems: "center",
+          justifyContent: "space-between",
           p: theme.spacing(3, 2),
           borderBottom: `1px solid ${theme.palette.divider}`,
         }}
       >
-        <Avatar
-          sx={{
-            bgcolor: theme.palette.primary.main,
-            mr: 2,
-            width: 40,
-            height: 40,
-          }}
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Avatar
+            sx={{
+              bgcolor: theme.palette.primary.main,
+              mr: 2,
+              width: 40,
+              height: 40,
+            }}
+          >
+            A
+          </Avatar>
+          <Typography variant="h6" color="text.primary">
+            My App
+          </Typography>
+        </Box>
+        {/* Иконка уведомлений с Badge и переходом на /notificationsPage */}
+        <IconButton
+          component={Link}
+          to="/notificationsPage"
+          sx={{ color: theme.palette.text.secondary }}
         >
-          A
-        </Avatar>
-        <Typography variant="h6" color="text.primary">
-          My App
-        </Typography>
+          <Badge
+            variant="dot"
+            color="error"
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            invisible={!hasUnread}
+          >
+            <NotificationsNoneIcon />
+          </Badge>
+        </IconButton>
       </Box>
 
       {/* Navigation Items */}

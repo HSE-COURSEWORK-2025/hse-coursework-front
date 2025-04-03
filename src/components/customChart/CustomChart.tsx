@@ -12,10 +12,12 @@ import {
   ZoomIn as ZoomInIcon,
   PanTool as PanToolIcon,
   Mouse as MouseIcon,
-  Refresh as RefreshIcon,
   CropFree as CropFreeIcon,
   DragIndicator as DragIndicatorIcon,
   AspectRatio as AspectRatioIcon,
+  ZoomOutMap as ZoomOutMapIcon,
+  UnfoldMore as UnfoldMoreIcon,
+  OpenWith as OpenWithIcon,
 } from "@mui/icons-material";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
@@ -79,6 +81,7 @@ interface MetricCardProps {
   };
   lineColor?: string; // Цвет основной линии графика
   selectionColor?: string; // Цвет выделения интервала
+  showStatus?: boolean;
 }
 
 export const CustomChart = ({
@@ -90,6 +93,7 @@ export const CustomChart = ({
   initialRange,
   selectionColor = "#4CAF50", // Material Green 500
   lineColor,
+  showStatus = true,
 }: MetricCardProps) => {
   const theme = useTheme();
   const mainChartRef = useRef<HTMLCanvasElement | null>(null);
@@ -777,32 +781,34 @@ export const CustomChart = ({
           <Typography variant="h6" gutterBottom>
             {title}
           </Typography>
-          <Box
-            sx={{
-              bgcolor:
-                verticalLines?.length || highlightIntervals?.length
-                  ? theme.palette.error.light
-                  : theme.palette.success.light,
-              color:
-                verticalLines?.length || highlightIntervals?.length
-                  ? theme.palette.error.contrastText
-                  : theme.palette.success.contrastText,
-              px: 1.5,
-              py: 0.5,
-              borderRadius: 1,
-              fontSize: "0.75rem",
-              fontWeight: 500,
-              lineHeight: 1.5,
-              display: "inline-flex",
-              alignItems: "center",
-              boxShadow: theme.shadows[1],
-              transition: "all 0.2s ease",
-            }}
-          >
-            {verticalLines?.length || highlightIntervals?.length
-              ? "не ОК"
-              : "ОК"}
-          </Box>
+          {showStatus && (
+            <Box
+              sx={{
+                bgcolor:
+                  verticalLines?.length || highlightIntervals?.length
+                    ? theme.palette.error.light
+                    : theme.palette.success.light,
+                color:
+                  verticalLines?.length || highlightIntervals?.length
+                    ? theme.palette.error.contrastText
+                    : theme.palette.success.contrastText,
+                px: 1.5,
+                py: 0.5,
+                borderRadius: 1,
+                fontSize: "0.75rem",
+                fontWeight: 500,
+                lineHeight: 1.5,
+                display: "inline-flex",
+                alignItems: "center",
+                boxShadow: theme.shadows[1],
+                transition: "all 0.2s ease",
+              }}
+            >
+              {verticalLines?.length || highlightIntervals?.length
+                ? "не ОК"
+                : "ОК"}
+            </Box>
+          )}
           <IconButton
             onClick={(e) => {
               e.stopPropagation();
@@ -828,103 +834,199 @@ export const CustomChart = ({
           anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
           transformOrigin={{ vertical: "top", horizontal: "right" }}
         >
-          <Box sx={{ p: 2, maxWidth: 320 }}>
+          <Box sx={{ p: 2, maxWidth: 320, bgcolor: "background.paper" }}>
             <Typography
-              variant="subtitle2"
+              variant="subtitle1"
               gutterBottom
-              sx={{ fontWeight: 600 }}
+              sx={{
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                color: "text.primary",
+              }}
             >
-              Основной график
+              <HelpOutlineIcon fontSize="small" color="primary" />
+              Управление графиком
             </Typography>
+
+            <Divider sx={{ my: 1 }} />
 
             {/* Основные взаимодействия */}
             <Box sx={{ mb: 2 }}>
-              <Box
-                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+              <Typography
+                variant="subtitle2"
+                gutterBottom
+                sx={{
+                  fontWeight: 500,
+                  color: "text.secondary",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  mb: 1.5,
+                }}
               >
-                <ZoomInIcon fontSize="small" color="primary" />
-                <Typography variant="caption">
-                  Выделение области - ЛКМ + протягивание
-                </Typography>
-              </Box>
+                <ZoomInIcon fontSize="small" />
+                Масштабирование
+              </Typography>
 
-              <Box
-                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
-              >
-                <PanToolIcon fontSize="small" color="primary" />
-                <Typography variant="caption">
-                  Панорамирование - ПКМ + протягивание
-                </Typography>
-              </Box>
+              <Box sx={{ pl: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    mb: 1,
+                  }}
+                >
+                  <PanToolIcon fontSize="small" color="action" />
+                  <Typography variant="body2">
+                    <Box component="span" sx={{ fontWeight: 500 }}>
+                      Выделение области:
+                    </Box>{" "}
+                    ЛКМ + перетаскивание
+                  </Typography>
+                </Box>
 
-              <Box
-                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
-              >
-                <MouseIcon fontSize="small" color="primary" />
-                <Typography variant="caption">
-                  Зумирование - Ctrl + колёсико мыши
-                </Typography>
-              </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    mb: 1,
+                  }}
+                >
+                  <MouseIcon fontSize="small" color="action" />
+                  <Typography variant="body2">
+                    <Box component="span" sx={{ fontWeight: 500 }}>
+                      Колёсико:
+                    </Box>{" "}
+                    Ctrl + прокрутка
+                  </Typography>
+                </Box>
 
-              <Box
-                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
-              >
-                <SwapHorizIcon fontSize="small" color="primary" />
-                <Typography variant="caption">
-                  Горизонтальная прокрутка - Shift + колёсико
-                </Typography>
-              </Box>
-
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <RefreshIcon fontSize="small" color="primary" />
-                <Typography variant="caption">
-                  Сброс зума - Двойной клик ЛКМ
-                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <AspectRatioIcon fontSize="small" color="action" />
+                  <Typography variant="body2">
+                    <Box component="span" sx={{ fontWeight: 500 }}>
+                      Сброс:
+                    </Box>{" "}
+                    Двойной клик
+                  </Typography>
+                </Box>
               </Box>
             </Box>
 
-            <Divider sx={{ my: 1 }} />
+            <Divider sx={{ my: 2 }} />
+
+            {/* Навигация */}
+            <Box sx={{ mb: 2 }}>
+              <Typography
+                variant="subtitle2"
+                gutterBottom
+                sx={{
+                  fontWeight: 500,
+                  color: "text.secondary",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  mb: 1.5,
+                }}
+              >
+                <DragIndicatorIcon fontSize="small" />
+                Перемещение
+              </Typography>
+
+              <Box sx={{ pl: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    mb: 1,
+                  }}
+                >
+                  <SwapHorizIcon fontSize="small" color="action" />
+                  <Typography variant="body2">
+                    <Box component="span" sx={{ fontWeight: 500 }}>
+                      Панорамирование:
+                    </Box>{" "}
+                    ПКМ + перетаскивание
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <CropFreeIcon fontSize="small" color="action" />
+                  <Typography variant="body2">
+                    <Box component="span" sx={{ fontWeight: 500 }}>
+                      Прокрутка:
+                    </Box>{" "}
+                    Shift + колёсико
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+
+            <Divider sx={{ my: 2 }} />
+
+            {/* Мини-карта */}
+            <Box>
+              <Typography
+                variant="subtitle2"
+                gutterBottom
+                sx={{
+                  fontWeight: 500,
+                  color: "text.secondary",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  mb: 1.5,
+                }}
+              >
+                <ZoomOutMapIcon fontSize="small" />
+                Область просмотра
+              </Typography>
+
+              <Box sx={{ pl: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    mb: 1,
+                  }}
+                >
+                  <UnfoldMoreIcon fontSize="small" color="action" />
+                  <Typography variant="body2">
+                    <Box component="span" sx={{ fontWeight: 500 }}>
+                      Изменение размера:
+                    </Box>{" "}
+                    Тяните за границы
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <OpenWithIcon fontSize="small" color="action" />
+                  <Typography variant="body2">
+                    <Box component="span" sx={{ fontWeight: 500 }}>
+                      Перемещение:
+                    </Box>{" "}
+                    Тяните за область
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+
+            <Divider sx={{ my: 2 }} />
 
             <Typography
-              variant="subtitle2"
-              gutterBottom
-              sx={{ fontWeight: 600 }}
+              variant="caption"
+              color="text.secondary"
+              sx={{
+                display: "block",
+                fontStyle: "italic",
+              }}
             >
-              Мини-карта
-            </Typography>
-
-            {/* Взаимодействия с мини-картой */}
-            <Box sx={{ mb: 1 }}>
-              <Box
-                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
-              >
-                <CropFreeIcon fontSize="small" color="secondary" />
-                <Typography variant="caption">
-                  Перемещение области - ЛКМ + перетаскивание
-                </Typography>
-              </Box>
-
-              <Box
-                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
-              >
-                <DragIndicatorIcon fontSize="small" color="secondary" />
-                <Typography variant="caption">
-                  Изменение границ - Наведите на край и тяните
-                </Typography>
-              </Box>
-
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <AspectRatioIcon fontSize="small" color="secondary" />
-                <Typography variant="caption">
-                  Масштаб области = размеру выделения
-                </Typography>
-              </Box>
-            </Box>
-
-            <Divider sx={{ my: 1 }} />
-
-            {/* Общие подсказки */}
-            <Typography variant="caption" color="textSecondary">
               * ЛКМ - Левая кнопка мыши
               <br />* ПКМ - Правая кнопка мыши
             </Typography>
