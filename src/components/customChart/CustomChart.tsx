@@ -6,7 +6,7 @@ import {
   IconButton,
   Popover,
   Box,
-  Divider
+  Divider,
 } from "@mui/material";
 import {
   ZoomIn as ZoomInIcon,
@@ -120,6 +120,62 @@ export const CustomChart = ({
   const maxX = Math.max(...dataX);
   const fullDataMin = minX - minX * extendValsPercent;
   const fullDataMax = maxX + maxX * extendValsPercent;
+
+  const handleMiniClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!miniChartInstance.current || isDraggingMini || resizingRef.current)
+      return;
+
+    const rect = miniChartRef.current!.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const xScale = miniChartInstance.current.scales.x;
+    const clickedValue = xScale.getValueForPixel(x);
+
+    if (clickedValue === undefined || clickedValue === null) return;
+
+    // Определяем пороговое расстояние в пикселях (10px)
+    const thresholdPixels = 15;
+
+    // Переводим границы интервала в пиксели
+    const startPixel = xScale.getPixelForValue(miniSelection.start);
+    const endPixel = xScale.getPixelForValue(miniSelection.end);
+
+    // Вычисляем расстояние до ближайшей границы
+    const distanceToStart = Math.abs(x - startPixel);
+    const distanceToEnd = Math.abs(x - endPixel);
+    const minDistance = Math.min(distanceToStart, distanceToEnd);
+
+    // Если клик слишком близко к границе - игнорируем
+    if (minDistance < thresholdPixels) return;
+
+    // Если клик внутри интервала или слишком близко к границам - не перемещаем
+    if (
+      clickedValue >= miniSelection.start &&
+      clickedValue <= miniSelection.end
+    )
+      return;
+
+    // Остальная логика перемещения...
+    const currentWidth = miniSelection.end - miniSelection.start;
+    const newStart = Math.max(fullDataMin, clickedValue - currentWidth / 2);
+    const newEnd = Math.min(fullDataMax, newStart + currentWidth);
+
+    // Корректировка если выходим за границы
+    const finalStart =
+      newEnd > fullDataMax ? fullDataMax - currentWidth : newStart;
+    const finalEnd = finalStart + currentWidth;
+
+    setMiniSelection({
+      start: finalStart,
+      end: finalEnd,
+    });
+
+    if (mainChartInstance.current) {
+      mainChartInstance.current.zoomScale("x", {
+        min: finalStart,
+        max: finalEnd,
+      });
+    }
+  };
 
   // --- Основной график ---
   const handleMainMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -348,7 +404,7 @@ export const CustomChart = ({
 
   // Логика перетаскивания всего выделенного интервала или изменения отдельной его границы на мини-графике
   const handleMiniMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!miniChartInstance.current) return;
+    if (!miniChartInstance.current || resizingRef.current) return;
     const rect = miniChartRef.current!.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const xScale = miniChartInstance.current.scales.x;
@@ -835,6 +891,7 @@ export const CustomChart = ({
         >
           <canvas
             ref={miniChartRef}
+            onClick={handleMiniClick}
             onMouseDown={handleMiniMouseDown}
             onMouseMove={handleMiniMouseMove}
             onMouseUp={handleMiniMouseUp}
