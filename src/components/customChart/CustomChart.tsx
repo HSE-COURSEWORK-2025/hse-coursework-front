@@ -6,12 +6,16 @@ import {
   IconButton,
   Popover,
   Box,
+  Divider
 } from "@mui/material";
 import {
   ZoomIn as ZoomInIcon,
   PanTool as PanToolIcon,
   Mouse as MouseIcon,
   Refresh as RefreshIcon,
+  CropFree as CropFreeIcon,
+  DragIndicator as DragIndicatorIcon,
+  AspectRatio as AspectRatioIcon,
 } from "@mui/icons-material";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
@@ -699,27 +703,105 @@ export const CustomChart = ({
           anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
           transformOrigin={{ vertical: "top", horizontal: "right" }}
         >
-          <Box sx={{ p: 2 }}>
-            <Typography variant="caption" display="flex" alignItems="center">
-              <ZoomInIcon fontSize="small" sx={{ mr: 0.5 }} /> Левой кнопкой
-              мыши: выделение области для увеличения (зумирование).
+          <Box sx={{ p: 2, maxWidth: 320 }}>
+            <Typography
+              variant="subtitle2"
+              gutterBottom
+              sx={{ fontWeight: 600 }}
+            >
+              Основной график
             </Typography>
-            <Typography variant="caption" display="flex" alignItems="center">
-              <PanToolIcon fontSize="small" sx={{ mr: 0.5 }} /> Правой кнопкой
-              мыши: перетаскивание (панорамирование) графика влево/вправо.
+
+            {/* Основные взаимодействия */}
+            <Box sx={{ mb: 2 }}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+              >
+                <ZoomInIcon fontSize="small" color="primary" />
+                <Typography variant="caption">
+                  Выделение области - ЛКМ + протягивание
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+              >
+                <PanToolIcon fontSize="small" color="primary" />
+                <Typography variant="caption">
+                  Панорамирование - ПКМ + протягивание
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+              >
+                <MouseIcon fontSize="small" color="primary" />
+                <Typography variant="caption">
+                  Зумирование - Ctrl + колёсико мыши
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+              >
+                <SwapHorizIcon fontSize="small" color="primary" />
+                <Typography variant="caption">
+                  Горизонтальная прокрутка - Shift + колёсико
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <RefreshIcon fontSize="small" color="primary" />
+                <Typography variant="caption">
+                  Сброс зума - Двойной клик ЛКМ
+                </Typography>
+              </Box>
+            </Box>
+
+            <Divider sx={{ my: 1 }} />
+
+            <Typography
+              variant="subtitle2"
+              gutterBottom
+              sx={{ fontWeight: 600 }}
+            >
+              Мини-карта
             </Typography>
-            <Typography variant="caption" display="flex" alignItems="center">
-              <MouseIcon fontSize="small" sx={{ mr: 0.5 }} /> Колёсико мыши (с
-              зажатым Ctrl): зумирование колесиком.
-            </Typography>
-            <Typography variant="caption" display="flex" alignItems="center">
-              <RefreshIcon fontSize="small" sx={{ mr: 0.5 }} /> Двойной клик:
-              сброс зума.
-            </Typography>
-            <Typography variant="caption" display="flex" alignItems="center">
-              <SwapHorizIcon fontSize="small" sx={{ mr: 0.5 }} /> При зажатом
-              Shift и кручении колесика мыши: перемещение выбранного диапазона
-              влево/вправо.
+
+            {/* Взаимодействия с мини-картой */}
+            <Box sx={{ mb: 1 }}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+              >
+                <CropFreeIcon fontSize="small" color="secondary" />
+                <Typography variant="caption">
+                  Перемещение области - ЛКМ + перетаскивание
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+              >
+                <DragIndicatorIcon fontSize="small" color="secondary" />
+                <Typography variant="caption">
+                  Изменение границ - Наведите на край и тяните
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <AspectRatioIcon fontSize="small" color="secondary" />
+                <Typography variant="caption">
+                  Масштаб области = размеру выделения
+                </Typography>
+              </Box>
+            </Box>
+
+            <Divider sx={{ my: 1 }} />
+
+            {/* Общие подсказки */}
+            <Typography variant="caption" color="textSecondary">
+              * ЛКМ - Левая кнопка мыши
+              <br />* ПКМ - Правая кнопка мыши
             </Typography>
           </Box>
         </Popover>
