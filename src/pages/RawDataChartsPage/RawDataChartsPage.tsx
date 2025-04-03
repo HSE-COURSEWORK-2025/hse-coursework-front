@@ -47,6 +47,9 @@ export const RawDataChartsPage = () => {
     });
   }, []);
 
+  // Один и тот же цвет выделения для всех графиков (жёлтый/оранжевый фон для выделения)
+  const selectionColor = "#FF9800"; 
+
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom>
@@ -57,6 +60,7 @@ export const RawDataChartsPage = () => {
       </Typography>
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+        {/* Пульс */}
         <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
           <CustomChart
             title="Пульс"
@@ -68,8 +72,11 @@ export const RawDataChartsPage = () => {
               { start: 1050, end: 1080 },
             ]}
             initialRange={{ min: 1950, max: 2000 }}
+            lineColor="#1565C0" // Глубокий синий
+            selectionColor={selectionColor}
           />
         </Box>
+        {/* Уровень кислорода */}
         <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
           <CustomChart
             title="Уровень кислорода в крови"
@@ -78,8 +85,11 @@ export const RawDataChartsPage = () => {
             initialRange={{ min: 1950, max: 2000 }}
             verticalLines={[]}
             highlightIntervals={[]}
+            lineColor="#00897B" // Яркий, насыщенный бирюзовый (teal)
+            selectionColor={selectionColor}
           />
         </Box>
+        {/* Стресс */}
         <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
           <CustomChart
             title="Оценка уровня стресса"
@@ -88,8 +98,11 @@ export const RawDataChartsPage = () => {
             initialRange={{ min: 1950, max: 2000 }}
             verticalLines={["123"]}
             highlightIntervals={[]}
+            lineColor="#512DA8" // Глубокий фиолетовый
+            selectionColor={selectionColor}
           />
         </Box>
+        {/* Частота дыхания */}
         <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
           <CustomChart
             title="Частота дыхания"
@@ -98,8 +111,11 @@ export const RawDataChartsPage = () => {
             initialRange={{ min: 1950, max: 2000 }}
             verticalLines={[]}
             highlightIntervals={[]}
+            lineColor="#424242" // Тёмно-серый, контрастный с тёплыми оттенками
+            selectionColor={selectionColor}
           />
         </Box>
+        {/* Время сна */}
         <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
           <CustomChart
             title="Время сна"
@@ -108,6 +124,8 @@ export const RawDataChartsPage = () => {
             initialRange={{ min: 1950, max: 2000 }}
             verticalLines={[]}
             highlightIntervals={[]}
+            lineColor="#00695C" // Тёмный бирюзовый/изумрудный
+            selectionColor={selectionColor}
           />
         </Box>
       </Box>

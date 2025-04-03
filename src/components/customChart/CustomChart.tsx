@@ -66,6 +66,8 @@ interface MetricCardProps {
     min: number;
     max: number;
   };
+  lineColor?: string; // Цвет основной линии графика
+  selectionColor?: string; // Цвет выделения интервала
 }
 
 export const CustomChart = ({
@@ -75,12 +77,16 @@ export const CustomChart = ({
   verticalLines = [],
   highlightIntervals = [],
   initialRange,
+  selectionColor = "#4CAF50", // Material Green 500
+  lineColor,
 }: MetricCardProps) => {
   const theme = useTheme();
   const mainChartRef = useRef<HTMLCanvasElement | null>(null);
   const mainChartInstance = useRef<Chart | null>(null);
   const miniChartRef = useRef<HTMLCanvasElement | null>(null);
   const miniChartInstance = useRef<Chart | null>(null);
+
+  if (!lineColor) lineColor = theme.palette.primary.main;
 
   // Состояния для выделения основного графика
   const [selection, setSelection] = useState<{
@@ -250,9 +256,10 @@ export const CustomChart = ({
     const end = xAxis.getPixelForValue(selection.end);
     ctx.save();
     ctx.beginPath();
-    ctx.fillStyle = `${theme.palette.primary.main}30`;
+    // Используем selectionColor с прозрачностью
+    ctx.fillStyle = `${selectionColor || theme.palette.primary.main}30`;
     ctx.fillRect(start, top, end - start, bottom - top);
-    ctx.strokeStyle = theme.palette.primary.main;
+    ctx.strokeStyle = selectionColor || theme.palette.primary.main;
     ctx.lineWidth = 2;
     ctx.setLineDash([5, 5]);
     ctx.strokeRect(start, top, end - start, bottom - top);
@@ -296,9 +303,12 @@ export const CustomChart = ({
             type: "box",
             xMin: miniSelection.start,
             xMax: miniSelection.end,
-            backgroundColor: `${theme.palette.primary.main}55`,
+            // Используем selectionColor с прозрачностью
+            backgroundColor: `${
+              selectionColor || theme.palette.primary.main
+            }55`,
             borderWidth: 1,
-            borderColor: theme.palette.primary.main,
+            borderColor: selectionColor || theme.palette.primary.main,
           },
         };
 
@@ -345,7 +355,7 @@ export const CustomChart = ({
               {
                 label: title,
                 data: data.map((d) => d.y),
-                borderColor: theme.palette.primary.main,
+                borderColor: lineColor,
                 tension: 0.4,
                 borderWidth: 1,
                 pointRadius: 0,
@@ -571,12 +581,12 @@ export const CustomChart = ({
               {
                 label: title,
                 data: data.map((d) => d.y),
-                borderColor: theme.palette.primary.main,
+                borderColor: lineColor,
                 tension: 0.4,
                 borderWidth: 2,
                 pointRadius: 0,
                 pointHoverRadius: 5,
-                pointHoverBackgroundColor: theme.palette.primary.main,
+                pointHoverBackgroundColor: lineColor,
               },
             ],
           },
