@@ -139,8 +139,8 @@ export const CustomChart = ({
   const dataX = data.map((d) => Number(d.x));
   const minX = Math.min(...dataX);
   const maxX = Math.max(...dataX);
-  const fullDataMin = minX - minX * extendValsPercent;
-  const fullDataMax = maxX + maxX * extendValsPercent;
+  const fullDataMin = minX;
+  const fullDataMax = maxX;
 
   const resizeHandlesPlugin = {
     id: "resizeHandles",

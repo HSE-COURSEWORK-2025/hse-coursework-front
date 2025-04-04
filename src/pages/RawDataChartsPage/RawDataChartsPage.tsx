@@ -1,35 +1,45 @@
 import { useState, useEffect } from "react";
 import { Container, Typography, Box } from "@mui/material";
 import { CustomChart } from "../../components/customChart/CustomChart";
+import axios from "axios";
+import { useSnackbar } from "notistack";
 
 interface DataPoint {
   x: string;
   y: number;
 }
 
-const generateRandomData = (
-  startX: number,
-  endX: number,
-  minValue: number,
-  maxValue: number,
-  precision: number = 0
-): DataPoint[] => {
-  return Array.from({ length: endX - startX + 1 }, (_, i) => ({
-    x: String(startX + i),
-    y: Number(
-      (Math.random() * (maxValue - minValue) + minValue).toFixed(precision)
-    ),
+type ChartDataType = {
+  pulse: DataPoint[];
+  oxygen: DataPoint[];
+  stress: DataPoint[];
+  breathing: DataPoint[];
+  sleep: DataPoint[];
+};
+
+type BackendDataElement = {
+  X: number;
+  Y: number;
+};
+
+const API_URL = process.env.REACT_APP_API_URL || "";
+const DATA_TYPES = {
+  pulse: "PULSE",
+  oxygen: "BLOOD_OXYGEN",
+  stress: "STRESS_LVL",
+  breathing: "RESPIRATORY_RATE",
+  sleep: "SLEEP_TIME",
+};
+
+const transformData = (backendData: BackendDataElement[]): DataPoint[] => {
+  return backendData.map((item) => ({
+    x: String(item.X),
+    y: Number(item.Y),
   }));
 };
 
 export const RawDataChartsPage: React.FC = () => {
-  const [chartData, setChartData] = useState<{
-    pulse: DataPoint[];
-    oxygen: DataPoint[];
-    stress: DataPoint[];
-    breathing: DataPoint[];
-    sleep: DataPoint[];
-  }>({
+  const [chartData, setChartData] = useState<ChartDataType>({
     pulse: [],
     oxygen: [],
     stress: [],
@@ -37,18 +47,66 @@ export const RawDataChartsPage: React.FC = () => {
     sleep: [],
   });
 
-  useEffect(() => {
-    setChartData({
-      pulse: generateRandomData(1000, 2000, 60, 100, 0),
-      oxygen: generateRandomData(1000, 2000, 95, 100, 0),
-      stress: generateRandomData(1000, 2000, 2, 4, 1),
-      breathing: generateRandomData(1000, 2000, 12, 20, 0),
-      sleep: generateRandomData(1000, 2000, 4, 9, 1),
-    });
-  }, []);
+  const [isLoading, setIsLoading] = useState(true);
+  const { enqueueSnackbar } = useSnackbar();
 
-  // Один и тот же цвет выделения для всех графиков (жёлтый/оранжевый фон для выделения)
-  const selectionColor = "#FF9800"; 
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        setIsLoading(true);
+        
+        const requests = Object.entries(DATA_TYPES).map(async ([key, type]) => {
+          try {
+            const response = await axios.get<BackendDataElement[]>(
+              `${API_URL}/api/v1/getData/getRawData`,
+              { params: { data_type: type } }
+            );
+            return { key, data: transformData(response.data) };
+          } catch (error) {
+            enqueueSnackbar(`Ошибка загрузки данных для ${key}`, { 
+              variant: "error",
+            });
+            return { key, data: [] };
+          }
+        });
+
+        const results = await Promise.all(requests);
+        const newChartData = results.reduce((acc, { key, data }) => ({
+          ...acc,
+          [key]: data,
+        }), {} as ChartDataType);
+
+        setChartData(newChartData);
+      } catch (error) {
+        enqueueSnackbar("Общая ошибка загрузки данных", { 
+          variant: "error",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAllData();
+  }, [enqueueSnackbar]);
+
+  const getInitialRange = (data: DataPoint[]) => {
+    if (data.length === 0) return { min: 0, max: 0 };
+    const xValues = data.map(d => parseInt(d.x));
+    return {
+      min: Math.min(...xValues),
+      max: Math.max(...xValues),
+    };
+  };
+
+  const selectionColor = "#FF9800";
+
+  if (isLoading) {
+    return (
+      <Container maxWidth="md" sx={{ py: 4, textAlign: "center" }}>
+        <Typography variant="h6">Загрузка данных...</Typography>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -56,80 +114,56 @@ export const RawDataChartsPage: React.FC = () => {
         Жизненные показатели
       </Typography>
       <Typography variant="body1" color="text.secondary" paragraph>
-        Анализ выбросов жизненных показателей
+        Исходные данные жизненных показателей
       </Typography>
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-        {/* Пульс */}
-        <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
-          <CustomChart
-            title="Пульс"
-            data={chartData.pulse}
-            unit="уд/мин"
-            verticalLines={[]}
-            highlightIntervals={[]}
-            initialRange={{ min: 1950, max: 2000 }}
-            lineColor="#1565C0" // Глубокий синий
-            selectionColor={selectionColor}
-            showStatus={false}
-          />
-        </Box>
-        {/* Уровень кислорода */}
-        <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
-          <CustomChart
-            title="Уровень кислорода в крови"
-            data={chartData.oxygen}
-            unit="SpO2%"
-            initialRange={{ min: 1950, max: 2000 }}
-            verticalLines={[]}
-            highlightIntervals={[]}
-            lineColor="#00897B" // Яркий, насыщенный бирюзовый (teal)
-            selectionColor={selectionColor}
-            showStatus={false}
-          />
-        </Box>
-        {/* Стресс */}
-        <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
-          <CustomChart
-            title="Оценка уровня стресса"
-            data={chartData.stress}
-            unit="баллы"
-            initialRange={{ min: 1950, max: 2000 }}
-            verticalLines={["123"]}
-            highlightIntervals={[]}
-            lineColor="#512DA8" // Глубокий фиолетовый
-            selectionColor={selectionColor}
-            showStatus={false}
-          />
-        </Box>
-        {/* Частота дыхания */}
-        <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
-          <CustomChart
-            title="Частота дыхания"
-            data={chartData.breathing}
-            unit="дых/мин"
-            initialRange={{ min: 1950, max: 2000 }}
-            verticalLines={[]}
-            highlightIntervals={[]}
-            lineColor="#424242" // Тёмно-серый, контрастный с тёплыми оттенками
-            selectionColor={selectionColor}
-            showStatus={false}
-          />
-        </Box>
-        {/* Время сна */}
-        <Box sx={{ flex: "1 1 calc(50% - 16px)" }}>
-          <CustomChart
-            title="Время сна"
-            data={chartData.sleep}
-            unit="часы"
-            initialRange={{ min: 1950, max: 2000 }}
-            verticalLines={[]}
-            highlightIntervals={[]}
-            lineColor="#00695C" // Тёмный бирюзовый/изумрудный
-            selectionColor={selectionColor}
-            showStatus={false}
-          />
-        </Box>
+        {Object.entries(chartData).map(([key, data]) => {
+          const chartKey = key as keyof ChartDataType;
+          const config = {
+            pulse: {
+              title: "Пульс",
+              unit: "уд/мин",
+              color: "#1565C0",
+            },
+            oxygen: {
+              title: "Уровень кислорода в крови",
+              unit: "SpO2%",
+              color: "#00897B",
+            },
+            stress: {
+              title: "Оценка уровня стресса",
+              unit: "баллы",
+              color: "#512DA8",
+            },
+            breathing: {
+              title: "Частота дыхания",
+              unit: "дых/мин",
+              color: "#424242",
+            },
+            sleep: {
+              title: "Время сна",
+              unit: "часы",
+              color: "#00695C",
+            },
+          }[chartKey];
+
+          return (
+            <Box key={key} sx={{ flex: "1 1 calc(50% - 16px)" }}>
+              <CustomChart
+                title={config.title}
+                data={data}
+                unit={config.unit}
+                verticalLines={[]}
+                highlightIntervals={[]}
+                initialRange={getInitialRange(data)}
+                lineColor={config.color}
+                selectionColor={selectionColor}
+                showStatus={false}
+              />
+            </Box>
+          );
+        })}
       </Box>
     </Container>
   );
