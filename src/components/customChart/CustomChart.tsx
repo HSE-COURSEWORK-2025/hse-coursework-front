@@ -9,7 +9,8 @@ import {
   Divider,
   Switch,
   FormControlLabel,
-  CircularProgress
+  CircularProgress,
+  alpha,
 } from "@mui/material";
 import {
   ZoomIn as ZoomInIcon,
@@ -98,13 +99,18 @@ export const CustomChart = ({
   selectionColor = "#4CAF50", // Material Green 500
   lineColor,
   showStatus = true,
-  simulateLoading = false
+  simulateLoading = false,
 }: MetricCardProps) => {
   const theme = useTheme();
   const mainChartRef = useRef<HTMLCanvasElement | null>(null);
   const mainChartInstance = useRef<Chart | null>(null);
   const miniChartRef = useRef<HTMLCanvasElement | null>(null);
   const miniChartInstance = useRef<Chart | null>(null);
+
+  const surfaceColor = theme.palette.background.paper;
+  const onSurfaceColor = theme.palette.text.primary;
+  const primaryContainer = alpha(theme.palette.primary.main, 0.1);
+  const errorContainer = alpha(theme.palette.error.main, 0.1);
 
   if (!lineColor) lineColor = theme.palette.primary.main;
 
@@ -763,317 +769,136 @@ export const CustomChart = ({
     fullDataMax,
   ]);
 
+  useEffect(() => {
+    setMiniSelection({
+      start: initialRange.min,
+      end: initialRange.max,
+    });
+  }, [initialRange]); // Новый эффект
 
   if (simulateLoading) {
     return (
       <Card
         sx={{
-          mb: 3,
-          borderRadius: 2,
-          "&:hover": { boxShadow: theme.shadows[4] },
+          borderRadius: 3,
+          boxShadow: theme.shadows[1],
+          bgcolor: surfaceColor,
           position: "relative",
         }}
       >
-        <CardContent sx={{ position: "relative", textAlign: "center" }}>
+        <CardContent sx={{ textAlign: "center", p: 3 }}>
           <Typography variant="h6" gutterBottom>
             {title}
           </Typography>
-          <Box
-            sx={{
-              height: 200,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <CircularProgress />
+          <Box sx={{ height: 200, display: "grid", placeItems: "center" }}>
+            <CircularProgress size={40} />
           </Box>
         </CardContent>
       </Card>
     );
   }
 
+  const StatusBadge = ({ isError }: { isError: boolean }) => (
+    <Box
+      sx={{
+        bgcolor: isError ? errorContainer : primaryContainer,
+        color: isError ? theme.palette.error.main : theme.palette.success.main,
+        px: 2,
+        py: 0.5,
+        borderRadius: 28,
+        typography: "labelMedium",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 1,
+      }}
+    >
+      <Box
+        sx={{
+          width: 8,
+          height: 8,
+          borderRadius: "50%",
+          bgcolor: isError
+            ? theme.palette.error.main
+            : theme.palette.success.main,
+        }}
+      />
+      {isError ? "Требуется внимание" : "Все хорошо"}
+    </Box>
+  );
+
   return (
     <Card
       sx={{
-        mb: 3,
-        borderRadius: 2,
-        "&:hover": { boxShadow: theme.shadows[4] },
+        borderRadius: 3,
+        boxShadow: theme.shadows[1],
+        bgcolor: surfaceColor,
         position: "relative",
+        overflow: "visible",
       }}
     >
-      <CardContent sx={{ position: "relative" }}>
-        {/* Заголовок и подсказка */}
+      <CardContent sx={{ p: 3 }}>
+        {/* Header Section */}
         <Box
           sx={{
             display: "flex",
+            justifyContent: "space-between",
             alignItems: "center",
-            gap: 1,
             mb: 2,
-            position: "relative",
+            gap: 2,
+            width: "100%",
           }}
         >
-          <Typography variant="h6" gutterBottom>
-            {title}
-          </Typography>
-          {showStatus && (
-            <Box
-              sx={{
-                bgcolor:
-                  verticalLines?.length || highlightIntervals?.length
-                    ? theme.palette.error.light
-                    : theme.palette.success.light,
-                color:
-                  verticalLines?.length || highlightIntervals?.length
-                    ? theme.palette.error.contrastText
-                    : theme.palette.success.contrastText,
-                px: 1.5,
-                py: 0.5,
-                borderRadius: 1,
-                fontSize: "0.75rem",
-                fontWeight: 500,
-                lineHeight: 1.5,
-                display: "inline-flex",
-                alignItems: "center",
-                boxShadow: theme.shadows[1],
-                transition: "all 0.2s ease",
-              }}
-            >
-              {verticalLines?.length || highlightIntervals?.length
-                ? "не ОК"
-                : "ОК"}
-            </Box>
-          )}
-          <IconButton
-            onClick={(e) => {
-              e.stopPropagation();
-              setAnchorEl(e.currentTarget);
-            }}
+          <Typography
+            variant="h6"
+            color={onSurfaceColor}
             sx={{
-              position: "absolute",
-              top: 8,
-              right: 8,
-              bgcolor: theme.palette.background.paper,
-              "&:hover": { bgcolor: theme.palette.grey[300] },
-              zIndex: 1,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              flex: 1, // Занимаем все доступное пространство
+              minWidth: 0, // Разрешаем сжатие
             }}
           >
-            <HelpOutlineIcon />
-          </IconButton>
-        </Box>
-        <Popover
-          open={Boolean(anchorEl)}
-          anchorEl={anchorEl}
-          onClose={() => setAnchorEl(null)}
-          disableEnforceFocus
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          transformOrigin={{ vertical: "top", horizontal: "right" }}
-        >
-          <Box sx={{ p: 2, maxWidth: 320, bgcolor: "background.paper" }}>
-            <Typography
-              variant="subtitle1"
-              gutterBottom
+            {title}
+          </Typography>
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              flexShrink: 0,
+              ml: "auto",
+            }}
+          >
+            {showStatus && (
+              <StatusBadge
+                isError={
+                  !!(verticalLines?.length || highlightIntervals?.length)
+                }
+              />
+            )}
+
+            <IconButton
+              onClick={(e) => setAnchorEl(e.currentTarget)}
               sx={{
-                fontWeight: 600,
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                color: "text.primary",
+                flexShrink: 0,
+                color: onSurfaceColor,
+                "&:hover": { bgcolor: alpha(onSurfaceColor, 0.08) },
               }}
             >
-              <HelpOutlineIcon fontSize="small" color="primary" />
-              Управление графиком
-            </Typography>
-
-            <Divider sx={{ my: 1 }} />
-
-            {/* Основные взаимодействия */}
-            <Box sx={{ mb: 2 }}>
-              <Typography
-                variant="subtitle2"
-                gutterBottom
-                sx={{
-                  fontWeight: 500,
-                  color: "text.secondary",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  mb: 1.5,
-                }}
-              >
-                <ZoomInIcon fontSize="small" />
-                Масштабирование
-              </Typography>
-
-              <Box sx={{ pl: 2 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1.5,
-                    mb: 1,
-                  }}
-                >
-                  <PanToolIcon fontSize="small" color="action" />
-                  <Typography variant="body2">
-                    <Box component="span" sx={{ fontWeight: 500 }}>
-                      Выделение области:
-                    </Box>{" "}
-                    ЛКМ + перетаскивание
-                  </Typography>
-                </Box>
-
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1.5,
-                    mb: 1,
-                  }}
-                >
-                  <MouseIcon fontSize="small" color="action" />
-                  <Typography variant="body2">
-                    <Box component="span" sx={{ fontWeight: 500 }}>
-                      Колёсико:
-                    </Box>{" "}
-                    Ctrl + прокрутка
-                  </Typography>
-                </Box>
-
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <AspectRatioIcon fontSize="small" color="action" />
-                  <Typography variant="body2">
-                    <Box component="span" sx={{ fontWeight: 500 }}>
-                      Сброс:
-                    </Box>{" "}
-                    Двойной клик
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-
-            <Divider sx={{ my: 2 }} />
-
-            {/* Навигация */}
-            <Box sx={{ mb: 2 }}>
-              <Typography
-                variant="subtitle2"
-                gutterBottom
-                sx={{
-                  fontWeight: 500,
-                  color: "text.secondary",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  mb: 1.5,
-                }}
-              >
-                <DragIndicatorIcon fontSize="small" />
-                Перемещение
-              </Typography>
-
-              <Box sx={{ pl: 2 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1.5,
-                    mb: 1,
-                  }}
-                >
-                  <SwapHorizIcon fontSize="small" color="action" />
-                  <Typography variant="body2">
-                    <Box component="span" sx={{ fontWeight: 500 }}>
-                      Панорамирование:
-                    </Box>{" "}
-                    ПКМ + перетаскивание
-                  </Typography>
-                </Box>
-
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <CropFreeIcon fontSize="small" color="action" />
-                  <Typography variant="body2">
-                    <Box component="span" sx={{ fontWeight: 500 }}>
-                      Прокрутка:
-                    </Box>{" "}
-                    Shift + колёсико
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-
-            <Divider sx={{ my: 2 }} />
-
-            {/* Мини-карта */}
-            <Box>
-              <Typography
-                variant="subtitle2"
-                gutterBottom
-                sx={{
-                  fontWeight: 500,
-                  color: "text.secondary",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  mb: 1.5,
-                }}
-              >
-                <ZoomOutMapIcon fontSize="small" />
-                Область просмотра
-              </Typography>
-
-              <Box sx={{ pl: 2 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1.5,
-                    mb: 1,
-                  }}
-                >
-                  <UnfoldMoreIcon fontSize="small" color="action" />
-                  <Typography variant="body2">
-                    <Box component="span" sx={{ fontWeight: 500 }}>
-                      Изменение размера:
-                    </Box>{" "}
-                    Тяните за границы
-                  </Typography>
-                </Box>
-
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <OpenWithIcon fontSize="small" color="action" />
-                  <Typography variant="body2">
-                    <Box component="span" sx={{ fontWeight: 500 }}>
-                      Перемещение:
-                    </Box>{" "}
-                    Тяните за область
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{
-                display: "block",
-                fontStyle: "italic",
-              }}
-            >
-              * ЛКМ - Левая кнопка мыши
-              <br />* ПКМ - Правая кнопка мыши
-            </Typography>
+              <HelpOutlineIcon fontSize="small" />
+            </IconButton>
           </Box>
-        </Popover>
-
-        {/* Основной график */}
+        </Box>
+        {/* Chart Canvas */}
         <Box
           sx={{
             position: "relative",
-            height: 150,
-            "&:hover": { cursor: "crosshair" },
+            height: 200,
+            borderRadius: 3,
+            overflow: "hidden",
+            border: `1px solid ${alpha(onSurfaceColor, 0.12)}`,
           }}
         >
           <canvas
@@ -1086,13 +911,15 @@ export const CustomChart = ({
           />
         </Box>
 
-        {/* Мини-график (обзор) – высота в 1/3 от основного */}
+        {/* Mini Map */}
         <Box
           sx={{
-            position: "relative",
-            height: 50,
             mt: 2,
-            "&:hover": { cursor: "pointer" },
+            height: 56,
+            borderRadius: 2,
+            overflow: "hidden",
+            position: "relative",
+            bgcolor: alpha(onSurfaceColor, 0.05),
           }}
         >
           <canvas
@@ -1105,25 +932,213 @@ export const CustomChart = ({
           />
         </Box>
 
-        {/* Информация о единицах и количестве точек */}
+        {/* Footer */}
         <Box
           sx={{
-            mt: 1,
+            mt: 2,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
           }}
         >
-          {unit && (
-            <Typography variant="caption" color="text.secondary">
-              Единицы измерения: {unit}
-            </Typography>
-          )}
-          <Typography variant="caption" color="text.secondary">
-            {`${data.length} точек данных`}
+          <Typography variant="bodySmall" color={alpha(onSurfaceColor, 0.6)}>
+            {unit ? `Units: ${unit}` : " "}
+          </Typography>
+          <Typography variant="bodySmall" color={alpha(onSurfaceColor, 0.6)}>
+            {data.length} data points
           </Typography>
         </Box>
       </CardContent>
+
+      {/* Help Popover */}
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={() => setAnchorEl(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+        sx={{
+          "& .MuiPaper-root": {
+            borderRadius: 4,
+            boxShadow: theme.shadows[3],
+            width: 360,
+            bgcolor: "surfaceContainerHigh.main",
+          },
+        }}
+      >
+        <Box sx={{ p: 2 }}>
+          {/* Заголовок */}
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
+            <HelpOutlineIcon
+              fontSize="small"
+              sx={{ color: "primary.main", flexShrink: 0 }}
+            />
+            <Typography variant="titleSmall" sx={{ color: "onSurface.main" }}>
+              Управление графиком
+            </Typography>
+          </Box>
+
+          {/* Секции */}
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            {/* Масштабирование */}
+            <Box>
+              <Typography
+                variant="labelLarge"
+                sx={{ color: "onSurfaceVariant.main", mb: 1 }}
+              >
+                Масштабирование
+              </Typography>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      bgcolor: "primaryContainer.main",
+                      borderRadius: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <PanToolIcon
+                      fontSize="small"
+                      sx={{ color: "onPrimaryContainer.main" }}
+                    />
+                  </Box>
+                  <Typography
+                    variant="bodyMedium"
+                    sx={{ color: "onSurface.main" }}
+                  >
+                    <Box component="span" sx={{ fontWeight: 500 }}>
+                      Выделение области:
+                    </Box>{" "}
+                    ЛКМ + перетаскивание
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      bgcolor: "secondaryContainer.main",
+                      borderRadius: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <MouseIcon
+                      fontSize="small"
+                      sx={{ color: "onSecondaryContainer.main" }}
+                    />
+                  </Box>
+                  <Typography
+                    variant="bodyMedium"
+                    sx={{ color: "onSurface.main" }}
+                  >
+                    <Box component="span" sx={{ fontWeight: 500 }}>
+                      Колёсико:
+                    </Box>{" "}
+                    Ctrl + прокрутка
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Перемещение */}
+            <Divider sx={{ borderColor: "outlineVariant.main" }} />
+            <Box>
+              <Typography
+                variant="labelLarge"
+                sx={{ color: "onSurfaceVariant.main", mb: 1 }}
+              >
+                Перемещение
+              </Typography>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      bgcolor: "tertiaryContainer.main",
+                      borderRadius: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <SwapHorizIcon
+                      fontSize="small"
+                      sx={{ color: "onTertiaryContainer.main" }}
+                    />
+                  </Box>
+                  <Typography
+                    variant="bodyMedium"
+                    sx={{ color: "onSurface.main" }}
+                  >
+                    <Box component="span" sx={{ fontWeight: 500 }}>
+                      Панорамирование:
+                    </Box>{" "}
+                    ПКМ + перетаскивание
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Область просмотра */}
+            <Divider sx={{ borderColor: "outlineVariant.main" }} />
+            <Box>
+              <Typography
+                variant="labelLarge"
+                sx={{ color: "onSurfaceVariant.main", mb: 1 }}
+              >
+                Настройки вида
+              </Typography>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      bgcolor: "surfaceVariant.main",
+                      borderRadius: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <UnfoldMoreIcon
+                      fontSize="small"
+                      sx={{ color: "onSurfaceVariant.main" }}
+                    />
+                  </Box>
+                  <Typography
+                    variant="bodyMedium"
+                    sx={{ color: "onSurface.main" }}
+                  >
+                    <Box component="span" sx={{ fontWeight: 500 }}>
+                      Изменение размера:
+                    </Box>{" "}
+                    Тяните за границы
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Подсказки */}
+            <Divider sx={{ borderColor: "outlineVariant.main" }} />
+            <Typography
+              variant="bodySmall"
+              sx={{ color: "onSurfaceVariant.main", mt: 1 }}
+            >
+              * ЛКМ - Левая кнопка мыши
+              <br />* ПКМ - Правая кнопка мыши
+            </Typography>
+          </Box>
+        </Box>
+      </Popover>
     </Card>
   );
 };

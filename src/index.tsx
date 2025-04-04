@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { SnackbarProvider } from "notistack";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -16,9 +17,11 @@ root.render(
       horizontal: "right",
     }}
   >
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
+    <GoogleOAuthProvider clientId={ process.env.GOOGLE_OAUTH_CLIENT_ID || '' }>
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    </GoogleOAuthProvider>
   </SnackbarProvider>
 );
 

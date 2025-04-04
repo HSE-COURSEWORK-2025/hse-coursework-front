@@ -1,178 +1,367 @@
-import { 
-  Box, 
-  Button, 
-  Card, 
-  CardContent, 
-  Container, 
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Container,
   Typography,
   Avatar,
-  Paper,
-  Stack
-} from '@mui/material';
-import { 
-  FitnessCenter, 
-  Favorite, 
-  AccessTime, 
-  Today, 
-  Insights 
-} from '@mui/icons-material';
+  Stack,
+  Chip,
+} from "@mui/material";
+import {
+  FitnessCenter,
+  Favorite,
+  AccessTime,
+  Today,
+  Insights,
+} from "@mui/icons-material";
 
 export const MainPage: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Шапка */}
-      <Box sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        mb: 4,
-        p: 3,
-        borderRadius: 3,
-        bgcolor: 'primary.main',
-        color: 'primary.contrastText'
-      }}>
-        <Avatar sx={{ 
-          width: 64, 
-          height: 64, 
-          mr: 3,
-          bgcolor: 'secondary.main'
-        }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          mb: 4,
+          p: 3,
+          borderRadius: 4,
+          bgcolor: "surfaceContainerHigh.main",
+          boxShadow: 1,
+        }}
+      >
+        <Avatar
+          sx={{
+            width: 64,
+            height: 64,
+            mr: 3,
+            bgcolor: "primaryContainer.main",
+            color: "onPrimaryContainer.main",
+          }}
+        >
           <FitnessCenter fontSize="large" />
         </Avatar>
         <Box>
-          <Typography variant="h4" component="h1">
+          <Typography variant="headlineSmall" component="h1">
             Здоровье — это просто
           </Typography>
-          <Typography variant="subtitle1">
+          <Typography
+            variant="bodyLarge"
+            sx={{ color: "onSurfaceVariant.main" }}
+          >
             Все ваши показатели в одном месте
           </Typography>
         </Box>
       </Box>
 
       {/* Быстрые действия */}
-      <Box sx={{ 
-        display: 'flex', 
-        flexWrap: 'wrap', 
-        gap: 2, 
-        mb: 4,
-        '& > *': { flex: '1 1 calc(50% - 16px)' },
-        '@media (min-width: 600px)': { '& > *': { flex: '1 1 calc(25% - 16px)' } }
-      }}>
-        <Button 
-          variant="contained" 
-          startIcon={<Favorite />}
-          sx={{ py: 3 }}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(4, 1fr)" },
+          gap: 2,
+          mb: 4,
+        }}
+      >
+        <Button
+          variant="contained"
+          startIcon={<Favorite sx={{ color: "secondary.main" }} />}
+          sx={{
+            py: 3,
+            borderRadius: 5,
+            bgcolor: "secondaryContainer.main",
+            color: "onSecondaryContainer.main",
+            textTransform: "none",
+            fontWeight: "medium",
+            "&:hover": {
+              bgcolor: "secondaryContainer.dark",
+            },
+            "&:active": {
+              bgcolor: "secondaryContainer.dark",
+              transform: "scale(0.98)",
+            },
+          }}
         >
           Показатели
         </Button>
-        <Button 
-          variant="contained" 
-          startIcon={<AccessTime />}
-          sx={{ py: 3 }}
+        <Button
+          variant="contained"
+          startIcon={<AccessTime sx={{ color: "tertiary.main" }} />}
+          sx={{
+            py: 3,
+            borderRadius: 5,
+            bgcolor: "tertiaryContainer.main",
+            color: "onTertiaryContainer.main",
+            textTransform: "none",
+            fontWeight: 500,
+            boxShadow: "none",
+            "&:hover": {
+              bgcolor: "tertiaryContainer.dark",
+              boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+            },
+            "&:active": {
+              transform: "scale(0.98)",
+            },
+          }}
         >
           Активность
         </Button>
-        <Button 
-          variant="contained" 
-          startIcon={<Today />}
-          sx={{ py: 3 }}
+        <Button
+          variant="contained"
+          startIcon={<Today sx={{ color: "onErrorContainer.main" }} />}
+          sx={{
+            py: 3,
+            borderRadius: 5,
+            bgcolor: "errorContainer.main",
+            color: "onErrorContainer.main",
+            textTransform: "none",
+            fontWeight: 500,
+            boxShadow: "none",
+            "&:hover": {
+              bgcolor: "errorContainer.dark",
+              boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+            },
+            "&:active": {
+              transform: "scale(0.98)",
+            },
+          }}
         >
           Календарь
         </Button>
-        <Button 
-          variant="contained" 
-          startIcon={<Insights />}
-          sx={{ py: 3 }}
+        <Button
+          variant="contained"
+          startIcon={<Insights sx={{ color: "onPrimaryContainer.main" }} />}
+          sx={{
+            py: 3,
+            borderRadius: 5,
+            bgcolor: "primaryContainer.main",
+            color: "onPrimaryContainer.main",
+            textTransform: "none",
+            fontWeight: 500,
+            boxShadow: "none",
+            "&:hover": {
+              bgcolor: "primaryContainer.dark",
+              boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+            },
+            "&:active": {
+              transform: "scale(0.98)",
+            },
+          }}
         >
           Аналитика
         </Button>
       </Box>
 
       {/* Основной контент */}
-      <Box sx={{ 
-        display: 'flex', 
-        flexDirection: { xs: 'column', md: 'row' }, 
-        gap: 3 
-      }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          gap: 3,
+        }}
+      >
         {/* Левая колонка */}
-        <Box sx={{ flex: 1 }}>
-          <Card sx={{ mb: 3 }}>
+        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
+          <Card sx={{ borderRadius: 4, boxShadow: 2 }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="titleLarge" gutterBottom>
                 Сегодняшние метрики
               </Typography>
-              <Box sx={{ 
-                display: 'flex', 
-                gap: 2,
-                flexWrap: 'wrap',
-                '& > *': { flex: '1 1 200px' }
-              }}>
-                <Paper sx={{ p: 2, textAlign: 'center', flex: 1 }}>
-                  <Typography variant="h5">72</Typography>
-                  <Typography variant="caption">Пульс</Typography>
-                </Paper>
-                <Paper sx={{ p: 2, textAlign: 'center', flex: 1 }}>
-                  <Typography variant="h5">98%</Typography>
-                  <Typography variant="caption">Кислород</Typography>
-                </Paper>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Box
+                  sx={{
+                    flex: 1,
+                    p: 3,
+                    borderRadius: 3,
+                    bgcolor: "surfaceContainerLow.main",
+                  }}
+                >
+                  <Typography
+                    variant="headlineSmall"
+                    sx={{ color: "primary.main" }}
+                  >
+                    72
+                  </Typography>
+                  <Typography
+                    variant="bodyMedium"
+                    sx={{ color: "onSurfaceVariant.main" }}
+                  >
+                    Пульс
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    flex: 1,
+                    p: 3,
+                    borderRadius: 3,
+                    bgcolor: "surfaceContainerLow.main",
+                  }}
+                >
+                  <Typography
+                    variant="headlineSmall"
+                    sx={{ color: "secondary.main" }}
+                  >
+                    98%
+                  </Typography>
+                  <Typography
+                    variant="bodyMedium"
+                    sx={{ color: "onSurfaceVariant.main" }}
+                  >
+                    Кислород
+                  </Typography>
+                </Box>
               </Box>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card sx={{ borderRadius: 4, boxShadow: 2 }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="titleLarge" gutterBottom>
                 Последние события
               </Typography>
               <Stack spacing={2}>
-                <Paper sx={{ p: 2 }}>
-                  <Typography>Утренняя пробежка 2.5 км</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    08:30 утра
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 3,
+                    bgcolor: "surfaceContainerHighest.main",
+                  }}
+                >
+                  <Typography variant="bodyLarge">
+                    Утренняя пробежка 2.5 км
                   </Typography>
-                </Paper>
-                <Paper sx={{ p: 2 }}>
-                  <Typography>Норма воды выполнена</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    1.5 л из 2 л
+                  <Chip
+                    label="08:30 утра"
+                    size="small"
+                    sx={{
+                      mt: 1,
+                      bgcolor: "surfaceVariant.main",
+                      color: "onSurfaceVariant.main",
+                    }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 3,
+                    bgcolor: "surfaceContainerHighest.main",
+                  }}
+                >
+                  <Typography variant="bodyLarge">
+                    Норма воды выполнена
                   </Typography>
-                </Paper>
+                  <Chip
+                    label="1.5 л из 2 л"
+                    size="small"
+                    sx={{
+                      mt: 1,
+                      bgcolor: "surfaceVariant.main",
+                      color: "onSurfaceVariant.main",
+                    }}
+                  />
+                </Box>
               </Stack>
             </CardContent>
           </Card>
         </Box>
 
         {/* Правая колонка */}
-        <Box sx={{ 
-          width: { xs: '100%', md: '320px' }, 
-          flexShrink: 0 
-        }}>
-          <Card sx={{ mb: 3 }}>
+        <Box
+          sx={{
+            width: { xs: "100%", md: 360 },
+            flexShrink: 0,
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+          }}
+        >
+          <Card sx={{ borderRadius: 4, boxShadow: 2 }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="titleLarge" gutterBottom>
                 Советы дня
               </Typography>
               <Stack spacing={2}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Favorite color="primary" />
-                  <Typography>Сделайте 5-минутную разминку</Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    p: 2,
+                    borderRadius: 3,
+                    bgcolor: "surfaceContainerHigh.main",
+                  }}
+                >
+                  <Favorite sx={{ color: "tertiary.main" }} />
+                  <Typography variant="bodyLarge">
+                    Сделайте 5-минутную разминку
+                  </Typography>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <AccessTime color="primary" />
-                  <Typography>Запланируйте время для отдыха</Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    p: 2,
+                    borderRadius: 3,
+                    bgcolor: "surfaceContainerHigh.main",
+                  }}
+                >
+                  <AccessTime sx={{ color: "primary.main" }} />
+                  <Typography variant="bodyLarge">
+                    Запланируйте время для отдыха
+                  </Typography>
                 </Box>
               </Stack>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card sx={{ borderRadius: 4, boxShadow: 2 }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="titleLarge" gutterBottom>
                 Быстрые действия
               </Typography>
               <Stack spacing={2}>
-                <Button variant="outlined" fullWidth>Добавить вес</Button>
-                <Button variant="outlined" fullWidth>Записать сон</Button>
-                <Button variant="outlined" fullWidth>Добавить активность</Button>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    borderRadius: 5,
+                    borderColor: "outline",
+                    color: "onSurface.main",
+                  }}
+                >
+                  Добавить вес
+                </Button>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    borderRadius: 5,
+                    borderColor: "outline",
+                    color: "onSurface.main",
+                  }}
+                >
+                  Записать сон
+                </Button>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    borderRadius: 5,
+                    borderColor: "outline",
+                    color: "onSurface.main",
+                  }}
+                >
+                  Добавить активность
+                </Button>
               </Stack>
             </CardContent>
           </Card>

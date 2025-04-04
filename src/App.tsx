@@ -7,7 +7,8 @@ import {
   RawDataChartsPage,
   MainPage,
   DataWOutliersChartsPage,
-  NotificationsPage
+  NotificationsPage,
+  LoginPage
 } from "./pages";
 import { Box } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
@@ -38,6 +39,11 @@ export const App = () => {
       text: "Графики данных с обнаруженными аномалиями",
       path: "/dataWOutliersPage",
       icon: <BugReportIcon />,
+    },
+    {
+      text: "Login test",
+      path: "/auth",
+      icon: <CodeIcon />,
     }
   ];
 
@@ -58,6 +64,10 @@ export const App = () => {
             <Route
               path="/notificationsPage"
               element={<NotificationsPage />}
+            />
+            <Route
+              path="/auth"
+              element={<LoginPage />}
             />
           </Routes>
         </Box>

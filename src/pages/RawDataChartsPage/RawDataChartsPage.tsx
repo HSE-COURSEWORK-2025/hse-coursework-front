@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { Container, Typography, Box, CircularProgress, FormControlLabel, Switch } from "@mui/material";
+import {
+  Container,
+  Typography,
+  Box,
+  CircularProgress,
+  FormControlLabel,
+  Switch,
+} from "@mui/material";
 import { CustomChart } from "../../components/customChart/CustomChart";
 import axios from "axios";
 import { useSnackbar } from "notistack";
@@ -48,7 +55,9 @@ export const RawDataChartsPage: React.FC = () => {
     sleep: [],
   });
   // Отдельное состояние загрузки для каждого графика
-  const [loadingMap, setLoadingMap] = useState<Record<keyof ChartDataType, boolean>>({
+  const [loadingMap, setLoadingMap] = useState<
+    Record<keyof ChartDataType, boolean>
+  >({
     pulse: true,
     oxygen: true,
     stress: true,
@@ -63,13 +72,17 @@ export const RawDataChartsPage: React.FC = () => {
   useEffect(() => {
     Object.entries(DATA_TYPES).forEach(([key, type]) => {
       axios
-        .get<BackendDataElement[]>(`${API_URL}/api/v1/getData/getRawData`, { params: { data_type: type } })
+        .get<BackendDataElement[]>(`${API_URL}/api/v1/getData/getRawData`, {
+          params: { data_type: type },
+        })
         .then((response) => {
           const data = transformData(response.data);
           setChartData((prev) => ({ ...prev, [key]: data }));
         })
         .catch(() => {
-          enqueueSnackbar(`Ошибка загрузки данных для ${key}`, { variant: "error" });
+          enqueueSnackbar(`Ошибка загрузки данных для ${key}`, {
+            variant: "error",
+          });
         })
         .finally(() => {
           setLoadingMap((prev) => ({ ...prev, [key]: false }));
@@ -124,17 +137,6 @@ export const RawDataChartsPage: React.FC = () => {
       <Typography variant="body1" color="text.secondary" paragraph>
         Исходные данные жизненных показателей
       </Typography>
-
-      {/* Переключатель принудительного режима загрузки */}
-      <FormControlLabel
-        control={
-          <Switch
-            checked={forceLoading}
-            onChange={(e) => setForceLoading(e.target.checked)}
-          />
-        }
-        label="Режим загрузки"
-      />
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
         {Object.entries(chartData).map(([key, data]) => {
