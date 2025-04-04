@@ -7,6 +7,9 @@ import {
   Popover,
   Box,
   Divider,
+  Switch,
+  FormControlLabel,
+  CircularProgress
 } from "@mui/material";
 import {
   ZoomIn as ZoomInIcon,
@@ -82,6 +85,7 @@ interface MetricCardProps {
   lineColor?: string; // Цвет основной линии графика
   selectionColor?: string; // Цвет выделения интервала
   showStatus?: boolean;
+  simulateLoading?: boolean;
 }
 
 export const CustomChart = ({
@@ -94,6 +98,7 @@ export const CustomChart = ({
   selectionColor = "#4CAF50", // Material Green 500
   lineColor,
   showStatus = true,
+  simulateLoading = false
 }: MetricCardProps) => {
   const theme = useTheme();
   const mainChartRef = useRef<HTMLCanvasElement | null>(null);
@@ -139,8 +144,8 @@ export const CustomChart = ({
   const dataX = data.map((d) => Number(d.x));
   const minX = Math.min(...dataX);
   const maxX = Math.max(...dataX);
-  const fullDataMin = minX - minX * extendValsPercent;
-  const fullDataMax = maxX + maxX * extendValsPercent;
+  const fullDataMin = minX;
+  const fullDataMax = maxX;
 
   const resizeHandlesPlugin = {
     id: "resizeHandles",
@@ -757,6 +762,36 @@ export const CustomChart = ({
     fullDataMin,
     fullDataMax,
   ]);
+
+
+  if (simulateLoading) {
+    return (
+      <Card
+        sx={{
+          mb: 3,
+          borderRadius: 2,
+          "&:hover": { boxShadow: theme.shadows[4] },
+          position: "relative",
+        }}
+      >
+        <CardContent sx={{ position: "relative", textAlign: "center" }}>
+          <Typography variant="h6" gutterBottom>
+            {title}
+          </Typography>
+          <Box
+            sx={{
+              height: 200,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card
