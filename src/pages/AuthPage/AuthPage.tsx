@@ -24,7 +24,10 @@ export const LoginPage: React.FC = () => {
           boxShadow: 3,
           bgcolor: 'background.paper',
           textAlign: 'center',
-          width: '100%'
+          width: '100%',
+          minWidth: '300px', // Минимальная ширина
+          overflow: 'visible',
+          position: 'relative',
         }}>
           {/* Заголовок */}
           <Typography variant="h4" sx={{ 
@@ -49,9 +52,7 @@ export const LoginPage: React.FC = () => {
             <GoogleLoginButton />
             
             <Divider sx={{ width: '100%', my: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                или
-              </Typography>
+              
             </Divider>
 
             <Typography variant="body2" color="text.secondary">
