@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { Container, Typography, Box, FormControlLabel, Switch } from "@mui/material";
+import {
+  Container,
+  Typography,
+  Box,
+  FormControlLabel,
+  Switch,
+} from "@mui/material";
 import { CustomChart } from "../../components/customChart/CustomChart";
 import axios from "axios";
 import { useSnackbar } from "notistack";
@@ -47,8 +53,10 @@ export const DataWOutliersChartsPage: React.FC = () => {
     breathing: [],
     sleep: [],
   });
-  
-  const [outliers, setOutliers] = useState<Record<keyof ChartDataType, string[]>>({
+
+  const [outliers, setOutliers] = useState<
+    Record<keyof ChartDataType, string[]>
+  >({
     pulse: [],
     oxygen: [],
     stress: [],
@@ -57,7 +65,9 @@ export const DataWOutliersChartsPage: React.FC = () => {
   });
 
   // Отдельное состояние загрузки для каждого графика
-  const [loadingMap, setLoadingMap] = useState<Record<keyof ChartDataType, boolean>>({
+  const [loadingMap, setLoadingMap] = useState<
+    Record<keyof ChartDataType, boolean>
+  >({
     pulse: true,
     oxygen: true,
     stress: true,
@@ -81,22 +91,30 @@ export const DataWOutliersChartsPage: React.FC = () => {
           const { data, outliers } = transformData(response.data);
           return { key, data, outliers };
         } catch (error) {
-          enqueueSnackbar(`Ошибка загрузки данных для ${key}`, { variant: "error" });
+          enqueueSnackbar(`Ошибка загрузки данных для ${key}`, {
+            variant: "error",
+          });
           return { key, data: [], outliers: [] };
         }
       });
 
       const results = await Promise.all(requests);
-      
-      const newChartData = results.reduce((acc, { key, data }) => ({
-        ...acc,
-        [key]: data,
-      }), {} as ChartDataType);
 
-      const newOutliers = results.reduce((acc, { key, outliers }) => ({
-        ...acc,
-        [key]: outliers,
-      }), {} as Record<keyof ChartDataType, string[]>);
+      const newChartData = results.reduce(
+        (acc, { key, data }) => ({
+          ...acc,
+          [key]: data,
+        }),
+        {} as ChartDataType
+      );
+
+      const newOutliers = results.reduce(
+        (acc, { key, outliers }) => ({
+          ...acc,
+          [key]: outliers,
+        }),
+        {} as Record<keyof ChartDataType, string[]>
+      );
 
       setChartData(newChartData);
       setOutliers(newOutliers);
@@ -161,17 +179,6 @@ export const DataWOutliersChartsPage: React.FC = () => {
       <Typography variant="body1" color="text.secondary" paragraph>
         Исходные данные жизненных показателей с выбросами
       </Typography>
-
-      {/* Переключатель принудительного режима загрузки */}
-      <FormControlLabel
-        control={
-          <Switch
-            checked={forceLoading}
-            onChange={(e) => setForceLoading(e.target.checked)}
-          />
-        }
-        label="Режим загрузки"
-      />
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
         {Object.entries(chartData).map(([key, data]) => {

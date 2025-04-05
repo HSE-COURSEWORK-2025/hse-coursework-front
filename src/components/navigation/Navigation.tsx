@@ -28,21 +28,31 @@ interface NavigationProps {
 
 const StyledDrawer = styled(Drawer)(({ theme }) => ({
   "& .MuiDrawer-paper": {
-    width: 240,
-    backgroundColor: theme.palette.background.default,
-    borderRight: "none",
-    boxShadow: theme.shadows[4],
+    width: 280,
+    backgroundColor: theme.palette.background.paper,
+    borderRight: `1px solid ${theme.palette.divider}`,
+    boxShadow: theme.shadows[1],
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(1),
   },
 }));
 
 const StyledListItemButton = styled(ListItemButton)<
   { component?: React.ElementType } & LinkProps
 >(({ theme }) => ({
-  borderRadius: theme.spacing(1),
+  borderRadius: "28px",
   margin: theme.spacing(0, 1.5),
-  padding: theme.spacing(1, 2),
+  padding: theme.spacing(1.5, 2),
+  minHeight: "56px",
+  transition: theme.transitions.create(["background-color", "box-shadow"], {
+    duration: theme.transitions.duration.short,
+  }),
   "&.Mui-selected": {
     backgroundColor: theme.palette.action.selected,
+    "& .MuiListItemIcon-root": {
+      color: theme.palette.primary.main,
+    },
     "&:hover": {
       backgroundColor: theme.palette.action.hover,
     },
@@ -50,13 +60,12 @@ const StyledListItemButton = styled(ListItemButton)<
   "&:hover": {
     backgroundColor: theme.palette.action.hover,
   },
+  "&:active": {
+    backgroundColor: theme.palette.action.selected,
+  },
 }));
 
-export const Navigation = ({
-  items,
-  open = true,
-  onClose,
-}: NavigationProps) => {
+export const Navigation = ({ items, open = true, onClose }: NavigationProps) => {
   const theme = useTheme();
   const location = useLocation();
 
@@ -70,35 +79,41 @@ export const Navigation = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          p: theme.spacing(3, 2),
-          borderBottom: `1px solid ${theme.palette.divider}`,
+          p: theme.spacing(3),
+          height: "64px",
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Avatar
             sx={{
               bgcolor: theme.palette.primary.main,
-              mr: 2,
+              color: theme.palette.primary.contrastText,
               width: 40,
               height: 40,
             }}
           >
             A
           </Avatar>
-          <Typography variant="h6" color="text.primary">
-            My App
-          </Typography>
+          {open && (
+            <Typography variant="h6" color="text.primary">
+              My App
+            </Typography>
+          )}
         </Box>
-        {/* Иконка уведомлений с Badge и переходом на /notificationsPage */}
         <IconButton
           component={Link}
           to="/notificationsPage"
-          sx={{ color: theme.palette.text.secondary }}
+          sx={{
+            color: "inherit",
+            "&:hover": {
+              backgroundColor: theme.palette.action.hover,
+            },
+          }}
         >
           <Badge
             variant="dot"
             color="error"
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
             invisible={!hasUnread}
           >
             <NotificationsNoneIcon />
@@ -107,9 +122,9 @@ export const Navigation = ({
       </Box>
 
       {/* Navigation Items */}
-      <List sx={{ p: theme.spacing(2) }}>
+      <List sx={{ p: theme.spacing(0, 1.5), flex: 1 }}>
         {items.map((item) => (
-          <ListItem key={item.path} disablePadding sx={{ mb: 1 }}>
+          <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
             <Tooltip title={!open ? item.text : ""} placement="right">
               <StyledListItemButton
                 component={Link}
@@ -119,11 +134,11 @@ export const Navigation = ({
                 <ListItemIcon
                   sx={{
                     minWidth: 0,
-                    color:
-                      location.pathname === item.path
-                        ? theme.palette.primary.main
-                        : theme.palette.text.secondary,
+                    color: "inherit",
                     mr: open ? 2 : "auto",
+                    ...(location.pathname === item.path && {
+                      color: theme.palette.primary.main,
+                    }),
                   }}
                 >
                   {item.icon}
@@ -133,12 +148,9 @@ export const Navigation = ({
                   <ListItemText
                     primary={item.text}
                     primaryTypographyProps={{
-                      variant: "body2",
+                      variant: "body1",
                       fontWeight: 500,
-                      color:
-                        location.pathname === item.path
-                          ? theme.palette.text.primary
-                          : theme.palette.text.secondary,
+                      color: "inherit",
                     }}
                   />
                 )}
@@ -149,9 +161,13 @@ export const Navigation = ({
       </List>
 
       {/* Footer */}
-      <Divider sx={{ my: 1 }} />
       <Box sx={{ p: theme.spacing(2) }}>
-        <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>
+        <Divider sx={{ mb: 2 }} />
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ textAlign: "center" }}
+        >
           Version 1.0.0
         </Typography>
       </Box>
