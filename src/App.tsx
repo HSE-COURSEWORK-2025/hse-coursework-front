@@ -48,7 +48,7 @@ export const App = () => {
   ];
 
   return (
-    <BrowserRouter basename="/frontend">
+    <BrowserRouter basename="/">
       <Box sx={{ display: "flex" }}>
         <Navigation items={menuItems} />
 
