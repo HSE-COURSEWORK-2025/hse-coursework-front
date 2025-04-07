@@ -4,6 +4,8 @@ import { useSnackbar } from "notistack";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 
+const API_URL = process.env.REACT_APP_API_URL || "";
+
 // Кастомные стили для MD3
 const Md3Wrapper = styled(Box)(({ theme }) => ({
   "& .google-login": {
@@ -67,7 +69,7 @@ export const GoogleLoginButton = () => {
       <GoogleLogin
         onSuccess={async (credentialResponse) => {
           try {
-            const response = await fetch("http://localhost:8080/api/v1/auth/google", {
+            const response = await fetch(API_URL + "/api/v1/auth/google", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
