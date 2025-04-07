@@ -3,6 +3,10 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useSnackbar } from "notistack";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
+import { useAuth } from "./AuthContext"; // Импорт функции setTokens из контекста
+import { useNavigate } from "react-router-dom";
+
+const API_URL = process.env.REACT_APP_AUTH_API_URL || "";
 
 // Кастомные стили для MD3
 const Md3Wrapper = styled(Box)(({ theme }) => ({
@@ -41,6 +45,8 @@ function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
 
 export const GoogleLoginButton = () => {
   const { enqueueSnackbar } = useSnackbar();
+  const { setTokens } = useAuth(); // Получаем setTokens для обновления токенов
+  const navigate = useNavigate();
 
   const handleSnackbar = (variant: "success" | "error", message: string) => {
     enqueueSnackbar(message, {
@@ -67,7 +73,7 @@ export const GoogleLoginButton = () => {
       <GoogleLogin
         onSuccess={async (credentialResponse) => {
           try {
-            const response = await fetch("http://localhost:8080/api/v1/auth/google", {
+            const response = await fetch(API_URL + "/api/v1/auth/google", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -80,8 +86,11 @@ export const GoogleLoginButton = () => {
             const data = await response.json();
 
             if (response.ok) {
-              localStorage.setItem("access_token", data.access_token);
+              // Используем setTokens, чтобы сохранить токены в AuthContext и localStorage
+              setTokens(data.access_token, data.refresh_token);
               handleSnackbar("success", "Успешный вход через Google");
+              // Перенаправляем на главную страницу
+              navigate("/");
             } else {
               throw new Error(data.detail || "Ошибка авторизации");
             }
@@ -107,7 +116,6 @@ export const GoogleLoginButton = () => {
         theme="filled_blue"
         logo_alignment="center"
         text="signin_with"
-        // className="google-login"
         ux_mode="popup"
       />
     </Md3Wrapper>

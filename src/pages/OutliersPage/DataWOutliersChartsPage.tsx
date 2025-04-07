@@ -28,7 +28,7 @@ type BackendData = {
   outliersX: number[];
 };
 
-const API_URL = process.env.REACT_APP_API_URL || "";
+const API_URL = process.env.REACT_APP_RESULTS_PROVIDER_API_URL || "";
 const DATA_TYPES = {
   pulse: "PULSE",
   oxygen: "BLOOD_OXYGEN",
