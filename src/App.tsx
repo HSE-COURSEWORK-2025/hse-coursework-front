@@ -1,14 +1,19 @@
 import React from "react";
 import "./App.css";
 import { Route, Routes, BrowserRouter } from "react-router-dom";
-import { Navigation } from "./components";
+import {
+  Navigation,
+  AuthProvider,
+  ProtectedRoute,
+  useAuth,
+} from "./components";
 import {
   TestPage,
   RawDataChartsPage,
   MainPage,
   DataWOutliersChartsPage,
   NotificationsPage,
-  LoginPage
+  LoginPage,
 } from "./pages";
 import { Box } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
@@ -22,56 +27,88 @@ export interface INavigationItem {
   icon: React.ReactNode;
 }
 
-export const App = () => {
-  // Массив элементов навигации
-  const menuItems: INavigationItem[] = [
-    {
-      text: "Главная",
-      path: "/",
-      icon: <HomeIcon />,
-    },
-    {
-      text: "Графики исходных данных",
-      path: "/rawDataPage",
-      icon: <CodeIcon />,
-    },
-    {
-      text: "Графики данных с обнаруженными аномалиями",
-      path: "/dataWOutliersPage",
-      icon: <BugReportIcon />,
-    },
-    {
-      text: "Login test",
-      path: "/auth",
-      icon: <CodeIcon />,
-    }
-  ];
+const menuItems: INavigationItem[] = [
+  {
+    text: "Главная",
+    path: "/",
+    icon: <HomeIcon />,
+  },
+  {
+    text: "Графики исходных данных",
+    path: "/rawDataPage",
+    icon: <CodeIcon />,
+  },
+  {
+    text: "Графики данных с обнаруженными аномалиями",
+    path: "/dataWOutliersPage",
+    icon: <BugReportIcon />,
+  },
+];
+
+const AppContent = () => {
+  const { accessToken } = useAuth(); // Используем контекст для реактивного обновления
 
   return (
-    <BrowserRouter basename="/">
-      <Box sx={{ display: "flex" }}>
-        <Navigation items={menuItems} />
+    <Box sx={{ display: "flex" }}>
+      {accessToken && <Navigation items={menuItems} />}
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Routes>
+          {/* Protected routes */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <MainPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/testpage"
+            element={
+              <ProtectedRoute>
+                <TestPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/rawDataPage"
+            element={
+              <ProtectedRoute>
+                <RawDataChartsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dataWOutliersPage"
+            element={
+              <ProtectedRoute>
+                <DataWOutliersChartsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notificationsPage"
+            element={
+              <ProtectedRoute>
+                <NotificationsPage />
+              </ProtectedRoute>
+            }
+          />
 
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          <Routes>
-            <Route path="/" element={<MainPage />} />
-            <Route path="/testpage" element={<TestPage />} />
-            <Route path="/rawDataPage" element={<RawDataChartsPage />} />
-            <Route
-              path="/dataWOutliersPage"
-              element={<DataWOutliersChartsPage />}
-            />
-            <Route
-              path="/notificationsPage"
-              element={<NotificationsPage />}
-            />
-            <Route
-              path="/auth"
-              element={<LoginPage />}
-            />
-          </Routes>
-        </Box>
+          {/* Public route: Login page */}
+          <Route path="/auth" element={<LoginPage />} />
+        </Routes>
       </Box>
+    </Box>
+  );
+};
+
+export const App = () => {
+  return (
+    <BrowserRouter basename="/">
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </BrowserRouter>
   );
 };
