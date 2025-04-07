@@ -4,7 +4,7 @@ import { useSnackbar } from "notistack";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 
-const API_URL = process.env.REACT_APP_API_URL || "";
+const API_URL = process.env.REACT_APP_AUTH_API_URL || "";
 
 // Кастомные стили для MD3
 const Md3Wrapper = styled(Box)(({ theme }) => ({
