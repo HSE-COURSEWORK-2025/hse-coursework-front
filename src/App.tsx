@@ -19,6 +19,7 @@ import { Box } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import CodeIcon from "@mui/icons-material/Code";
 import BugReportIcon from "@mui/icons-material/BugReport";
+import axios, { AxiosRequestConfig } from "axios";
 
 // Определяем тип для элементов навигации
 export interface INavigationItem {
@@ -44,6 +45,23 @@ const menuItems: INavigationItem[] = [
     icon: <BugReportIcon />,
   },
 ];
+
+// Применяем interceptor к глобальному axios, чтобы каждый раз подставлялся актуальный токен
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      // Убедимся, что headers существуют
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Accept = "application/json";
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 const AppContent = () => {
   const { accessToken } = useAuth(); // Используем контекст для реактивного обновления
