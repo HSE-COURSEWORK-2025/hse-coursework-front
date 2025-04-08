@@ -20,6 +20,25 @@ import { INavigationItem } from "../type";
 import { Link, useLocation, LinkProps } from "react-router-dom";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 
+// Функция для декодирования payload токена
+const parseJwt = (token: string) => {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+};
+
+// Получаем данные пользователя из токена
+
 interface NavigationProps {
   items: INavigationItem[];
   open?: boolean;
@@ -65,11 +84,20 @@ const StyledListItemButton = styled(ListItemButton)<
   },
 }));
 
-export const Navigation = ({ items, open = true, onClose }: NavigationProps) => {
+export const Navigation = ({
+  items,
+  open = true,
+  onClose,
+}: NavigationProps) => {
   const theme = useTheme();
   const location = useLocation();
 
   const hasUnread = true;
+
+  const token = localStorage.getItem("accessToken") || "";
+  const userData = parseJwt(token);
+  const userName = userData?.name || "My App";
+  const userLogo = userData?.picture || "";
 
   return (
     <StyledDrawer variant="permanent" open={open} onClose={onClose}>
@@ -85,6 +113,7 @@ export const Navigation = ({ items, open = true, onClose }: NavigationProps) => 
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Avatar
+            src={userLogo}
             sx={{
               bgcolor: theme.palette.primary.main,
               color: theme.palette.primary.contrastText,
@@ -92,11 +121,11 @@ export const Navigation = ({ items, open = true, onClose }: NavigationProps) => 
               height: 40,
             }}
           >
-            A
+            {!userLogo && userName[0]}
           </Avatar>
           {open && (
             <Typography variant="h6" color="text.primary">
-              My App
+              {userName}
             </Typography>
           )}
         </Box>
@@ -143,7 +172,6 @@ export const Navigation = ({ items, open = true, onClose }: NavigationProps) => 
                 >
                   {item.icon}
                 </ListItemIcon>
-
                 {open && (
                   <ListItemText
                     primary={item.text}

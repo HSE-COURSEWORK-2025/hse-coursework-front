@@ -12,6 +12,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const API_URL = process.env.REACT_APP_AUTH_API_URL || "";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     }
     try {
-      const response = await axios.post("http://localhost:8081/auth-api/api/v1/auth/refresh", {
+      const response = await axios.post(`${API_URL}/api/v1/auth/refresh`, {
         refresh_token: refreshToken,
       });
       const { access_token, refresh_token } = response.data;
