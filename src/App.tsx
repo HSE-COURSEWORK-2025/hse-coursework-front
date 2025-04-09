@@ -14,6 +14,7 @@ import {
   DataWOutliersChartsPage,
   NotificationsPage,
   LoginPage,
+  GoogleFitnessAuthPage
 } from "./pages";
 import { Box } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
@@ -42,6 +43,11 @@ const menuItems: INavigationItem[] = [
   {
     text: "Графики данных с обнаруженными аномалиями",
     path: "/dataWOutliersPage",
+    icon: <BugReportIcon />,
+  },
+  {
+    text: "Google fitness auth test",
+    path: "/googleFitnessAuthPage",
     icon: <BugReportIcon />,
   },
 ];
@@ -109,6 +115,14 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <NotificationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/googleFitnessAuthPage"
+            element={
+              <ProtectedRoute>
+                <GoogleFitnessAuthPage />
               </ProtectedRoute>
             }
           />
