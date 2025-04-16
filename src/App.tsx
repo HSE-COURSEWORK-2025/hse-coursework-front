@@ -14,7 +14,8 @@ import {
   DataWOutliersChartsPage,
   NotificationsPage,
   LoginPage,
-  GoogleFitnessAuthPage
+  GoogleFitnessAuthPage,
+  QRAuthPage
 } from "./pages";
 import { Box } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
@@ -48,6 +49,11 @@ const menuItems: INavigationItem[] = [
   {
     text: "Google fitness auth test",
     path: "/googleFitnessAuthPage",
+    icon: <BugReportIcon />,
+  },
+  {
+    text: "QR Auth Page",
+    path: "/QRAuthPage",
     icon: <BugReportIcon />,
   },
 ];
@@ -123,6 +129,14 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <GoogleFitnessAuthPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/QRAuthPage"
+            element={
+              <ProtectedRoute>
+                <QRAuthPage />
               </ProtectedRoute>
             }
           />
