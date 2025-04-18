@@ -47,11 +47,6 @@ const menuItems: INavigationItem[] = [
     icon: <BugReportIcon />,
   },
   {
-    text: "Google fitness auth test",
-    path: "/googleFitnessAuthPage",
-    icon: <BugReportIcon />,
-  },
-  {
     text: "QR Auth Page",
     path: "/QRAuthPage",
     icon: <BugReportIcon />,
@@ -142,7 +137,7 @@ const AppContent = () => {
           />
 
           {/* Public route: Login page */}
-          <Route path="/auth" element={<LoginPage />} />
+          <Route path="/auth" element={<GoogleFitnessAuthPage />} />
         </Routes>
       </Box>
     </Box>

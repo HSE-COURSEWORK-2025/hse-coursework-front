@@ -1,13 +1,22 @@
+// src/pages/GoogleFitnessAuthPage.tsx
 import React, { useEffect, useState } from "react";
 import { Container, Box, Typography, Button, Divider } from "@mui/material";
 import { motion } from "framer-motion";
 import { useSnackbar } from "notistack";
+import { useAuth } from "../../components/auth/AuthContext";
+import { useNavigate } from "react-router-dom";
 import DirectionsRun from "@mui/icons-material/DirectionsRun";
 
-// Расширение глобального объекта window для google
+// Расширение глобального объекта window для Google Identity Services
 declare global {
   interface Window {
-    google: any;
+    google?: {
+      accounts?: {
+        oauth2?: {
+          initCodeClient: (opts: any) => any;
+        };
+      };
+    };
   }
 }
 
@@ -29,63 +38,72 @@ const API_URL = process.env.REACT_APP_AUTH_API_URL || "";
 
 export const GoogleFitnessAuthPage: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar();
-  // Состояния для хранения authorization code и полученных токенов от вашего сервера
   const [authCode, setAuthCode] = useState<string | null>(null);
-  const [tokens, setTokens] = useState<{ access_token: string; refresh_token: string } | null>(null);
   const [codeClient, setCodeClient] = useState<any>(null);
+  const { setTokens } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Проверяем, загружен ли google-объект
-    if (window.google) {
-      // Инициализируем codeClient для Authorization Code Flow
-      const client = window.google.accounts.oauth2.initCodeClient({
-        client_id: process.env.REACT_APP_GOOGLE_OAUTH_CLIENT_ID,
-        scope: scopes,
-        redirect_uri: process.env.REACT_APP_GOOGLE_REDIRECT_URI, // Должен совпадать с настройками в Google API Console
-        access_type: "offline", // Запрос refresh token
-        prompt: "consent",     // Обязательное согласие пользователя для выдачи refresh token
-        callback: (response: any) => {
-          if (response.error) {
-            enqueueSnackbar("Ошибка авторизации", { variant: "error" });
-            return;
-          }
-          if (response.code) {
-            console.log('got code', response.code)
-            setAuthCode(response.code);
-            enqueueSnackbar("Успешная авторизация, код получен.", { variant: "success" });
-            // Отправляем authorization code на сервер для обмена на токены
-            exchangeCode(response.code);
-          }
-        },
-      });
-      setCodeClient(client);
-    }
+    // Ждём, пока GSI SDK загрузится и появится window.google.accounts.oauth2.initCodeClient
+    const interval = setInterval(() => {
+      if (window.google?.accounts?.oauth2?.initCodeClient) {
+        clearInterval(interval);
+        const client = window.google.accounts.oauth2.initCodeClient({
+          client_id: process.env.REACT_APP_GOOGLE_OAUTH_CLIENT_ID!,
+          scope: scopes,
+          redirect_uri: process.env.REACT_APP_GOOGLE_REDIRECT_URI!,
+          access_type: "offline",
+          prompt: "consent",
+          callback: (response: any) => {
+            if (response.error) {
+              enqueueSnackbar("Ошибка авторизации", { variant: "error" });
+              return;
+            }
+            if (response.code) {
+              setAuthCode(response.code);
+              enqueueSnackbar("Успешная авторизация, код получен.", {
+                variant: "success",
+              });
+              exchangeCode(response.code);
+            }
+          },
+        });
+        setCodeClient(client);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
   }, [enqueueSnackbar]);
 
-  // Функция обмена authorization code на токены через ваш серверный эндпоинт
   const exchangeCode = async (code: string) => {
     try {
-      const response = await fetch(`${API_URL}/api/v1/auth/google-code-fitness`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ code }),
-      });
-      if (!response.ok) {
-        throw new Error("Ошибка обмена кода на токены");
-      }
+      const response = await fetch(
+        `${API_URL}/api/v1/auth/google-code-fitness`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code }),
+        }
+      );
+      if (!response.ok) throw new Error("Ошибка обмена кода на токены");
       const data = await response.json();
-      setTokens(data);
-      enqueueSnackbar("Токены успешно получены.", { variant: "success" });
-    } catch (error: any) {
-      enqueueSnackbar(error.message, { variant: "error" });
+
+      setTokens(data.access_token, data.refresh_token);
+
+      enqueueSnackbar("Успешный вход через Google.", { variant: "success" });
+      navigate("/");
+    } catch (err: any) {
+      enqueueSnackbar(err.message, { variant: "error" });
     }
   };
 
   const handleSignIn = () => {
     if (codeClient) {
       codeClient.requestCode();
+    } else {
+      enqueueSnackbar("SDK ещё не загружен, попробуйте чуть позже", {
+        variant: "warning",
+      });
     }
   };
 
@@ -112,22 +130,19 @@ export const GoogleFitnessAuthPage: React.FC = () => {
             bgcolor: "background.paper",
             textAlign: "center",
             width: "100%",
-            minWidth: "300px",
+            minWidth: 300,
           }}
         >
-          {/* Заголовок */}
           <Typography
             variant="h4"
             sx={{ mb: 2, fontWeight: 700, color: "primary.main" }}
           >
             Авторизация Google Fit
           </Typography>
-
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            Для доступа к данным Google Fit выполните авторизацию с помощью вашего Google аккаунта.
+            Для доступа к данным Google Fit выполните авторизацию с помощью
+            вашего Google аккаунта.
           </Typography>
-
-          {/* Блок с авторизацией */}
           <Box
             sx={{
               display: "flex",
@@ -138,39 +153,20 @@ export const GoogleFitnessAuthPage: React.FC = () => {
           >
             <Button
               variant="contained"
-              color="primary"
               onClick={handleSignIn}
               startIcon={<DirectionsRun />}
               sx={{
                 backgroundColor: "#4285F4",
                 borderRadius: "20px",
-                padding: "16px 32px",
-                fontSize: "18px",
+                p: "16px 32px",
+                fontSize: 18,
                 width: "100%",
                 textTransform: "none",
               }}
             >
               Войти через Google Fit
             </Button>
-
             <Divider sx={{ width: "100%", my: 2 }} />
-
-            {authCode && (
-              <Typography variant="body2" color="text.primary">
-                Authorization Code: {authCode}
-              </Typography>
-            )}
-
-            {tokens && (
-              <Box>
-                <Typography variant="body2" color="text.primary">
-                  Access Token: {tokens.access_token}
-                </Typography>
-                <Typography variant="body2" color="text.primary">
-                  Refresh Token: {tokens.refresh_token}
-                </Typography>
-              </Box>
-            )}
           </Box>
         </Box>
       </motion.div>
