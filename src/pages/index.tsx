@@ -6,3 +6,4 @@ export { NotificationsPage } from "./NotificationsPage/NotificationsPage";
 export { LoginPage } from "./AuthPage/AuthPage";
 export { QRAuthPage } from "./QRAuthPage/QRAuthPage";
 export { GoogleFitnessAuthPage } from "./GoogleFitnessAuthPage/GoogleFitnessAuthPage";
+export { IntegrationStatusPage } from "./IntegrationStatusPage/IntegrationStatusPage";

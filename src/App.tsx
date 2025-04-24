@@ -15,7 +15,8 @@ import {
   NotificationsPage,
   LoginPage,
   GoogleFitnessAuthPage,
-  QRAuthPage
+  QRAuthPage,
+  IntegrationStatusPage
 } from "./pages";
 import { Box } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
@@ -49,6 +50,11 @@ const menuItems: INavigationItem[] = [
   {
     text: "QR Auth Page",
     path: "/QRAuthPage",
+    icon: <BugReportIcon />,
+  },
+  {
+    text: "Integration Status Page",
+    path: "/IntegrationStatusPage",
     icon: <BugReportIcon />,
   },
 ];
@@ -132,6 +138,14 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <QRAuthPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/IntegrationStatusPage"
+            element={
+              <ProtectedRoute>
+                <IntegrationStatusPage />
               </ProtectedRoute>
             }
           />
