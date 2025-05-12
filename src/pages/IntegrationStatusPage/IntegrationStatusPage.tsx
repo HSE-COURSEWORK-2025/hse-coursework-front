@@ -8,16 +8,20 @@ import {
   Avatar,
   Stack,
   LinearProgress,
-  Button,
 } from "@mui/material";
 import { useTheme, alpha } from "@mui/material";
 import { FitnessCenter, HealthAndSafety, Sync } from "@mui/icons-material";
 import axios from "axios";
 
 const API_URL = process.env.REACT_APP_INTEGRATION_API_URL || "";
-const WS_PROGRESS_URL =
-  process.env.REACT_APP_WS_PROGRESS_URL ||
-  "ws://localhost:8082/data-collection-api/api/v1/processing_status/progress";
+const INTEGRATIONS_URL =
+  "http://localhost:8081/auth-api/api/v1/integrations/integrations";
+
+interface IntegrationOut {
+  id: number;
+  source: "google_fitness_api" | "google_health_api";
+  connected_at: string;
+}
 
 export const IntegrationStatusPage: React.FC = () => {
   const theme = useTheme();
@@ -32,24 +36,23 @@ export const IntegrationStatusPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const token = localStorage.getItem("accessToken");
 
+  // Получаем, какие интеграции есть у пользователя
   const fetchStatus = async () => {
+    if (!token) {
+      setError("Нет токена авторизации");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
     try {
-      setLoading(true);
-      setError(null);
-      const [fitRes, healthRes] = await Promise.all([
-        axios.get<{ connected: boolean; progress: number }>(
-          `${API_URL}/google-fitness/status`
-        ),
-        axios.get<{ connected: boolean; progress: number }>(
-          `${API_URL}/google-health/status`
-        ),
-      ]);
-      setFitnessConnected(fitRes.data.connected);
-      setFitnessProgress(fitRes.data.progress);
-      setHealthConnected(healthRes.data.connected);
-      setHealthProgress(healthRes.data.progress);
+      const res = await axios.get<IntegrationOut[]>(INTEGRATIONS_URL);
+      const sources = res.data.map((i) => i.source);
+      setFitnessConnected(sources.includes("google_fitness_api"));
+      setHealthConnected(sources.includes("google_health_api"));
     } catch (err: any) {
-      setError(err.message || "Ошибка при загрузке статуса интеграций");
+      setError(err.message || "Ошибка при загрузке списка интеграций");
     } finally {
       setLoading(false);
     }
@@ -57,53 +60,64 @@ export const IntegrationStatusPage: React.FC = () => {
 
   const toggleFitness = async () => {
     if (loading || fitnessConnected === null) return;
+    setLoading(true);
     try {
-      setLoading(true);
       const endpoint = fitnessConnected ? "disconnect" : "connect";
-      await axios.post(`${API_URL}/google-fitness/${endpoint}`);
+      await axios.post(`${API_URL}/google-fitness/${endpoint}`, null, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       await fetchStatus();
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const toggleHealth = async () => {
     if (loading || healthConnected === null) return;
+    setLoading(true);
     try {
-      setLoading(true);
       const endpoint = healthConnected ? "disconnect" : "connect";
-      await axios.post(`${API_URL}/google-health/${endpoint}`);
+      await axios.post(`${API_URL}/google-health/${endpoint}`, null, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       await fetchStatus();
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // WebSocket для прогресса
   useEffect(() => {
-    const ws = new WebSocket(`${WS_PROGRESS_URL}?token=${token}`);
+    if (!token) return;
+    const fitnessWs = new WebSocket(
+      `ws://localhost:8082/data-collection-api/api/v1/processing_status/google_fitness_api_progress?token=${token}`
+    );
+    const healthWs = new WebSocket(
+      `ws://localhost:8082/data-collection-api/api/v1/processing_status/google_health_api_progress?token=${token}`
+    );
 
-    ws.onopen = () => console.log("WebSocket connected");
-
-    ws.onmessage = (event) => {
+    fitnessWs.onmessage = (e) => {
       try {
-        const { type, progress } = JSON.parse(event.data);
-
-        if (type === "google_fitness_api") {
-          setFitnessProgress(progress);
-        } else if (type === "google_health_api") {
-          setHealthProgress(progress);
-        }
-      } catch (e) {
-        console.error("Ошибка парсинга сообщения WebSocket", e);
-      }
+        setFitnessProgress(JSON.parse(e.data).progress);
+      } catch {}
+    };
+    healthWs.onmessage = (e) => {
+      try {
+        setHealthProgress(JSON.parse(e.data).progress);
+      } catch {}
     };
 
-    ws.onerror = (err) => console.error("WebSocket ошибка", err);
-    ws.onclose = () => console.log("WebSocket отключён");
+    return () => {
+      fitnessWs.close();
+      healthWs.close();
+    };
+  }, [token]);
 
-    return () => ws.close();
-  }, []);
-
+  // При монтировании читаем интеграции
   useEffect(() => {
     fetchStatus();
   }, []);
@@ -147,7 +161,13 @@ export const IntegrationStatusPage: React.FC = () => {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
-        <Avatar sx={{ mr: 2, bgcolor: "primaryContainer.main", color: "onPrimaryContainer.main" }}>
+        <Avatar
+          sx={{
+            mr: 2,
+            bgcolor: "primaryContainer.main",
+            color: "onPrimaryContainer.main",
+          }}
+        >
           <Sync />
         </Avatar>
         <Typography variant="h4">Статус интеграций</Typography>
@@ -163,9 +183,22 @@ export const IntegrationStatusPage: React.FC = () => {
         {/* Google Fitness */}
         <Card sx={{ borderRadius: 4, boxShadow: 2 }}>
           <CardContent>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 2,
+              }}
+            >
               <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Avatar sx={{ bgcolor: "secondaryContainer.main", color: "onSecondaryContainer.main", mr: 2 }}>
+                <Avatar
+                  sx={{
+                    bgcolor: "secondaryContainer.main",
+                    color: "onSecondaryContainer.main",
+                    mr: 2,
+                  }}
+                >
                   <FitnessCenter />
                 </Avatar>
                 <Box>
@@ -175,21 +208,41 @@ export const IntegrationStatusPage: React.FC = () => {
                   </Typography>
                 </Box>
               </Box>
-              <StatusBadge isError={!fitnessConnected} toggle={toggleFitness} />
+              <StatusBadge
+                isError={!fitnessConnected}
+                toggle={toggleFitness}
+              />
             </Box>
             <Typography variant="subtitle2" gutterBottom>
               Прогресс: {fitnessProgress}%
             </Typography>
-            <LinearProgress variant="determinate" value={fitnessProgress} sx={{ height: 10, borderRadius: 5 }} />
+            <LinearProgress
+              variant="determinate"
+              value={fitnessProgress}
+              sx={{ height: 10, borderRadius: 5 }}
+            />
           </CardContent>
         </Card>
 
         {/* Google Health */}
         <Card sx={{ borderRadius: 4, boxShadow: 2 }}>
           <CardContent>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 2,
+              }}
+            >
               <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Avatar sx={{ bgcolor: "tertiaryContainer.main", color: "onTertiaryContainer.main", mr: 2 }}>
+                <Avatar
+                  sx={{
+                    bgcolor: "tertiaryContainer.main",
+                    color: "onTertiaryContainer.main",
+                    mr: 2,
+                  }}
+                >
                   <HealthAndSafety />
                 </Avatar>
                 <Box>
@@ -204,22 +257,14 @@ export const IntegrationStatusPage: React.FC = () => {
             <Typography variant="subtitle2" gutterBottom>
               Прогресс: {healthProgress}%
             </Typography>
-            <LinearProgress variant="determinate" value={healthProgress} sx={{ height: 10, borderRadius: 5 }} />
+            <LinearProgress
+              variant="determinate"
+              value={healthProgress}
+              sx={{ height: 10, borderRadius: 5 }}
+            />
           </CardContent>
         </Card>
       </Stack>
-
-      <Box sx={{ textAlign: "center", mt: 4 }}>
-        <Button
-          variant="contained"
-          startIcon={<Sync />}
-          onClick={fetchStatus}
-          disabled={loading}
-          sx={{ textTransform: "none" }}
-        >
-          Обновить статус
-        </Button>
-      </Box>
     </Container>
   );
 };

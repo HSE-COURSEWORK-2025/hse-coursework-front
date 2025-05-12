@@ -16,7 +16,8 @@ import {
   LoginPage,
   GoogleFitnessAuthPage,
   QRAuthPage,
-  IntegrationStatusPage
+  IntegrationStatusPage,
+  MLPredictionsPage
 } from "./pages";
 import { Box } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
@@ -55,6 +56,11 @@ const menuItems: INavigationItem[] = [
   {
     text: "Integration Status Page",
     path: "/IntegrationStatusPage",
+    icon: <BugReportIcon />,
+  },
+  {
+    text: "ML Predictions Page",
+    path: "/MLPredictionsPAge",
     icon: <BugReportIcon />,
   },
 ];
@@ -146,6 +152,14 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <IntegrationStatusPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/MLPredictionsPage"
+            element={
+              <ProtectedRoute>
+                <MLPredictionsPage />
               </ProtectedRoute>
             }
           />
