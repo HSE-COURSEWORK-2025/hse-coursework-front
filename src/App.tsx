@@ -14,6 +14,10 @@ import {
   DataWOutliersChartsPage,
   NotificationsPage,
   LoginPage,
+  GoogleFitnessAuthPage,
+  QRAuthPage,
+  IntegrationStatusPage,
+  MLPredictionsPage
 } from "./pages";
 import { Box } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
@@ -42,6 +46,21 @@ const menuItems: INavigationItem[] = [
   {
     text: "Графики данных с обнаруженными аномалиями",
     path: "/dataWOutliersPage",
+    icon: <BugReportIcon />,
+  },
+  {
+    text: "QR Auth Page",
+    path: "/QRAuthPage",
+    icon: <BugReportIcon />,
+  },
+  {
+    text: "Integration Status Page",
+    path: "/IntegrationStatusPage",
+    icon: <BugReportIcon />,
+  },
+  {
+    text: "ML Predictions Page",
+    path: "/MLPredictionsPAge",
     icon: <BugReportIcon />,
   },
 ];
@@ -112,9 +131,41 @@ const AppContent = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/googleFitnessAuthPage"
+            element={
+              <ProtectedRoute>
+                <GoogleFitnessAuthPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/QRAuthPage"
+            element={
+              <ProtectedRoute>
+                <QRAuthPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/IntegrationStatusPage"
+            element={
+              <ProtectedRoute>
+                <IntegrationStatusPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/MLPredictionsPage"
+            element={
+              <ProtectedRoute>
+                <MLPredictionsPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Public route: Login page */}
-          <Route path="/auth" element={<LoginPage />} />
+          <Route path="/auth" element={<GoogleFitnessAuthPage />} />
         </Routes>
       </Box>
     </Box>
