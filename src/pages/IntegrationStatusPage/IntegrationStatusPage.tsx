@@ -13,9 +13,9 @@ import { useTheme, alpha } from "@mui/material";
 import { FitnessCenter, HealthAndSafety, Sync } from "@mui/icons-material";
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_INTEGRATION_API_URL || "";
-const INTEGRATIONS_URL =
-  "http://localhost:8081/auth-api/api/v1/integrations/integrations";
+const AUTH_API_URL = process.env.REACT_APP_AUTH_API_URL || "";
+const DATA_COLLECTION_WS_URL = process.env.REACT_APP_DATA_COLLECTION_WS_URL || "";
+const INTEGRATIONS_URL = `${AUTH_API_URL}/api/v1/integrations/integrations`;
 
 interface IntegrationOut {
   id: number;
@@ -63,7 +63,7 @@ export const IntegrationStatusPage: React.FC = () => {
     setLoading(true);
     try {
       const endpoint = fitnessConnected ? "disconnect" : "connect";
-      await axios.post(`${API_URL}/google-fitness/${endpoint}`, null, {
+      await axios.post(`${AUTH_API_URL}/google-fitness/${endpoint}`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
       await fetchStatus();
@@ -79,7 +79,7 @@ export const IntegrationStatusPage: React.FC = () => {
     setLoading(true);
     try {
       const endpoint = healthConnected ? "disconnect" : "connect";
-      await axios.post(`${API_URL}/google-health/${endpoint}`, null, {
+      await axios.post(`${AUTH_API_URL}/google-health/${endpoint}`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
       await fetchStatus();
@@ -94,10 +94,10 @@ export const IntegrationStatusPage: React.FC = () => {
   useEffect(() => {
     if (!token) return;
     const fitnessWs = new WebSocket(
-      `ws://localhost:8082/data-collection-api/api/v1/processing_status/google_fitness_api_progress?token=${token}`
+      `${DATA_COLLECTION_WS_URL}/api/v1/processing_status/google_fitness_api_progress?token=${token}`
     );
     const healthWs = new WebSocket(
-      `ws://localhost:8082/data-collection-api/api/v1/processing_status/google_health_api_progress?token=${token}`
+      `${DATA_COLLECTION_WS_URL}/api/v1/processing_status/google_health_api_progress?token=${token}`
     );
 
     fitnessWs.onmessage = (e) => {
