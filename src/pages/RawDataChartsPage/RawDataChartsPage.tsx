@@ -29,13 +29,13 @@ type BackendDataElement = {
   Y: number;
 };
 
-const API_URL = process.env.REACT_APP_RESULTS_PROVIDER_API_URL || "";
+const API_URL = process.env.REACT_APP_DATA_COLLECTION_API_URL || "";
 const DATA_TYPES = {
-  pulse: "PULSE",
-  oxygen: "BLOOD_OXYGEN",
-  stress: "STRESS_LVL",
-  breathing: "RESPIRATORY_RATE",
-  sleep: "SLEEP_TIME",
+  pulse: "HeartRateRecord",
+  oxygen: "BloodOxygenData",
+  // stress: "STRESS_LVL",
+  // breathing: "RESPIRATORY_RATE",
+  sleep: "SleepSessionData",
 };
 
 const transformData = (backendData: BackendDataElement[]): DataPoint[] => {
@@ -72,8 +72,7 @@ export const RawDataChartsPage: React.FC = () => {
   useEffect(() => {
     Object.entries(DATA_TYPES).forEach(([key, type]) => {
       axios
-        .get<BackendDataElement[]>(`${API_URL}/api/v1/getData/getRawData`, {
-          params: { data_type: type },
+        .get<BackendDataElement[]>(`${API_URL}/api/v1/get_data/raw_data/${type}`, {
         })
         .then((response) => {
           const data = transformData(response.data);

@@ -28,13 +28,13 @@ type BackendData = {
   outliersX: number[];
 };
 
-const API_URL = process.env.REACT_APP_RESULTS_PROVIDER_API_URL || "";
+const API_URL = process.env.REACT_APP_DATA_COLLECTION_API_URL || "";
 const DATA_TYPES = {
-  pulse: "PULSE",
-  oxygen: "BLOOD_OXYGEN",
-  stress: "STRESS_LVL",
-  breathing: "RESPIRATORY_RATE",
-  sleep: "SLEEP_TIME",
+  pulse: "HeartRateRecord",
+  oxygen: "BloodOxygenData",
+  // stress: "STRESS_LVL",
+  // breathing: "RESPIRATORY_RATE",
+  sleep: "SleepSessionData",
 };
 
 const transformData = (backendData: BackendData) => ({
@@ -85,7 +85,7 @@ export const DataWOutliersChartsPage: React.FC = () => {
       const requests = Object.entries(DATA_TYPES).map(async ([key, type]) => {
         try {
           const response = await axios.get<BackendData>(
-            `${API_URL}/api/v1/getData/getAnalyzedData`,
+            `${API_URL}/api/v1/get_data/data_with_outliers/${type}`,
             { params: { data_type: type } }
           );
           const { data, outliers } = transformData(response.data);
