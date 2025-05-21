@@ -46,7 +46,6 @@ const transformData = (backendData: BackendDataElement[]): DataPoint[] => {
 };
 
 export const RawDataChartsPage: React.FC = () => {
-  // Состояние для данных графиков
   const [chartData, setChartData] = useState<ChartDataType>({
     pulse: [],
     oxygen: [],
@@ -54,7 +53,7 @@ export const RawDataChartsPage: React.FC = () => {
     breathing: [],
     sleep: [],
   });
-  // Отдельное состояние загрузки для каждого графика
+
   const [loadingMap, setLoadingMap] = useState<
     Record<keyof ChartDataType, boolean>
   >({
@@ -64,16 +63,16 @@ export const RawDataChartsPage: React.FC = () => {
     breathing: true,
     sleep: true,
   });
-  const { enqueueSnackbar } = useSnackbar();
 
-  // Флаг для принудительного режима загрузки (для демонстрации)
+  const { enqueueSnackbar } = useSnackbar();
   const [forceLoading, setForceLoading] = useState(false);
 
   useEffect(() => {
     Object.entries(DATA_TYPES).forEach(([key, type]) => {
       axios
-        .get<BackendDataElement[]>(`${API_URL}/api/v1/get_data/raw_data/${type}`, {
-        })
+        .get<BackendDataElement[]>(
+          `${API_URL}/api/v1/get_data/raw_data/${type}`
+        )
         .then((response) => {
           const data = transformData(response.data);
           setChartData((prev) => ({ ...prev, [key]: data }));
@@ -138,9 +137,10 @@ export const RawDataChartsPage: React.FC = () => {
       </Typography>
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-        {Object.entries(chartData).map(([key, data]) => {
+        {Object.entries(DATA_TYPES).map(([key]) => {
           const chartKey = key as keyof ChartDataType;
           const config = chartConfigs[chartKey];
+          const data = chartData[chartKey];
 
           return (
             <Box
@@ -163,7 +163,6 @@ export const RawDataChartsPage: React.FC = () => {
                 lineColor={config.color}
                 selectionColor={selectionColor}
                 showStatus={false}
-                // Если принудительный режим загрузки включён или данные ещё грузятся – показываем анимацию
                 simulateLoading={forceLoading || loadingMap[chartKey]}
               />
             </Box>
