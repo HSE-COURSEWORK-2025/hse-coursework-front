@@ -21,6 +21,9 @@ declare global {
 }
 
 const scopes = [
+  "openid",
+  "email",
+  "profile",
   "https://www.googleapis.com/auth/fitness.activity.read",
   "https://www.googleapis.com/auth/fitness.blood_glucose.read",
   "https://www.googleapis.com/auth/fitness.blood_pressure.read",
