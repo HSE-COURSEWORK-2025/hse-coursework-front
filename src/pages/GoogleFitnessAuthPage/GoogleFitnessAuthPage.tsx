@@ -6,6 +6,7 @@ import { useSnackbar } from "notistack";
 import { useAuth } from "../../components/auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import DirectionsRun from "@mui/icons-material/DirectionsRun";
+import PersonIcon from "@mui/icons-material/Person";
 
 // Расширение глобального объекта window для Google Identity Services
 declare global {
@@ -110,66 +111,47 @@ export const GoogleFitnessAuthPage: React.FC = () => {
     }
   };
 
+  const handleTestLogin = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/v1/auth/get-test-account`,
+        {
+          method: "GET",
+          headers: { Accept: "application/json" },
+        }
+      );
+      if (!response.ok) throw new Error(`Ошибка: ${response.status}`);
+      const data = await response.json();
+
+      setTokens(data.access_token, data.refresh_token);
+      enqueueSnackbar("Успешный вход в тестовый аккаунт!", {
+        variant: "success",
+      });
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+      enqueueSnackbar("Не удалось войти в тестовый аккаунт", {
+        variant: "error",
+      });
+    }
+  };
+
   return (
-    <Container
-      maxWidth="xs"
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Box
-          sx={{
-            p: 4,
-            borderRadius: 2,
-            boxShadow: 3,
-            bgcolor: "background.paper",
-            textAlign: "center",
-            width: "100%",
-            minWidth: 300,
-          }}
-        >
-          <Typography
-            variant="h4"
-            sx={{ mb: 2, fontWeight: 700, color: "primary.main" }}
-          >
-            Авторизация Google Fit
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            Для доступа к данным Google Fit выполните авторизацию с помощью
-            вашего Google аккаунта.
-          </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 2,
-            }}
-          >
-            <Button
-              variant="contained"
-              onClick={handleSignIn}
-              startIcon={<DirectionsRun />}
-              sx={{
-                backgroundColor: "#4285F4",
-                borderRadius: "20px",
-                p: "16px 32px",
-                fontSize: 18,
-                width: "100%",
-                textTransform: "none",
-              }}
-            >
+    <Container maxWidth="xs" sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <Box sx={{ p: 4, borderRadius: 2, boxShadow: 3, bgcolor: "background.paper", textAlign: "center", width: "100%", minWidth: 300 }}>
+          <Typography variant="h4" sx={{ mb: 2, fontWeight: 700, color: "primary.main" }}>Авторизация Google Fit</Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>Для доступа к данным Google Fit выполните авторизацию с помощью вашего Google аккаунта.</Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+            <Button variant="contained" onClick={handleSignIn} startIcon={<DirectionsRun />} sx={{ backgroundColor: "#4285F4", borderRadius: "20px", py: 1.5, px: 3, fontSize: 16, width: "100%", textTransform: "none", ':hover': { backgroundColor: '#357ae8' } }}>
               Войти через Google Fit
             </Button>
-            <Divider sx={{ width: "100%", my: 2 }} />
+
+            <Button variant="contained" onClick={handleTestLogin} startIcon={<PersonIcon />} sx={{ background: 'linear-gradient(45deg, #6c63ff 30%, #3f3d56 90%)', borderRadius: '20px', py: 1.5, px: 3, fontSize: 16, width: '100%', textTransform: 'none', color: '#fff', boxShadow: '0 3px 5px 2px rgba(108,99,255, .3)', ':hover': { background: 'linear-gradient(45deg, #5a52e0 30%, #2e2c3d 90%)' } }}>
+              Войти в тестовый аккаунт
+            </Button>
+
+            <Divider sx={{ width: '100%', my: 2 }} />
           </Box>
         </Box>
       </motion.div>
