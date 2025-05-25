@@ -1,3 +1,4 @@
+// src/pages/IntegrationStatusPage.tsx
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -14,7 +15,8 @@ import { FitnessCenter, HealthAndSafety, Sync } from "@mui/icons-material";
 import axios from "axios";
 
 const AUTH_API_URL = process.env.REACT_APP_AUTH_API_URL || "";
-const DATA_COLLECTION_WS_URL = process.env.REACT_APP_DATA_COLLECTION_WS_URL || "";
+const DATA_COLLECTION_WS_URL =
+  process.env.REACT_APP_DATA_COLLECTION_WS_URL || "";
 const INTEGRATIONS_URL = `${AUTH_API_URL}/api/v1/integrations/integrations`;
 
 interface IntegrationOut {
@@ -23,18 +25,49 @@ interface IntegrationOut {
   connected_at: string;
 }
 
+// Функция декодирования JWT из вашего примера
+const parseJwt = (token: string) => {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+};
+
 export const IntegrationStatusPage: React.FC = () => {
   const theme = useTheme();
   const errorContainer = alpha(theme.palette.error.main, 0.1);
   const primaryContainer = alpha(theme.palette.primary.main, 0.1);
 
-  const [fitnessConnected, setFitnessConnected] = useState<boolean | null>(null);
+  const [fitnessConnected, setFitnessConnected] = useState<boolean | null>(
+    null
+  );
   const [healthConnected, setHealthConnected] = useState<boolean | null>(null);
   const [fitnessProgress, setFitnessProgress] = useState<number>(0);
   const [healthProgress, setHealthProgress] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const token = localStorage.getItem("accessToken");
+
+  // Новое состояние для флага тестового пользователя
+  const [isTestUser, setIsTestUser] = useState<boolean>(false);
+
+  const token = localStorage.getItem("accessToken") || "";
+
+  // Декодируем токен и выставляем флаг тестового пользователя один раз при монтировании
+  useEffect(() => {
+    if (token) {
+      const data = parseJwt(token);
+      setIsTestUser(Boolean(data?.test_user));
+    }
+  }, [token]);
 
   // Получаем, какие интеграции есть у пользователя
   const fetchStatus = async () => {
@@ -58,8 +91,9 @@ export const IntegrationStatusPage: React.FC = () => {
     }
   };
 
+  // Отключаем toggle для тестового пользователя
   const toggleFitness = async () => {
-    if (loading || fitnessConnected === null) return;
+    if (loading || fitnessConnected === null || isTestUser) return;
     setLoading(true);
     try {
       const endpoint = fitnessConnected ? "disconnect" : "connect";
@@ -125,14 +159,20 @@ export const IntegrationStatusPage: React.FC = () => {
   const StatusBadge = ({
     isError,
     toggle,
+    disabled = false,
   }: {
     isError: boolean;
     toggle: () => void;
+    disabled?: boolean;
   }) => (
     <Box
       sx={{
         bgcolor: isError ? errorContainer : primaryContainer,
-        color: isError ? theme.palette.error.main : theme.palette.success.main,
+        color: disabled
+          ? theme.palette.text.disabled
+          : isError
+          ? theme.palette.error.main
+          : theme.palette.success.main,
         px: 2,
         py: 0.5,
         borderRadius: 28,
@@ -140,10 +180,10 @@ export const IntegrationStatusPage: React.FC = () => {
         display: "inline-flex",
         alignItems: "center",
         gap: 1,
-        cursor: loading ? "default" : "pointer",
+        cursor: disabled || loading ? "not-allowed" : "pointer",
       }}
       onClick={() => {
-        if (!loading) toggle();
+        if (!loading && !disabled) toggle();
       }}
     >
       <Box
@@ -151,10 +191,14 @@ export const IntegrationStatusPage: React.FC = () => {
           width: 8,
           height: 8,
           borderRadius: "50%",
-          bgcolor: isError ? theme.palette.error.main : theme.palette.success.main,
+          bgcolor: disabled
+            ? theme.palette.text.disabled
+            : isError
+            ? theme.palette.error.main
+            : theme.palette.success.main,
         }}
       />
-      {isError ? "Не подключено" : "Подключено"}
+      {disabled ? "Недоступно" : isError ? "Не подключено" : "Подключено"}
     </Box>
   );
 
@@ -202,15 +246,21 @@ export const IntegrationStatusPage: React.FC = () => {
                   <FitnessCenter />
                 </Avatar>
                 <Box>
-                  <Typography variant="h6">Google Fitness API</Typography>
+                  <Typography variant="h6">
+                    Google Fitness API{" "}
+                    {isTestUser
+                      ? "Google Fitness API (недоступно для тестовых пользователей)"
+                      : "Google Fitness API"}
+                  </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Прогресс выгрузки фитнес-данных.
+                    Прогресс выгрузки фитнес-данных
                   </Typography>
                 </Box>
               </Box>
               <StatusBadge
                 isError={!fitnessConnected}
                 toggle={toggleFitness}
+                disabled={isTestUser}
               />
             </Box>
             <Typography variant="subtitle2" gutterBottom>
