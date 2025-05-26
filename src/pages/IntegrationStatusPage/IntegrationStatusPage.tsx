@@ -250,7 +250,7 @@ export const IntegrationStatusPage: React.FC = () => {
                     Google Fitness API{" "}
                     {isTestUser
                       ? "Google Fitness API (недоступно для тестовых пользователей)"
-                      : "Google Fitness API"}
+                      : ""}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Прогресс выгрузки фитнес-данных
