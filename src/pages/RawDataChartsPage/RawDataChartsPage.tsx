@@ -35,7 +35,7 @@ const DATA_TYPES = {
   oxygen: "BloodOxygenData",
   // stress: "STRESS_LVL",
   // breathing: "RESPIRATORY_RATE",
-  sleep: "SleepSessionData",
+  sleep: "SleepSessionTimeData",
 };
 
 const transformData = (backendData: BackendDataElement[]): DataPoint[] => {

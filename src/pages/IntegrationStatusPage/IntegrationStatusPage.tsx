@@ -249,11 +249,11 @@ export const IntegrationStatusPage: React.FC = () => {
                   <Typography variant="h6">
                     Google Fitness API{" "}
                     {isTestUser
-                      ? "Google Fitness API (недоступно для тестовых пользователей)"
+                      ? "(недоступно для тестовых пользователей)"
                       : ""}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Прогресс выгрузки фитнес-данных
+                    Прогресс выгрузки данных из Google Fitness API
                   </Typography>
                 </Box>
               </Box>
@@ -296,9 +296,9 @@ export const IntegrationStatusPage: React.FC = () => {
                   <HealthAndSafety />
                 </Avatar>
                 <Box>
-                  <Typography variant="h6">Google Health API</Typography>
+                  <Typography variant="h6">Google Health Connect</Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Прогресс выгрузки данных о здоровье.
+                    Прогресс выгрузки данных из Google Health Connect.
                   </Typography>
                 </Box>
               </Box>
