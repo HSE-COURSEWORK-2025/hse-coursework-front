@@ -6,6 +6,7 @@ import {
   Paper,
   useTheme,
   Link,
+  Avatar,
 } from "@mui/material";
 import {
   Timeline,
@@ -26,17 +27,30 @@ import {
 
 export const MainPage: React.FC = () => {
   const theme = useTheme();
+  const avatarUrl =
+    "https://avatars.githubusercontent.com/u/209133373?s=200&v=4";
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       {/* Заголовок страницы */}
-      <Box sx={{ textAlign: "center", mb: 5 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Как работать с сервисом
-        </Typography>
-        <Typography variant="subtitle1" color="text.secondary">
-          Шаг за шагом от подключения до отображения результатов анализа
-        </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          mb: 5,
+          gap: 2, // отступ между аватаркой и текстом
+        }}
+      >
+
+        <Box textAlign="left">
+          <Typography variant="h4" component="h1" gutterBottom>
+            Как работать с сервисом
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary">
+            Шаг за шагом от подключения до отображения результатов анализа
+          </Typography>
+        </Box>
       </Box>
 
       {/* Инструкция в виде временной шкалы */}
@@ -62,7 +76,8 @@ export const MainPage: React.FC = () => {
                 Подключите мобильное приложение
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Откройте раздел «Выгрузка с мобильного устройства», отсканируйте QR-код в Android-приложении и подтвердите разрешения.
+                Откройте раздел «Выгрузка с мобильного устройства», отсканируйте
+                QR-код в Android-приложении и подтвердите разрешения.
               </Typography>
             </TimelineContent>
           </TimelineItem>
@@ -87,7 +102,8 @@ export const MainPage: React.FC = () => {
                 Автоматическая выгрузка
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Данные из Google Fitness API подтягиваются каждый час. Статус выгрузки доступен на странице «Статус задач».
+                Данные из Google Fitness API подтягиваются каждый час. Статус
+                выгрузки доступен на странице «Статус задач».
               </Typography>
             </TimelineContent>
           </TimelineItem>
@@ -112,7 +128,8 @@ export const MainPage: React.FC = () => {
                 Просмотр графиков
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                В разделе «Графики исходных данных» — интерактивные визуализации пульса, кислорода, активности и сна.
+                В разделе «Графики исходных данных» — интерактивные визуализации
+                пульса, кислорода, активности и сна.
               </Typography>
             </TimelineContent>
           </TimelineItem>
@@ -137,7 +154,8 @@ export const MainPage: React.FC = () => {
                 Анализ выбросов и прогнозы
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Откройте «Графики с выбросами» для аномалий и «Результаты анализа» для вероятностей рисков.
+                Откройте «Графики с выбросами» для аномалий и «Результаты
+                анализа» для вероятностей рисков.
               </Typography>
             </TimelineContent>
           </TimelineItem>
@@ -162,7 +180,9 @@ export const MainPage: React.FC = () => {
                 Получите уведомления
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                О завершении выгрузки, обнаружении выбросов и результатах ML вы получите уведомления в веб-приложении и на почту (не для тестовых аккаунтов).
+                О завершении выгрузки, обнаружении выбросов и результатах ML вы
+                получите уведомления в веб-приложении и на почту (не для
+                тестовых аккаунтов).
               </Typography>
             </TimelineContent>
           </TimelineItem>
