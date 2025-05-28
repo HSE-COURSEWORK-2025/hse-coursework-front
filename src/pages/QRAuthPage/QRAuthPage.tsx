@@ -1,32 +1,36 @@
 import React, { useEffect, useState } from "react";
-import { Container, Box, Typography, Button, CircularProgress } from "@mui/material";
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  CircularProgress,
+  Stack,
+} from "@mui/material";
 import { motion } from "framer-motion";
 import axios from "axios";
 
 const API_URL = process.env.REACT_APP_AUTH_API_URL || "";
 
-// Если сервер возвращает именно Blob с изображением, можно задать generic тип Blob
+// Тип для получения Blob из ответа
 type QrResponse = Blob;
 
 export const QRAuthPage: React.FC = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+  const [appQrCodeUrl, setAppQrCodeUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [appQrError, setAppQrError] = useState<string | null>(null);
 
-  // Функция получения QR кода с сервера через axios
-  const fetchQRCode = async () => {
+  // Получение QR-кода для авторизации
+  const fetchAuthQRCode = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      // Запрос аналогичен приведённому примеру:
       const response = await axios.get<QrResponse>(
         `${API_URL}/api/v1/qr_auth/get_auth_qr_code`,
-        {
-          // responseType необходимо задать для получения бинарного ответа
-          responseType: "blob",
-        }
+        { responseType: "blob" }
       );
-      // Преобразуем Blob в URL для использования в атрибуте src
       const blobUrl = URL.createObjectURL(response.data);
       setQrCodeUrl(blobUrl);
     } catch (err: any) {
@@ -36,14 +40,30 @@ export const QRAuthPage: React.FC = () => {
     }
   };
 
-  // Загружаем QR код сразу при монтировании компонента
+  // Получение QR-кода для загрузки приложения
+  const fetchAppQRCode = async () => {
+    try {
+      setAppQrError(null);
+      const response = await axios.get<QrResponse>(
+        `${API_URL}/api/v1/qr_auth/get_app_qr_code`,
+        { responseType: "blob" }
+      );
+      const blobUrl = URL.createObjectURL(response.data);
+      setAppQrCodeUrl(blobUrl);
+    } catch (err: any) {
+      setAppQrError(err.message || "Ошибка при получении QR кода приложения");
+    }
+  };
+
+  // При монтировании компонента — загружаем оба кода
   useEffect(() => {
-    fetchQRCode();
+    fetchAuthQRCode();
+    fetchAppQRCode();
   }, []);
 
   return (
     <Container
-      maxWidth="sm"
+      maxWidth="md"
       sx={{
         minHeight: "100vh",
         display: "flex",
@@ -69,35 +89,81 @@ export const QRAuthPage: React.FC = () => {
             textAlign: "center",
           }}
         >
-          <Typography variant="headlineSmall" sx={{ fontWeight: 700, color: "primary.main", mb: 2 }}>
-            Авторизация по QR коду
+          <Typography
+            variant="headlineSmall"
+            sx={{ fontWeight: 700, color: "primary.main", mb: 2 }}
+          >
+            QR-коды
           </Typography>
-          <Typography variant="bodyMedium" color="text.secondary" sx={{ mb: 4 }}>
-            Сканируйте данный QR код на вашем мобильном устройстве для входа на сайт.
+          <Typography
+            variant="bodyMedium"
+            color="text.secondary"
+            sx={{ mb: 4 }}
+          >
+            Сканируйте нужный QR-код:
           </Typography>
-          <Box sx={{ my: 3, display: "flex", justifyContent: "center" }}>
-            {isLoading ? (
-              <CircularProgress />
-            ) : error ? (
-              <Typography variant="bodyMedium" color="error">
-                {error}
+
+          <Stack
+            direction="row"
+            spacing={4}
+            justifyContent="center"
+            sx={{ mb: 4 }}
+          >
+            {/* QR код для авторизации */}
+            <Box>
+              <Typography variant="bodyMedium" sx={{ mb: 1 }}>
+                Для авторизации
               </Typography>
-            ) : (
-              <Box
-                component="img"
-                src={qrCodeUrl}
-                alt="QR Code для авторизации"
-                sx={{
-                  width: 250,
-                  height: 250,
-                  borderRadius: 2,
-                  boxShadow: 2,
-                }}
-              />
-            )}
-          </Box>
-          <Button variant="contained" onClick={fetchQRCode} sx={{ textTransform: "none" }}>
-            Обновить QR код
+              {isLoading ? (
+                <CircularProgress />
+              ) : error ? (
+                <Typography color="error">{error}</Typography>
+              ) : (
+                <Box
+                  component="img"
+                  src={qrCodeUrl}
+                  alt="QR Code для авторизации"
+                  sx={{
+                    width: 250,
+                    height: 250,
+                    borderRadius: 2,
+                    boxShadow: 2,
+                  }}
+                />
+              )}
+            </Box>
+
+            {/* QR код для загрузки приложения */}
+            <Box>
+              <Typography variant="bodyMedium" sx={{ mb: 1 }}>
+                Для загрузки приложения
+              </Typography>
+              {appQrError ? (
+                <Typography color="error">{appQrError}</Typography>
+              ) : appQrCodeUrl ? (
+                <Box
+                  component="img"
+                  src={appQrCodeUrl}
+                  alt="QR Code для загрузки приложения"
+                  sx={{
+                    width: 250,
+                    height: 250,
+                    borderRadius: 2,
+                    boxShadow: 2,
+                  }}
+                />
+              ) : (
+                <CircularProgress />
+              )}
+            </Box>
+          </Stack>
+
+          <Button
+            variant="contained"
+            onClick={fetchAuthQRCode}
+            sx={{ textTransform: "none" }}
+          >
+            Обновить QR код для авторизации
           </Button>
         </Box>
       </motion.div>
