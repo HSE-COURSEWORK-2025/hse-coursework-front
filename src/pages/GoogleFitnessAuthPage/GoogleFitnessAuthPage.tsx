@@ -143,7 +143,7 @@ export const GoogleFitnessAuthPage: React.FC = () => {
           <Typography variant="h4" sx={{ mb: 2, fontWeight: 700, color: "primary.main" }}>Авторизация Google Fit</Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>Для доступа к данным Google Fit выполните авторизацию с помощью вашего Google аккаунта.</Typography>
           <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-            <Button variant="contained" onClick={handleSignIn} startIcon={<DirectionsRun />} sx={{ backgroundColor: "#4285F4", borderRadius: "20px", py: 1.5, px: 3, fontSize: 16, width: "100%", textTransform: "none", ':hover': { backgroundColor: '#357ae8' } }}>
+            <Button variant="contained" onClick={handleSignIn} startIcon={<DirectionsRun />} sx={{ backgroundColor: "#16a180", borderRadius: "20px", py: 1.5, px: 3, fontSize: 16, width: "100%", textTransform: "none", ':hover': { backgroundColor: '#13876e' } }}>
               Войти через Google Fit
             </Button>
 
