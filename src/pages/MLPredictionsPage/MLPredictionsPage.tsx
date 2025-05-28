@@ -5,11 +5,10 @@ import {
   CardContent,
   Container,
   Typography,
-  LinearProgress,
   Stack,
-  Avatar,
+  useTheme,
+  CircularProgress,
 } from "@mui/material";
-import { Insights } from "@mui/icons-material";
 
 // Пример предсказанных диагнозов
 const mockPredictions = [
@@ -17,76 +16,152 @@ const mockPredictions = [
   { name: "Нарушения ритма сердца", probability: 0.29 },
 ];
 
-export const MLPredictionsPage: React.FC = () => {
+// Круговой прогресс с цифрой и цветом по Material Design
+interface CircularProgressWithLabelProps {
+  value: number;
+  color: "error" | "yellow" | "success";
+}
+const CircularProgressWithLabel: React.FC<CircularProgressWithLabelProps> = ({
+  value,
+  color,
+}) => {
+  const theme = useTheme();
+  
+  // Определяем реальный цвет для индикатора
+  const getStrokeColor = () => {
+    switch (color) {
+      case "error":
+        return theme.palette.error.main;
+      case "success":
+        return theme.palette.success.main;
+      case "yellow":
+        // Используем тёмный оттенок warning как темно-желтый
+        return theme.palette.warning.dark;
+      default:
+        return theme.palette.text.primary;
+    }
+  };
+
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      {/* Заголовок страницы */}
+    <Box position="relative" display="inline-flex">
+      <CircularProgress
+        variant="determinate"
+        value={value}
+        size={80}
+        thickness={4}
+        sx={{ color: getStrokeColor() }}
+      />
+      <Box
+        position="absolute"
+        top={0}
+        left={0}
+        bottom={0}
+        right={0}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Typography variant="caption" component="div" color="text.primary">
+          {`${Math.round(value)}%`}
+        </Typography>
+      </Box>
+    </Box>
+  );
+};
+
+// Статус-бейдж
+const StatusBadge: React.FC<{ isError: boolean }> = ({ isError }) => {
+  const theme = useTheme();
+  const bg = isError
+    ? theme.palette.error.main + "1A"   // 10% opacity
+    : theme.palette.primary.main + "1A"; // 10% opacity
+  const dotColor = isError
+    ? theme.palette.error.main
+    : theme.palette.success.main;
+  const text = isError ? "Требуется внимание" : "Все хорошо";
+
+  return (
+    <Box
+      sx={{
+        mt: 1,
+        px: 1.5,
+        py: 0.5,
+        bgcolor: bg,
+        color: isError ? theme.palette.error.main : theme.palette.success.main,
+        borderRadius: 28,
+        typography: "body2",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 1,
+      }}
+    >
       <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
-          mb: 4,
-          p: 3,
-          borderRadius: 4,
-          bgcolor: "surfaceContainerHigh.main",
-          boxShadow: 1,
+          width: 8,
+          height: 8,
+          borderRadius: "50%",
+          bgcolor: dotColor,
         }}
-      >
-        <Avatar
-          sx={{
-            width: 64,
-            height: 64,
-            mr: 3,
-            bgcolor: "primaryContainer.main",
-            color: "onPrimaryContainer.main",
-          }}
-        >
-          <Insights fontSize="large" />
-        </Avatar>
-        <Box>
-          <Typography variant="headlineSmall" component="h1">
-            Результаты анализа здоровья
-          </Typography>
-          <Typography variant="bodyLarge" sx={{ color: "onSurfaceVariant.main" }}>
-            Предсказания модели на основе ваших показателей
-          </Typography>
-        </Box>
+      />
+      {text}
+    </Box>
+  );
+};
+
+export const MLPredictionsPage: React.FC = () => {
+  // Определяем цвет по вероятности
+  const getColor = (p: number): "error" | "yellow" | "success" => {
+    if (p > 0.7) return "error";
+    if (p > 0.4) return "yellow";
+    return "success";
+  };
+
+  return (
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      {/* Заголовок */}
+      <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
+        <Typography variant="h4">🤖 ML-прогнозы</Typography>
       </Box>
 
-      {/* Список предсказаний */}
+      {/* Список прогнозов */}
       <Stack spacing={3}>
-        {mockPredictions.map((item, index) => (
-          <Card key={index} sx={{ borderRadius: 4, boxShadow: 2 }}>
-            <CardContent>
-              <Typography variant="titleMedium" gutterBottom>
-                {item.name}
-              </Typography>
-              <LinearProgress
-                variant="determinate"
-                value={item.probability * 100}
-                sx={{
-                  height: 10,
-                  borderRadius: 5,
-                  bgcolor: "surfaceVariant.main",
-                  "& .MuiLinearProgress-bar": {
-                    bgcolor:
-                      item.probability > 0.7
-                        ? "error.main"
-                        : item.probability > 0.4
-                        ? "warning.main"
-                        : "success.main",
-                  },
-                }}
-              />
-              <Typography
-                variant="bodyMedium"
-                sx={{ mt: 1, color: "onSurfaceVariant.main" }}
-              >
-                Вероятность: {(item.probability * 100).toFixed(1)}%
-              </Typography>
-            </CardContent>
-          </Card>
-        ))}
+        {mockPredictions.map((item, idx) => {
+          const pct = item.probability * 100;
+          const colorKey = getColor(item.probability);
+          const isError = colorKey === "error";
+
+          return (
+            <Card key={idx} sx={{ borderRadius: 4, boxShadow: 2 }}>
+              <CardContent sx={{ position: 'relative' }}>
+                {/* Статус-бейдж в правом верхнем углу */}
+                <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+                  <StatusBadge isError={isError} />
+                </Box>
+
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  alignItems="center"
+                  spacing={3}
+                >
+                  {/* Круговой прогресс */}
+                  <Box textAlign="center">
+                    <CircularProgressWithLabel value={pct} color={colorKey} />
+                  </Box>
+
+                  {/* Описание */}
+                  <Box>
+                    <Typography variant="h6" gutterBottom>
+                      {item.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Вероятность события: <strong>{pct.toFixed(1)}%</strong>
+                    </Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          );
+        })}
       </Stack>
     </Container>
   );

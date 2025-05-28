@@ -174,11 +174,9 @@ export const DataWOutliersChartsPage: React.FC = () => {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Жизненные показатели с выбросами
+        🚨 Графики аномалий
       </Typography>
-      <Typography variant="body1" color="text.secondary" paragraph>
-        Исходные данные жизненных показателей с выбросами
-      </Typography>
+
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
         {Object.entries(chartData).map(([key, data]) => {

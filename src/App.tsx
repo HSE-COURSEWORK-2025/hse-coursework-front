@@ -36,34 +36,35 @@ const menuItems: INavigationItem[] = [
   {
     text: "Главная",
     path: "/",
-    icon: <HomeIcon />,
+    icon: <>🏠</>,
   },
   {
     text: "Графики исходных данных",
     path: "/rawDataPage",
-    icon: <CodeIcon />,
+    icon: <>📈</>,
   },
   {
-    text: "Графики данных с обнаруженными аномалиями",
+    text: "Графики аномалий",
     path: "/dataWOutliersPage",
-    icon: <BugReportIcon />,
+    icon: <>🚨</>,
   },
   {
-    text: "QR Auth Page",
+    text: "QR-авторизация",
     path: "/QRAuthPage",
-    icon: <BugReportIcon />,
+    icon: <>📲</>,
   },
   {
-    text: "Integration Status Page",
+    text: "Статус выгрузки данных",
     path: "/IntegrationStatusPage",
-    icon: <BugReportIcon />,
+    icon: <>⏳</>,
   },
   {
-    text: "ML Predictions Page",
-    path: "/MLPredictionsPAge",
-    icon: <BugReportIcon />,
+    text: "ML-прогнозы",
+    path: "/MLPredictionsPage",
+    icon: <>🤖</>,
   },
 ];
+
 
 // Применяем interceptor к глобальному axios, чтобы каждый раз подставлялся актуальный токен
 axios.interceptors.request.use(

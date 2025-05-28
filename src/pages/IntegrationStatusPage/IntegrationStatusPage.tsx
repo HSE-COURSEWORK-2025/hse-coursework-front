@@ -14,6 +14,7 @@ import { useTheme, alpha } from "@mui/material";
 import { FitnessCenter, HealthAndSafety, Sync } from "@mui/icons-material";
 import axios from "axios";
 
+
 const AUTH_API_URL = process.env.REACT_APP_AUTH_API_URL || "";
 const DATA_COLLECTION_WS_URL =
   process.env.REACT_APP_DATA_COLLECTION_WS_URL || "";
@@ -205,18 +206,10 @@ export const IntegrationStatusPage: React.FC = () => {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
-        <Avatar
-          sx={{
-            mr: 2,
-            bgcolor: "primaryContainer.main",
-            color: "onPrimaryContainer.main",
-          }}
-        >
-          <Sync />
-        </Avatar>
-        <Typography variant="h4">Статус интеграций</Typography>
+        <Typography variant="h4">⏳ Статус выгрузки данных</Typography>
       </Box>
 
+      {/* Ошибки */}
       {error && (
         <Typography color="error" sx={{ mb: 2 }}>
           {error}
@@ -224,7 +217,7 @@ export const IntegrationStatusPage: React.FC = () => {
       )}
 
       <Stack spacing={3}>
-        {/* Google Fitness */}
+        {/* Google Fitness API */}
         <Card sx={{ borderRadius: 4, boxShadow: 2 }}>
           <CardContent>
             <Box
@@ -237,13 +230,20 @@ export const IntegrationStatusPage: React.FC = () => {
             >
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <Avatar
+                  variant="square"
                   sx={{
-                    bgcolor: "secondaryContainer.main",
-                    color: "onSecondaryContainer.main",
+                    width: 40,
+                    height: 40,
+                    bgcolor: "transparent",
                     mr: 2,
                   }}
                 >
-                  <FitnessCenter />
+                  <Box
+                    component="img"
+                    src="https://gstatic.com/images/branding/product/1x/gfit_512dp.png"
+                    alt="Google Fitness Logo"
+                    sx={{ width: "100%", height: "100%" }}
+                  />
                 </Avatar>
                 <Box>
                   <Typography variant="h6">
@@ -263,6 +263,7 @@ export const IntegrationStatusPage: React.FC = () => {
                 disabled={isTestUser}
               />
             </Box>
+
             <Typography variant="subtitle2" gutterBottom>
               Прогресс: {fitnessProgress}%
             </Typography>
@@ -274,7 +275,7 @@ export const IntegrationStatusPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Google Health */}
+        {/* Google Health Connect */}
         <Card sx={{ borderRadius: 4, boxShadow: 2 }}>
           <CardContent>
             <Box
@@ -287,23 +288,34 @@ export const IntegrationStatusPage: React.FC = () => {
             >
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <Avatar
+                  variant="square"
                   sx={{
-                    bgcolor: "tertiaryContainer.main",
-                    color: "onTertiaryContainer.main",
+                    width: 40,
+                    height: 40,
+                    bgcolor: "transparent",
                     mr: 2,
                   }}
                 >
-                  <HealthAndSafety />
+                  <Box
+                    component="img"
+                    src="https://play-lh.googleusercontent.com/EbzDx68RZddtIMvs8H8MLcO-KOiBqEYJbi_kRjEdXved0p3KXr0nwUnLUgitZ5kQVWVZ"
+                    alt="Google Health Connect Logo"
+                    sx={{ width: "100%", height: "100%" }}
+                  />
                 </Avatar>
                 <Box>
                   <Typography variant="h6">Google Health Connect</Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Прогресс выгрузки данных из Google Health Connect.
+                    Прогресс выгрузки данных из Google Health Connect
                   </Typography>
                 </Box>
               </Box>
-              <StatusBadge isError={!healthConnected} toggle={toggleHealth} />
+              <StatusBadge
+                isError={!healthConnected}
+                toggle={toggleHealth}
+              />
             </Box>
+
             <Typography variant="subtitle2" gutterBottom>
               Прогресс: {healthProgress}%
             </Typography>
@@ -317,4 +329,5 @@ export const IntegrationStatusPage: React.FC = () => {
       </Stack>
     </Container>
   );
+
 };

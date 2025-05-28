@@ -89,18 +89,11 @@ export const QRAuthPage: React.FC = () => {
             textAlign: "center",
           }}
         >
-          <Typography
-            variant="headlineSmall"
-            sx={{ fontWeight: 700, color: "primary.main", mb: 2 }}
-          >
-            QR-коды
-          </Typography>
-          <Typography
-            variant="bodyMedium"
-            color="text.secondary"
-            sx={{ mb: 4 }}
-          >
-            Сканируйте нужный QR-код:
+          {/* Мини-инструкция */}
+          <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
+            Отсканируйте <strong>левый</strong> QR-код в мобильном приложении
+            для авторизации. Если у вас ещё нет приложения, используйте{" "}
+            <strong>правый</strong> QR-код для установки.
           </Typography>
 
           <Stack
@@ -161,7 +154,14 @@ export const QRAuthPage: React.FC = () => {
           <Button
             variant="contained"
             onClick={fetchAuthQRCode}
-            sx={{ textTransform: "none" }}
+            sx={{
+              textTransform: "none",
+              backgroundColor: "#16a180",
+              color: "#ffffff",
+              "&:hover": {
+                backgroundColor: "#13876e", // чуть более тёмный для эффекта наведения
+              },
+            }}
           >
             Обновить QR код для авторизации
           </Button>
