@@ -155,6 +155,7 @@ export const MainPage: React.FC = () => {
               <TimelineDot color="success">
                 <NotificationsActive />
               </TimelineDot>
+              <TimelineConnector />
             </TimelineSeparator>
             <TimelineContent sx={{ py: "12px", px: 2 }}>
               <Typography variant="h6" component="span">

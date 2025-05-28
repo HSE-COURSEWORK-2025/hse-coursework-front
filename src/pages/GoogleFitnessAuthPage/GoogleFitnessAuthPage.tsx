@@ -48,7 +48,6 @@ export const GoogleFitnessAuthPage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Ждём, пока GSI SDK загрузится и появится window.google.accounts.oauth2.initCodeClient
     const interval = setInterval(() => {
       if (window.google?.accounts?.oauth2?.initCodeClient) {
         clearInterval(interval);
@@ -60,14 +59,12 @@ export const GoogleFitnessAuthPage: React.FC = () => {
           prompt: "consent",
           callback: (response: any) => {
             if (response.error) {
-              enqueueSnackbar("Ошибка авторизации", { variant: "error" });
+              enqueueSnackbar("Не удалось авторизоваться. Попробуйте снова.", { variant: "error" });
               return;
             }
             if (response.code) {
               setAuthCode(response.code);
-              enqueueSnackbar("Успешная авторизация, код получен.", {
-                variant: "success",
-              });
+              enqueueSnackbar("Код авторизации получен! Обмен токенов...", { variant: "success" });
               exchangeCode(response.code);
             }
           },
@@ -93,8 +90,7 @@ export const GoogleFitnessAuthPage: React.FC = () => {
       const data = await response.json();
 
       setTokens(data.access_token, data.refresh_token);
-
-      enqueueSnackbar("Успешный вход через Google.", { variant: "success" });
+      enqueueSnackbar("Вход через Google Fit выполнен успешно!", { variant: "success" });
       navigate("/");
     } catch (err: any) {
       enqueueSnackbar(err.message, { variant: "error" });
@@ -105,9 +101,7 @@ export const GoogleFitnessAuthPage: React.FC = () => {
     if (codeClient) {
       codeClient.requestCode();
     } else {
-      enqueueSnackbar("SDK ещё не загружен, попробуйте чуть позже", {
-        variant: "warning",
-      });
+      enqueueSnackbar("SDK загружается, чуть позже всё будет готово!", { variant: "warning" });
     }
   };
 
@@ -124,34 +118,89 @@ export const GoogleFitnessAuthPage: React.FC = () => {
       const data = await response.json();
 
       setTokens(data.access_token, data.refresh_token);
-      enqueueSnackbar("Успешный вход в тестовый аккаунт!", {
-        variant: "success",
-      });
+      enqueueSnackbar("Тестовый аккаунт загружен! Добро пожаловать.", { variant: "success" });
       navigate("/");
     } catch (error) {
       console.error(error);
-      enqueueSnackbar("Не удалось войти в тестовый аккаунт", {
-        variant: "error",
-      });
+      enqueueSnackbar("Не удалось войти в тестовый аккаунт.", { variant: "error" });
     }
   };
 
   return (
-    <Container maxWidth="xs" sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <Container
+      maxWidth="xs"
+      sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}
+    >
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <Box sx={{ p: 4, borderRadius: 2, boxShadow: 3, bgcolor: "background.paper", textAlign: "center", width: "100%", minWidth: 300 }}>
-          <Typography variant="h4" sx={{ mb: 2, fontWeight: 700, color: "primary.main" }}>Авторизация Google Fit</Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>Для доступа к данным Google Fit выполните авторизацию с помощью вашего Google аккаунта.</Typography>
+        <Box
+          sx={{
+            p: 4,
+            borderRadius: 2,
+            boxShadow: 3,
+            bgcolor: "background.paper",
+            textAlign: "center",
+            width: "100%",
+            minWidth: 300,
+          }}
+        >
+          <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, color: "primary.main" }}>
+            Вход
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Авторизуйтесь через Google, чтобы приложение могло читать ваши данные о здоровье из Google Fitness API. 
+          </Typography>
+
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+            Или воспользуйтесь тестовым аккаунтом для ознакомления с возможностями без регистрации.
+          </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-            <Button variant="contained" onClick={handleSignIn} startIcon={<DirectionsRun />} sx={{ backgroundColor: "#16a180", borderRadius: "20px", py: 1.5, px: 3, fontSize: 16, width: "100%", textTransform: "none", ':hover': { backgroundColor: '#13876e' } }}>
+            {/* Кнопка Google Fit с градиентом */}
+            <Button
+              variant="contained"
+              onClick={handleSignIn}
+              startIcon={<DirectionsRun />}
+              sx={{
+                background: 'linear-gradient(45deg, #FF8E53 30%, #FE6B8B 90%)',
+                borderRadius: '20px',
+                py: 1.5,
+                px: 3,
+                fontSize: 16,
+                width: '100%',
+                textTransform: 'none',
+                color: '#fff',
+                boxShadow: '0 3px 5px 2px rgba(255,105,135, .3)',
+                ':hover': {
+                  background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+                },
+              }}
+            >
               Войти через Google Fit
             </Button>
 
-            <Button variant="contained" onClick={handleTestLogin} startIcon={<PersonIcon />} sx={{ background: 'linear-gradient(45deg, #6c63ff 30%, #3f3d56 90%)', borderRadius: '20px', py: 1.5, px: 3, fontSize: 16, width: '100%', textTransform: 'none', color: '#fff', boxShadow: '0 3px 5px 2px rgba(108,99,255, .3)', ':hover': { background: 'linear-gradient(45deg, #5a52e0 30%, #2e2c3d 90%)' } }}>
+            {/* Кнопка тестового аккаунта (стиль сохранён) */}
+
+            <Button
+              variant="contained"
+              onClick={handleTestLogin}
+              startIcon={<PersonIcon />}
+              sx={{
+                background: 'linear-gradient(45deg, #6c63ff 30%, #3f3d56 90%)',
+                borderRadius: '20px',
+                py: 1.5,
+                px: 3,
+                fontSize: 16,
+                width: '100%',
+                textTransform: 'none',
+                color: '#fff',
+                boxShadow: '0 3px 5px 2px rgba(108,99,255, .3)',
+                ':hover': {
+                  background: 'linear-gradient(45deg, #5a52e0 30%, #2e2c3d 90%)',
+                },
+              }}
+            >
               Войти в тестовый аккаунт
             </Button>
 
-            <Divider sx={{ width: '100%', my: 2 }} />
           </Box>
         </Box>
       </motion.div>
