@@ -9,12 +9,22 @@ import {
   useTheme,
   CircularProgress,
 } from "@mui/material";
+import BedtimeIcon from '@mui/icons-material/Bedtime';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import NightsStayIcon from '@mui/icons-material/NightsStay';
+import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 
 // Пример предсказанных диагнозов
 const mockPredictions = [
   { name: "Риск бессонницы", probability: 0.44 },
   { name: "Нарушения ритма сердца", probability: 0.29 },
-];
+  ];
+
+// Соответствие диагноза и иконки
+const iconMap: Record<string, React.ElementType> = {
+  "Риск бессонницы": NightsStayIcon,
+  "Нарушения ритма сердца": MonitorHeartIcon,
+};
 
 // Круговой прогресс с цифрой и цветом по Material Design
 interface CircularProgressWithLabelProps {
@@ -35,7 +45,6 @@ const CircularProgressWithLabel: React.FC<CircularProgressWithLabelProps> = ({
       case "success":
         return theme.palette.success.main;
       case "yellow":
-        // Используем тёмный оттенок warning как темно-желтый
         return theme.palette.warning.dark;
       default:
         return theme.palette.text.primary;
@@ -73,8 +82,8 @@ const CircularProgressWithLabel: React.FC<CircularProgressWithLabelProps> = ({
 const StatusBadge: React.FC<{ isError: boolean }> = ({ isError }) => {
   const theme = useTheme();
   const bg = isError
-    ? theme.palette.error.main + "1A"   // 10% opacity
-    : theme.palette.primary.main + "1A"; // 10% opacity
+    ? theme.palette.error.main + "1A"
+    : theme.palette.primary.main + "1A";
   const dotColor = isError
     ? theme.palette.error.main
     : theme.palette.success.main;
@@ -129,6 +138,7 @@ export const MLPredictionsPage: React.FC = () => {
           const pct = item.probability * 100;
           const colorKey = getColor(item.probability);
           const isError = colorKey === "error";
+          const IconComponent = iconMap[item.name] || React.Fragment;
 
           return (
             <Card key={idx} sx={{ borderRadius: 4, boxShadow: 2 }}>
@@ -150,9 +160,12 @@ export const MLPredictionsPage: React.FC = () => {
 
                   {/* Описание */}
                   <Box>
-                    <Typography variant="h6" gutterBottom>
-                      {item.name}
-                    </Typography>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <IconComponent />
+                      <Typography variant="h6" gutterBottom>
+                        {item.name}
+                      </Typography>
+                    </Stack>
                     <Typography variant="body2" color="text.secondary">
                       Вероятность события: <strong>{pct.toFixed(1)}%</strong>
                     </Typography>
@@ -160,6 +173,7 @@ export const MLPredictionsPage: React.FC = () => {
                 </Stack>
               </CardContent>
             </Card>
+            
           );
         })}
       </Stack>
