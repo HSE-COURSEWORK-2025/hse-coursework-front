@@ -51,7 +51,7 @@ export const GenerateReportPage: React.FC<GenerateReportPageProps> = ({ onGenera
           onClick={onGenerate}
           disabled={showProgress && progress! < 100}
         >
-          {showProgress && progress! < 100 ? 'Генерация...' : 'Скачать отчёт (PDF)'}
+          {showProgress && progress! < 100 ? 'Генерация...' : 'Сгенерировать отчёт (PDF)'}
         </Button>
       </Box>
     </Container>
