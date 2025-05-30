@@ -196,7 +196,7 @@ export const MainPage: React.FC = () => {
         {/* Контакты */}
         <Box sx={{ mt: 6, textAlign: "center" }}>
           <Typography variant="body2" color="text.secondary">
-            Вопросы? Пишите в Telegram:{" "}
+            Есть вопросы? Пишите в Telegram:{" "}
             <Link
               href="https://t.me/igmalysh"
               target="_blank"
