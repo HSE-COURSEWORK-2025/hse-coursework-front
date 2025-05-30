@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Drawer,
@@ -16,11 +16,11 @@ import {
   IconButton,
   Badge,
 } from "@mui/material";
-import { INavigationItem } from "../type";
 import { Link, useLocation, LinkProps } from "react-router-dom";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
+import { INavigationItem } from "../type";
 
-// Функция для декодирования payload токена
+// Декодер JWT, как у вас
 const parseJwt = (token: string) => {
   try {
     const base64Url = token.split(".")[1];
@@ -32,12 +32,10 @@ const parseJwt = (token: string) => {
         .join("")
     );
     return JSON.parse(jsonPayload);
-  } catch (e) {
+  } catch {
     return null;
   }
 };
-
-// Получаем данные пользователя из токена
 
 interface NavigationProps {
   items: INavigationItem[];
@@ -84,20 +82,57 @@ const StyledListItemButton = styled(ListItemButton)<
   },
 }));
 
-export const Navigation = ({
+export const Navigation: React.FC<NavigationProps> = ({
   items,
   open = true,
   onClose,
-}: NavigationProps) => {
+}) => {
   const theme = useTheme();
   const location = useLocation();
 
-  const hasUnread = true;
-
+  // JWT + пользовательские данные
   const token = localStorage.getItem("accessToken") || "";
   const userData = parseJwt(token);
   const userName = userData?.name || "My App";
   const userLogo = userData?.picture || "";
+
+  // --- Вот тут ключ: статус уведомлений из WS ---
+  const [hasUnread, setHasUnread] = useState(false);
+
+  useEffect(() => {
+    if (!token) return;
+    // Пример: ws://localhost:8000
+    const WS_BASE = process.env.REACT_APP_WS_BASE_URL || window.location.origin.replace(/^http/, "ws");
+    const ws = new WebSocket(
+      `${WS_BASE}/notifications-api/api/v1/notifications/has_unchecked?token=${token}`
+    );
+
+    ws.onopen = () => {
+      // сразу «пингнем», чтобы таска подтвердила наличие
+      ws.send("ping");
+    };
+    ws.onmessage = (evt) => {
+      try {
+        const { has_unchecked } = JSON.parse(evt.data);
+        setHasUnread(has_unchecked);
+      } catch {
+        // игнорируем кривые данные
+      }
+    };
+    ws.onerror = () => {
+      // на ошибку можно переподключаться или логировать
+      console.error("WS error on notifications_status");
+    };
+    ws.onclose = () => {
+      // при падении соединения можно переподключать,
+      // но для простоты просто чистим статус
+      setHasUnread(false);
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, [token]);
 
   return (
     <StyledDrawer variant="permanent" open={open} onClose={onClose}>
