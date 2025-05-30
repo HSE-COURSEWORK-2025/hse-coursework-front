@@ -62,111 +62,122 @@ export const QRAuthPage: React.FC = () => {
   }, []);
 
   return (
-    <Container
-      maxWidth="md"
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        p: 3,
-        backgroundColor: "background.default",
-      }}
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        style={{ width: "100%" }}
+    <Container>
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          📲 QR-авторизация
+        </Typography>
+      </Container>
+      <Container
+        maxWidth="md"
+        sx={{
+          minHeight: "67vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          p: 3,
+          backgroundColor: "background.default",
+        }}
       >
-        <Box
-          sx={{
-            backgroundColor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 3,
-            p: 4,
-            textAlign: "center",
-          }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          style={{ width: "100%" }}
         >
-          {/* Мини-инструкция */}
-          <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
-            Отсканируйте <strong>левый</strong> QR-код в мобильном приложении
-            для авторизации. Если у вас ещё нет приложения, используйте{" "}
-            <strong>правый</strong> QR-код для установки.
-          </Typography>
-
-          <Stack
-            direction="row"
-            spacing={4}
-            justifyContent="center"
-            sx={{ mb: 4 }}
-          >
-            {/* QR код для авторизации */}
-            <Box>
-              <Typography variant="bodyMedium" sx={{ mb: 1 }}>
-                Для авторизации
-              </Typography>
-              {isLoading ? (
-                <CircularProgress />
-              ) : error ? (
-                <Typography color="error">{error}</Typography>
-              ) : (
-                <Box
-                  component="img"
-                  src={qrCodeUrl}
-                  alt="QR Code для авторизации"
-                  sx={{
-                    width: 250,
-                    height: 250,
-                    borderRadius: 2,
-                    boxShadow: 2,
-                  }}
-                />
-              )}
-            </Box>
-
-            {/* QR код для загрузки приложения */}
-            <Box>
-              <Typography variant="bodyMedium" sx={{ mb: 1 }}>
-                Для загрузки приложения
-              </Typography>
-              {appQrError ? (
-                <Typography color="error">{appQrError}</Typography>
-              ) : appQrCodeUrl ? (
-                <Box
-                  component="img"
-                  src={appQrCodeUrl}
-                  alt="QR Code для загрузки приложения"
-                  sx={{
-                    width: 250,
-                    height: 250,
-                    borderRadius: 2,
-                    boxShadow: 2,
-                  }}
-                />
-              ) : (
-                <CircularProgress />
-              )}
-            </Box>
-          </Stack>
-
-          <Button
-            variant="contained"
-            onClick={fetchAuthQRCode}
+          <Box
             sx={{
-              textTransform: "none",
-              backgroundColor: "#16a180",
-              color: "#ffffff",
-              "&:hover": {
-                backgroundColor: "#13876e", // чуть более тёмный для эффекта наведения
-              },
+              backgroundColor: "background.paper",
+              borderRadius: 2,
+              boxShadow: 3,
+              p: 4,
+              textAlign: "center",
             }}
           >
-            Обновить QR код для авторизации
-          </Button>
-        </Box>
-      </motion.div>
+            {/* Мини-инструкция */}
+            <Typography
+              variant="subtitle1"
+              color="text.secondary"
+              sx={{ mb: 3 }}
+            >
+              Отсканируйте <strong>левый</strong> QR-код в мобильном приложении
+              для авторизации. Если у вас ещё нет приложения, используйте{" "}
+              <strong>правый</strong> QR-код для установки.
+            </Typography>
+
+            <Stack
+              direction="row"
+              spacing={4}
+              justifyContent="center"
+              sx={{ mb: 4 }}
+            >
+              {/* QR код для авторизации */}
+              <Box>
+                <Typography variant="bodyMedium" sx={{ mb: 1 }}>
+                  Для авторизации
+                </Typography>
+                {isLoading ? (
+                  <CircularProgress />
+                ) : error ? (
+                  <Typography color="error">{error}</Typography>
+                ) : (
+                  <Box
+                    component="img"
+                    src={qrCodeUrl}
+                    alt="QR Code для авторизации"
+                    sx={{
+                      width: 250,
+                      height: 250,
+                      borderRadius: 2,
+                      boxShadow: 2,
+                    }}
+                  />
+                )}
+              </Box>
+
+              {/* QR код для загрузки приложения */}
+              <Box>
+                <Typography variant="bodyMedium" sx={{ mb: 1 }}>
+                  Для загрузки приложения
+                </Typography>
+                {appQrError ? (
+                  <Typography color="error">{appQrError}</Typography>
+                ) : appQrCodeUrl ? (
+                  <Box
+                    component="img"
+                    src={appQrCodeUrl}
+                    alt="QR Code для загрузки приложения"
+                    sx={{
+                      width: 250,
+                      height: 250,
+                      borderRadius: 2,
+                      boxShadow: 2,
+                    }}
+                  />
+                ) : (
+                  <CircularProgress />
+                )}
+              </Box>
+            </Stack>
+
+            <Button
+              variant="contained"
+              onClick={fetchAuthQRCode}
+              sx={{
+                textTransform: "none",
+                backgroundColor: "#16a180",
+                color: "#ffffff",
+                "&:hover": {
+                  backgroundColor: "#13876e", // чуть более тёмный для эффекта наведения
+                },
+              }}
+            >
+              Обновить QR код для авторизации
+            </Button>
+          </Box>
+        </motion.div>
+      </Container>
     </Container>
   );
 };

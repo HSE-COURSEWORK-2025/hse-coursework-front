@@ -28,6 +28,8 @@
     "chartjs-plugin-annotation": "3.0.1",
     "chartjs-plugin-zoom": "2.0.1",
     "framer-motion": "^12.6.3",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
     "jwt-decode": "^4.0.0",
     "notistack": "^3.0.2",
     "react": "^19.1.0",

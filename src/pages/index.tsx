@@ -8,3 +8,4 @@ export { QRAuthPage } from "./QRAuthPage/QRAuthPage";
 export { GoogleFitnessAuthPage } from "./GoogleFitnessAuthPage/GoogleFitnessAuthPage";
 export { IntegrationStatusPage } from "./IntegrationStatusPage/IntegrationStatusPage";
 export { MLPredictionsPage } from "./MLPredictionsPage/MLPredictionsPage";
+export { GenerateReportPage } from "./GenerateReportPage/GenerateReportPage" 

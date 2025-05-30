@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import {
   Box,
   Card,
@@ -8,9 +8,10 @@ import {
   Stack,
   useTheme,
   CircularProgress,
+  Button,
 } from "@mui/material";
-import BedtimeIcon from '@mui/icons-material/Bedtime';
-import FavoriteIcon from '@mui/icons-material/Favorite';
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import NightsStayIcon from '@mui/icons-material/NightsStay';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 
@@ -18,7 +19,7 @@ import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 const mockPredictions = [
   { name: "Риск бессонницы", probability: 0.44 },
   { name: "Нарушения ритма сердца", probability: 0.29 },
-  ];
+];
 
 // Соответствие диагноза и иконки
 const iconMap: Record<string, React.ElementType> = {
@@ -36,8 +37,6 @@ const CircularProgressWithLabel: React.FC<CircularProgressWithLabelProps> = ({
   color,
 }) => {
   const theme = useTheme();
-  
-  // Определяем реальный цвет для индикатора
   const getStrokeColor = () => {
     switch (color) {
       case "error":
@@ -117,7 +116,20 @@ const StatusBadge: React.FC<{ isError: boolean }> = ({ isError }) => {
   );
 };
 
-export const MLPredictionsPage: React.FC = () => {
+interface MLPredictionsPageProps {
+  onLoaded?: () => void;
+}
+
+export const MLPredictionsPage: React.FC<MLPredictionsPageProps> = ({
+  onLoaded,
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Вызываем onLoaded сразу после первого рендера
+  useEffect(() => {
+    onLoaded?.();
+  }, [onLoaded]);
+
   // Определяем цвет по вероятности
   const getColor = (p: number): "error" | "yellow" | "success" => {
     if (p > 0.7) return "error";
@@ -126,9 +138,9 @@ export const MLPredictionsPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      {/* Заголовок */}
-      <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
+    <Container ref={containerRef} maxWidth="md" sx={{ py: 4 }}>
+      {/* Заголовок и кнопка PDF */}
+      <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 2 }}>
         <Typography variant="h4">🤖 ML-прогнозы</Typography>
       </Box>
 
@@ -142,9 +154,9 @@ export const MLPredictionsPage: React.FC = () => {
 
           return (
             <Card key={idx} sx={{ borderRadius: 4, boxShadow: 2 }}>
-              <CardContent sx={{ position: 'relative' }}>
-                {/* Статус-бейдж в правом верхнем углу */}
-                <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+              <CardContent sx={{ position: "relative" }}>
+                {/* Статус-бейдж */}
+                <Box sx={{ position: "absolute", top: 16, right: 16 }}>
                   <StatusBadge isError={isError} />
                 </Box>
 
@@ -173,7 +185,6 @@ export const MLPredictionsPage: React.FC = () => {
                 </Stack>
               </CardContent>
             </Card>
-            
           );
         })}
       </Stack>
