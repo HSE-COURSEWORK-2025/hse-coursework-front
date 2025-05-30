@@ -126,48 +126,12 @@ export const MLPredictionsPage: React.FC = () => {
     return "success";
   };
 
-  // Генерация PDF по скриншоту контейнера
-  const generatePDF = async () => {
-  // Захватываем корневой элемент страницы
-  const element = document.documentElement;
-
-  // Вычисляем полные размеры страницы
-  const pageWidth = document.documentElement.scrollWidth;
-  const pageHeight = document.documentElement.scrollHeight;
-
-  // Делаем скриншот всего документа
-  const canvas = await html2canvas(element, {
-    scale: 2,                     // увеличить разрешение
-    windowWidth: pageWidth,      // ширина окна рендеринга
-    windowHeight: pageHeight,    // высота окна рендеринга
-    scrollX: -window.scrollX,    // обнуляем горизонтальную прокрутку
-    scrollY: -window.scrollY,    // обнуляем вертикальную прокрутку
-  });
-
-  const imgData = canvas.toDataURL("image/png");
-  const imgWidth = canvas.width;
-  const imgHeight = canvas.height;
-
-  // Создаём PDF точно по размеру скриншота
-  const pdf = new jsPDF({
-    orientation: imgWidth > imgHeight ? "landscape" : "portrait",
-    unit: "px",
-    format: [imgWidth, imgHeight],
-  });
-
-  pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-  pdf.save("fullpage.pdf");
-};
-
 
   return (
     <Container ref={containerRef} maxWidth="md" sx={{ py: 4 }}>
       {/* Заголовок и кнопка PDF */}
       <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 2 }}>
         <Typography variant="h4">🤖 ML-прогнозы</Typography>
-        <Button variant="contained" onClick={generatePDF}>
-          Скачать PDF
-        </Button>
       </Box>
 
       {/* Список прогнозов */}

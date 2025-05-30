@@ -62,10 +62,16 @@ export const QRAuthPage: React.FC = () => {
   }, []);
 
   return (
+    <Container>
+      <Container maxWidth="md" sx={{ py: 4 }}>
+            <Typography variant="h4" gutterBottom>
+              📲 QR-авторизация
+            </Typography>
+      </Container>
     <Container
       maxWidth="md"
       sx={{
-        minHeight: "100vh",
+        minHeight: "67vh",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
@@ -74,6 +80,7 @@ export const QRAuthPage: React.FC = () => {
         backgroundColor: "background.default",
       }}
     >
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -167,6 +174,7 @@ export const QRAuthPage: React.FC = () => {
           </Button>
         </Box>
       </motion.div>
+    </Container>
     </Container>
   );
 };

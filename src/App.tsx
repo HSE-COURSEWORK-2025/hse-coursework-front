@@ -1,5 +1,5 @@
 // App.tsx
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
 import { Route, Routes, BrowserRouter, useNavigate } from "react-router-dom";
 import {
@@ -18,7 +18,8 @@ import {
   GoogleFitnessAuthPage,
   QRAuthPage,
   IntegrationStatusPage,
-  MLPredictionsPage
+  MLPredictionsPage,
+  GenerateReportPage
 } from "./pages";
 import { Box, Button } from "@mui/material";
 import axios from "axios";
@@ -44,6 +45,7 @@ const menuItems: INavigationItem[] = [
   { text: "QR-авторизация", path: "/QRAuthPage", icon: <>📲</> },
   { text: "Статус выгрузки данных", path: "/IntegrationStatusPage", icon: <>⏳</> },
   { text: "ML-прогнозы", path: "/MLPredictionsPage", icon: <>🤖</> },
+  { text: "Сгенерировать отчет", path: "/GenerateReportPage", icon: <>📄</> },
 ];
 
 const pageComponents: Record<string, React.FC> = {
@@ -54,6 +56,7 @@ const pageComponents: Record<string, React.FC> = {
   "/QRAuthPage": QRAuthPage,
   "/IntegrationStatusPage": IntegrationStatusPage,
   "/MLPredictionsPage": MLPredictionsPage,
+  // "/GenerateReportPage": GenerateReportPage,
 };
 
 // Axios interceptor
@@ -75,33 +78,39 @@ const AppContent = () => {
   const navigate = useNavigate();
 
   // Пути страниц для отчёта
-  const reportPages = menuItems.map((item) => item.path);
+  const reportPages = [
+  "/rawDataPage",
+  "/dataWOutliersPage",
+  "/MLPredictionsPage",
+];
 
   // Функция генерации многостраничного PDF
   
+  const [progress, setProgress] = useState<number | undefined>(undefined);
 
 
-   const generateFullReport = async () => {
+
+  const generateFullReport = async () => {
+    setProgress(0);
     let pdf: jsPDF | null = null;
-
-    // Найдём offscreen-контейнер
     const offscreen = document.getElementById("pdf-offscreen")!;
-    let root: Root | null = null;
+    const total = reportPages.length;
 
-    for (let i = 0; i < reportPages.length; i++) {
+    for (let i = 0; i < total; i++) {
       const path = reportPages[i];
       const PageComp = pageComponents[path];
       if (!PageComp) continue;
 
-      // 1) Создаём React-root и рендерим страницу в offscreen
-      offscreen.innerHTML = "";        // гарантия чистоты
-      root = createRoot(offscreen);
+      offscreen.innerHTML = "";
+      const root: Root = createRoot(offscreen);
       root.render(<PageComp />);
 
-      // 2) Ждём, пока всё отрисуется (если нужны данные — дождаться onLoad, API и т.п.)
-      await new Promise((res) => setTimeout(res, 500));
+      // подождать, пока отрисуется
+      await new Promise((r) => setTimeout(r, 700));
 
-      // 3) Захват offscreen-контейнера
+      // зафиксировать всю высоту
+      offscreen.style.height = offscreen.scrollHeight + "px";
+
       const canvas = await html2canvas(offscreen, {
         scale: 2,
         width: offscreen.scrollWidth,
@@ -114,7 +123,6 @@ const AppContent = () => {
       const imgH = canvas.height;
       const orient = imgW > imgH ? "landscape" : "portrait";
 
-      // 4) Инициализация или добавление страницы в PDF
       if (i === 0) {
         pdf = new jsPDF({
           unit: "px",
@@ -126,15 +134,15 @@ const AppContent = () => {
       }
       pdf!.addImage(imgData, "PNG", 0, 0, imgW, imgH);
 
-      // 5) Убираем React-root перед следующей итерацией
-      if (root) {
-        root.unmount();
-        root = null;
-      }
+      root.unmount();
+
+      // обновить прогресс
+      setProgress(Math.round(((i + 1) / total) * 100));
     }
 
-    // 6) Сохраняем PDF
     pdf?.save("full-report.pdf");
+    // можно сбросить progress в undefined или оставить на 100
+    // setProgress(undefined);
   };
 
 
@@ -144,18 +152,7 @@ const AppContent = () => {
       {accessToken && <Navigation items={menuItems} />}
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        {/* Кнопка «Скачать полный отчёт» */}
-        {accessToken && (
-          <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
-            <Button
-              variant="contained"
-              onClick={generateFullReport}
-            >
-              Скачать полный отчёт
-            </Button>
-          </Box>
-        )}
-
+        
         <Routes>
           <Route
             path="/"
@@ -226,6 +223,17 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <MLPredictionsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/GenerateReportPage"
+            element={
+              <ProtectedRoute>
+                <GenerateReportPage
+                  onGenerate={generateFullReport}
+                  progress={progress}
+                />
               </ProtectedRoute>
             }
           />
