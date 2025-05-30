@@ -39,7 +39,7 @@ export interface INavigationItem {
 }
 
 const menuItems: INavigationItem[] = [
-  { text: "Главная", path: "/", icon: <>🏠</> },
+  { text: "Как работать с сервисом", path: "/", icon: <>🏠</> },
   { text: "Графики исходных данных", path: "/rawDataPage", icon: <>📈</> },
   { text: "Графики аномалий", path: "/dataWOutliersPage", icon: <>🚨</> },
   { text: "QR-авторизация", path: "/QRAuthPage", icon: <>📲</> },
