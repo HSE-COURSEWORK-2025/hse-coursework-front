@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   Box,
   Card,
@@ -8,9 +8,10 @@ import {
   Stack,
   useTheme,
   CircularProgress,
+  Button,
 } from "@mui/material";
-import BedtimeIcon from '@mui/icons-material/Bedtime';
-import FavoriteIcon from '@mui/icons-material/Favorite';
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import NightsStayIcon from '@mui/icons-material/NightsStay';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 
@@ -18,7 +19,7 @@ import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 const mockPredictions = [
   { name: "Риск бессонницы", probability: 0.44 },
   { name: "Нарушения ритма сердца", probability: 0.29 },
-  ];
+];
 
 // Соответствие диагноза и иконки
 const iconMap: Record<string, React.ElementType> = {
@@ -36,8 +37,6 @@ const CircularProgressWithLabel: React.FC<CircularProgressWithLabelProps> = ({
   color,
 }) => {
   const theme = useTheme();
-  
-  // Определяем реальный цвет для индикатора
   const getStrokeColor = () => {
     switch (color) {
       case "error":
@@ -118,6 +117,8 @@ const StatusBadge: React.FC<{ isError: boolean }> = ({ isError }) => {
 };
 
 export const MLPredictionsPage: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   // Определяем цвет по вероятности
   const getColor = (p: number): "error" | "yellow" | "success" => {
     if (p > 0.7) return "error";
@@ -125,11 +126,48 @@ export const MLPredictionsPage: React.FC = () => {
     return "success";
   };
 
+  // Генерация PDF по скриншоту контейнера
+  const generatePDF = async () => {
+  // Захватываем корневой элемент страницы
+  const element = document.documentElement;
+
+  // Вычисляем полные размеры страницы
+  const pageWidth = document.documentElement.scrollWidth;
+  const pageHeight = document.documentElement.scrollHeight;
+
+  // Делаем скриншот всего документа
+  const canvas = await html2canvas(element, {
+    scale: 2,                     // увеличить разрешение
+    windowWidth: pageWidth,      // ширина окна рендеринга
+    windowHeight: pageHeight,    // высота окна рендеринга
+    scrollX: -window.scrollX,    // обнуляем горизонтальную прокрутку
+    scrollY: -window.scrollY,    // обнуляем вертикальную прокрутку
+  });
+
+  const imgData = canvas.toDataURL("image/png");
+  const imgWidth = canvas.width;
+  const imgHeight = canvas.height;
+
+  // Создаём PDF точно по размеру скриншота
+  const pdf = new jsPDF({
+    orientation: imgWidth > imgHeight ? "landscape" : "portrait",
+    unit: "px",
+    format: [imgWidth, imgHeight],
+  });
+
+  pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+  pdf.save("fullpage.pdf");
+};
+
+
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      {/* Заголовок */}
-      <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
+    <Container ref={containerRef} maxWidth="md" sx={{ py: 4 }}>
+      {/* Заголовок и кнопка PDF */}
+      <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 2 }}>
         <Typography variant="h4">🤖 ML-прогнозы</Typography>
+        <Button variant="contained" onClick={generatePDF}>
+          Скачать PDF
+        </Button>
       </Box>
 
       {/* Список прогнозов */}
@@ -143,7 +181,7 @@ export const MLPredictionsPage: React.FC = () => {
           return (
             <Card key={idx} sx={{ borderRadius: 4, boxShadow: 2 }}>
               <CardContent sx={{ position: 'relative' }}>
-                {/* Статус-бейдж в правом верхнем углу */}
+                {/* Статус-бейдж */}
                 <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
                   <StatusBadge isError={isError} />
                 </Box>
@@ -173,7 +211,6 @@ export const MLPredictionsPage: React.FC = () => {
                 </Stack>
               </CardContent>
             </Card>
-            
           );
         })}
       </Stack>
