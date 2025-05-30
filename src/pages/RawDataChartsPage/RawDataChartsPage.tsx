@@ -19,8 +19,6 @@ interface DataPoint {
 type ChartDataType = {
   pulse: DataPoint[];
   oxygen: DataPoint[];
-  stress: DataPoint[];
-  breathing: DataPoint[];
   sleep: DataPoint[];
 };
 
@@ -45,13 +43,17 @@ const transformData = (backendData: BackendDataElement[]): DataPoint[] => {
   }));
 };
 
-export const RawDataChartsPage: React.FC = () => {
+interface RawDataChartsPageProps {
+  onLoaded?: () => void;
+}
+
+export const RawDataChartsPage: React.FC<RawDataChartsPageProps> = ({
+  onLoaded,
+}) => {
   const [chartData, setChartData] = useState<ChartDataType>({
     pulse: [],
     oxygen: [],
-    stress: [],
-    breathing: [],
-    sleep: [],
+    sleep: []
   });
 
   const [loadingMap, setLoadingMap] = useState<
@@ -59,9 +61,7 @@ export const RawDataChartsPage: React.FC = () => {
   >({
     pulse: true,
     oxygen: true,
-    stress: true,
-    breathing: true,
-    sleep: true,
+    sleep: true
   });
 
   const { enqueueSnackbar } = useSnackbar();
@@ -83,7 +83,14 @@ export const RawDataChartsPage: React.FC = () => {
           });
         })
         .finally(() => {
-          setLoadingMap((prev) => ({ ...prev, [key]: false }));
+          setLoadingMap((prev) => {
+            const updated = { ...prev, [key]: false };
+            // Если все загрузки завершены, вызываем onLoaded
+            if (Object.values(updated).every((v) => v === false)) {
+              onLoaded?.();
+            }
+            return updated;
+          });
         });
     });
   }, [enqueueSnackbar]);

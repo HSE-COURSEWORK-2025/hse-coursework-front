@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import {
   Box,
   Card,
@@ -116,8 +116,19 @@ const StatusBadge: React.FC<{ isError: boolean }> = ({ isError }) => {
   );
 };
 
-export const MLPredictionsPage: React.FC = () => {
+interface MLPredictionsPageProps {
+  onLoaded?: () => void;
+}
+
+export const MLPredictionsPage: React.FC<MLPredictionsPageProps> = ({
+  onLoaded,
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Вызываем onLoaded сразу после первого рендера
+  useEffect(() => {
+    onLoaded?.();
+  }, [onLoaded]);
 
   // Определяем цвет по вероятности
   const getColor = (p: number): "error" | "yellow" | "success" => {
@@ -125,7 +136,6 @@ export const MLPredictionsPage: React.FC = () => {
     if (p > 0.4) return "yellow";
     return "success";
   };
-
 
   return (
     <Container ref={containerRef} maxWidth="md" sx={{ py: 4 }}>
@@ -144,9 +154,9 @@ export const MLPredictionsPage: React.FC = () => {
 
           return (
             <Card key={idx} sx={{ borderRadius: 4, boxShadow: 2 }}>
-              <CardContent sx={{ position: 'relative' }}>
+              <CardContent sx={{ position: "relative" }}>
                 {/* Статус-бейдж */}
-                <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+                <Box sx={{ position: "absolute", top: 16, right: 16 }}>
                   <StatusBadge isError={isError} />
                 </Box>
 

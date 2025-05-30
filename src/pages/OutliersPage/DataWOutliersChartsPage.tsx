@@ -10,6 +10,10 @@ import { CustomChart } from "../../components/customChart/CustomChart";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 
+type Props = {
+  onLoaded?: () => void;
+};
+
 interface DataPoint {
   x: string;
   y: number;
@@ -45,7 +49,7 @@ const transformData = (backendData: BackendData) => ({
   outliers: backendData.outliersX.map(String),
 });
 
-export const DataWOutliersChartsPage: React.FC = () => {
+export const DataWOutliersChartsPage: React.FC<Props> = ({ onLoaded }) => {
   const [chartData, setChartData] = useState<ChartDataType>({
     pulse: [],
     oxygen: [],
@@ -131,6 +135,12 @@ export const DataWOutliersChartsPage: React.FC = () => {
 
     fetchAllData();
   }, [enqueueSnackbar]);
+
+  useEffect(() => {
+    if (Object.values(loadingMap).every((v) => v === false)) {
+      onLoaded?.();
+    }
+  }, [loadingMap, onLoaded]);
 
   const getInitialRange = (data: DataPoint[]) => {
     if (data.length === 0) return { min: 0, max: 0 };

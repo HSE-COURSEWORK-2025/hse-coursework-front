@@ -19,7 +19,7 @@ import {
   QRAuthPage,
   IntegrationStatusPage,
   MLPredictionsPage,
-  GenerateReportPage
+  GenerateReportPage,
 } from "./pages";
 import { Box, Button } from "@mui/material";
 import axios from "axios";
@@ -43,12 +43,16 @@ const menuItems: INavigationItem[] = [
   { text: "Графики исходных данных", path: "/rawDataPage", icon: <>📈</> },
   { text: "Графики аномалий", path: "/dataWOutliersPage", icon: <>🚨</> },
   { text: "QR-авторизация", path: "/QRAuthPage", icon: <>📲</> },
-  { text: "Статус выгрузки данных", path: "/IntegrationStatusPage", icon: <>⏳</> },
+  {
+    text: "Статус выгрузки данных",
+    path: "/IntegrationStatusPage",
+    icon: <>⏳</>,
+  },
   { text: "ML-прогнозы", path: "/MLPredictionsPage", icon: <>🤖</> },
   { text: "Сгенерировать отчет", path: "/GenerateReportPage", icon: <>📄</> },
 ];
 
-const pageComponents: Record<string, React.FC> = {
+const pageComponents: Record<string, React.FC<any>> = {
   "/": MainPage,
   "/rawDataPage": RawDataChartsPage,
   "/dataWOutliersPage": DataWOutliersChartsPage,
@@ -79,16 +83,14 @@ const AppContent = () => {
 
   // Пути страниц для отчёта
   const reportPages = [
-  "/rawDataPage",
-  "/dataWOutliersPage",
-  "/MLPredictionsPage",
-];
+    "/rawDataPage",
+    "/dataWOutliersPage",
+    "/MLPredictionsPage",
+  ];
 
   // Функция генерации многостраничного PDF
-  
+
   const [progress, setProgress] = useState<number | undefined>(undefined);
-
-
 
   const generateFullReport = async () => {
     setProgress(0);
@@ -103,10 +105,15 @@ const AppContent = () => {
 
       offscreen.innerHTML = "";
       const root: Root = createRoot(offscreen);
-      root.render(<PageComp />);
+      const loadedPromise = new Promise<void>((resolve) => {
+        const root = createRoot(offscreen);
+        // Теперь resolve определён и передаётся как проп
+        root.render(<PageComp onLoaded={resolve} />);
+      });
+      await loadedPromise;
 
       // подождать, пока отрисуется
-      await new Promise((r) => setTimeout(r, 700));
+      await new Promise((r) => setTimeout(r, 1000));
 
       // зафиксировать всю высоту
       offscreen.style.height = offscreen.scrollHeight + "px";
@@ -145,14 +152,15 @@ const AppContent = () => {
     // setProgress(undefined);
   };
 
-
+  const trigr = () => {
+    console.log('smth loaded')
+  };
 
   return (
     <Box sx={{ display: "flex" }}>
       {accessToken && <Navigation items={menuItems} />}
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        
         <Routes>
           <Route
             path="/"
@@ -255,10 +263,10 @@ export const App = () => (
         style={{
           position: "absolute",
           top: 0,
-          left: "-100vw",         // hide off to the left
-          width: "100vw",          // full viewport width
-          minHeight: "100vh",      // at least full viewport height
-          overflow: "auto",        // so tall pages scroll inside it
+          left: "-100vw", // hide off to the left
+          width: "100vw", // full viewport width
+          minHeight: "100vh", // at least full viewport height
+          overflow: "auto", // so tall pages scroll inside it
         }}
       />
     </AuthProvider>
