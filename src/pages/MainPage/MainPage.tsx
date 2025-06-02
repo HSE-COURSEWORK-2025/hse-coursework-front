@@ -106,8 +106,10 @@ export const MainPage: React.FC = () => {
                   Автоматическая выгрузка
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Данные из Google Fitness API подтягиваются каждый час. Статус
-                  выгрузки доступен на странице «Статус задач».
+                  Данные из Google Fitness API подтягиваются каждый час (недоступно для тестовых аккаунтов). 
+                  Данные из Google Health Connect подтягиваются каждый раз, когда 
+                  вы сканируете QR с мобильного устройства. 
+                  Статус выгрузки доступен на странице «Статус выгрузки данных».
                 </Typography>
               </TimelineContent>
             </TimelineItem>
@@ -158,8 +160,8 @@ export const MainPage: React.FC = () => {
                   Анализ выбросов и прогнозы
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Откройте «Графики с выбросами» для аномалий и «Результаты
-                  анализа» для вероятностей рисков.
+                  Откройте «Графики с выбросами» для просмотра найденных аномалий и 
+                  «ML-прогнозы» для просмотра вероятностей рисков.
                 </Typography>
               </TimelineContent>
             </TimelineItem>
@@ -185,7 +187,7 @@ export const MainPage: React.FC = () => {
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   О завершении выгрузки, обнаружении выбросов и результатах ML
-                  вы получите уведомления в веб-приложении и на почту (не для
+                  обработки вы получите уведомления в веб-приложении и на почту (недоступно для
                   тестовых аккаунтов).
                 </Typography>
               </TimelineContent>

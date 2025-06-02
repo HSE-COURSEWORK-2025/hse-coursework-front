@@ -9,3 +9,4 @@ export { GoogleFitnessAuthPage } from "./GoogleFitnessAuthPage/GoogleFitnessAuth
 export { IntegrationStatusPage } from "./IntegrationStatusPage/IntegrationStatusPage";
 export { MLPredictionsPage } from "./MLPredictionsPage/MLPredictionsPage";
 export { GenerateReportPage } from "./GenerateReportPage/GenerateReportPage" 
+export { GetFHIRDataQRPage } from "./GetFHIRDataQRPage/GetFHIRDataQRPage"
