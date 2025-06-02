@@ -20,6 +20,7 @@ import {
   IntegrationStatusPage,
   MLPredictionsPage,
   GenerateReportPage,
+  GetFHIRDataQRPage,
 } from "./pages";
 import { Box, Button } from "@mui/material";
 import axios from "axios";
@@ -41,8 +42,12 @@ export interface INavigationItem {
 const menuItems: INavigationItem[] = [
   { text: "Как работать с сервисом", path: "/", icon: <>🏠</> },
   { text: "Графики исходных данных", path: "/rawDataPage", icon: <>📈</> },
-  { text: "Графики аномалий", path: "/dataWOutliersPage", icon: <>🚨</> },
-  { text: "QR-авторизация", path: "/QRAuthPage", icon: <>📲</> },
+  { text: "Графики с выбросами", path: "/dataWOutliersPage", icon: <>🚨</> },
+  {
+    text: "Выгрузка с мобильного устройства",
+    path: "/QRAuthPage",
+    icon: <>📲</>,
+  },
   {
     text: "Статус выгрузки данных",
     path: "/IntegrationStatusPage",
@@ -61,6 +66,8 @@ const pageComponents: Record<string, React.FC<any>> = {
   "/IntegrationStatusPage": IntegrationStatusPage,
   "/MLPredictionsPage": MLPredictionsPage,
   // "/GenerateReportPage": GenerateReportPage,
+
+  "/FHIRDataQRPage": GetFHIRDataQRPage,
 };
 
 // Axios interceptor
@@ -86,6 +93,8 @@ const AppContent = () => {
     "/rawDataPage",
     "/dataWOutliersPage",
     "/MLPredictionsPage",
+    "/FHIRDataQRPage",
+    // "/dataWOutliersPage",
   ];
 
   // Функция генерации многостраничного PDF
@@ -153,7 +162,7 @@ const AppContent = () => {
   };
 
   const trigr = () => {
-    console.log('smth loaded')
+    console.log("smth loaded");
   };
 
   return (
@@ -248,6 +257,15 @@ const AppContent = () => {
 
           {/* Публичный роут */}
           <Route path="/auth" element={<GoogleFitnessAuthPage />} />
+
+          <Route
+            path="/FHIRDataQRPage"
+            element={
+              <ProtectedRoute>
+                <GetFHIRDataQRPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Box>
     </Box>

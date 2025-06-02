@@ -65,7 +65,7 @@ export const QRAuthPage: React.FC = () => {
     <Container>
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Typography variant="h4" gutterBottom>
-          📲 QR-авторизация
+          📲 Выгрузка с мобильного устройства
         </Typography>
       </Container>
       <Container
