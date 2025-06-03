@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import "chartjs-adapter-date-fns";
 import {
   Card,
   CardContent,
@@ -448,14 +449,34 @@ export const CustomChart = ({
             },
             scales: {
               x: {
-                type: "linear",
-                min: fullDataMin,
-                max: fullDataMax,
-                grid: { display: false },
-                ticks: { display: false },
+                type: "time",
+                time: {
+                  unit: "day",
+                  tooltipFormat: "PP",
+                },
+                title: { display: false },
+                min: initialRange ? initialRange.min : fullDataMin,
+                max: initialRange ? initialRange.max : fullDataMax,
+                grid: { color: theme.palette.divider, tickLength: 0 },
+                ticks: {
+                  color: theme.palette.text.secondary,
+                  autoSkip: true,
+                  maxRotation: 0,
+                  callback: (value) => {
+                    const date = new Date(Number(value));
+                    // Например, "1 января 2025 г.", "15 февраля 2025 г." и т.п.
+                    return date.toLocaleString("ru-RU", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    });
+                  },
+                },
               },
               y: {
-                display: false,
+                title: { display: false },
+                grid: { color: theme.palette.divider, tickLength: 0 },
+                ticks: { color: theme.palette.text.secondary, padding: 8 },
               },
             },
           },
@@ -708,7 +729,11 @@ export const CustomChart = ({
             },
             scales: {
               x: {
-                type: "linear",
+                type: "time",
+                time: {
+                  unit: "day",
+                  tooltipFormat: "PP",
+                },
                 title: { display: false },
                 min: initialRange ? initialRange.min : fullDataMin,
                 max: initialRange ? initialRange.max : fullDataMax,
@@ -717,7 +742,15 @@ export const CustomChart = ({
                   color: theme.palette.text.secondary,
                   autoSkip: true,
                   maxRotation: 0,
-                  callback: (value) => Number(value).toFixed(1),
+                  callback: (value) => {
+                    const date = new Date(Number(value));
+                    // Например, "1 января 2025 г.", "15 февраля 2025 г." и т.п.
+                    return date.toLocaleString("ru-RU", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    });
+                  },
                 },
               },
               y: {

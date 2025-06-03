@@ -161,10 +161,6 @@ const AppContent = () => {
     // setProgress(undefined);
   };
 
-  const trigr = () => {
-    console.log("smth loaded");
-  };
-
   return (
     <Box sx={{ display: "flex" }}>
       {accessToken && <Navigation items={menuItems} />}
@@ -179,14 +175,8 @@ const AppContent = () => {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/testpage"
-            element={
-              <ProtectedRoute>
-                <TestPage />
-              </ProtectedRoute>
-            }
-          />
+
+
           <Route
             path="/rawDataPage"
             element={
