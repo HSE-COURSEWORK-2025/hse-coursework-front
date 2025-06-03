@@ -449,28 +449,34 @@ export const CustomChart = ({
             },
             scales: {
               x: {
-                type: "time", // обязательно!
+                type: "time",
                 time: {
-                  tooltipFormat: "dd.MM.yyyy HH:mm",
-                  displayFormats: {
-                    hour: "HH:mm",
-                    day: "dd.MM",
-                    month: "MM.yyyy",
+                  unit: "day",
+                  tooltipFormat: "PP",
+                },
+                title: { display: false },
+                min: initialRange ? initialRange.min : fullDataMin,
+                max: initialRange ? initialRange.max : fullDataMax,
+                grid: { color: theme.palette.divider, tickLength: 0 },
+                ticks: {
+                  color: theme.palette.text.secondary,
+                  autoSkip: true,
+                  maxRotation: 0,
+                  callback: (value) => {
+                    const date = new Date(Number(value));
+                    // Например, "1 января 2025 г.", "15 февраля 2025 г." и т.п.
+                    return date.toLocaleString("ru-RU", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    });
                   },
                 },
-                ticks: {
-                  autoSkip: true,
-                  maxTicksLimit: 10,
-                },
-                // title: {
-                //   display: true,
-                //   text: "Дата и время",
-                // },
-                min: initialRange.min, // уже в формате timestamp
-                max: initialRange.max,
               },
               y: {
-                display: false,
+                title: { display: false },
+                grid: { color: theme.palette.divider, tickLength: 0 },
+                ticks: { color: theme.palette.text.secondary, padding: 8 },
               },
             },
           },
@@ -723,10 +729,10 @@ export const CustomChart = ({
             },
             scales: {
               x: {
-                type: "time", // <-- меняем с linear на time
+                type: "time",
                 time: {
-                  unit: "day", // или "hour"/"minute" в зависимости от интервала
-                  tooltipFormat: "PP", // формат даты в подсказке (опционально)
+                  unit: "day",
+                  tooltipFormat: "PP",
                 },
                 title: { display: false },
                 min: initialRange ? initialRange.min : fullDataMin,
@@ -736,13 +742,14 @@ export const CustomChart = ({
                   color: theme.palette.text.secondary,
                   autoSkip: true,
                   maxRotation: 0,
-                  // Вместо Number(value).toFixed(1) теперь value — timestamp,
-                  // поэтому показываем, например, короткую дату:
                   callback: (value) => {
-                    // value приходит как миллисекунды, преобразуем в Date
                     const date = new Date(Number(value));
-                    // Например, выведите "дд.мм" или любой свой формат:
-                    return `${date.getDate()}.${date.getMonth() + 1}`;
+                    // Например, "1 января 2025 г.", "15 февраля 2025 г." и т.п.
+                    return date.toLocaleString("ru-RU", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    });
                   },
                 },
               },
