@@ -1,3 +1,4 @@
+// … импорты оставляем без изменений
 import { useState, useEffect } from "react";
 import {
   Container,
@@ -15,6 +16,7 @@ type Props = {
 };
 
 interface DataPoint {
+  // теперь x как ISO-строка, y как число
   x: string;
   y: number;
 }
@@ -28,8 +30,8 @@ type ChartDataType = {
 };
 
 type BackendData = {
-  data: Array<{ X: number; Y: number }>;
-  outliersX: number[];
+  data: Array<{ X: string; Y: number }>; // X приходит как ISO
+  outliersX: string[];                     // тоже ISO-строки
 };
 
 const API_URL = process.env.REACT_APP_DATA_COLLECTION_API_URL || "";
@@ -41,12 +43,17 @@ const DATA_TYPES = {
   sleep: "SleepSessionTimeData",
 };
 
+// 1) Исправляем transformData:
+//    Теперь просто передаём X как есть (ISO-строку). А для outliers сразу конвертим в таймстемпы.
 const transformData = (backendData: BackendData) => ({
   data: backendData.data.map((item) => ({
-    x: String(item.X),
+    x: item.X,        // ISO-строка, например "2025-05-27T03:33:00Z"
     y: Number(item.Y),
   })),
-  outliers: backendData.outliersX.map(String),
+  // Конвертируем каждый ISO-строку в миллисекунды:
+  outliers: backendData.outliersX.map((iso) =>
+    new Date(iso).getTime().toString()
+  ),
 });
 
 export const DataWOutliersChartsPage: React.FC<Props> = ({ onLoaded }) => {
@@ -68,7 +75,7 @@ export const DataWOutliersChartsPage: React.FC<Props> = ({ onLoaded }) => {
     sleep: [],
   });
 
-  // Отдельное состояние загрузки для каждого графика
+  // Состояния загрузки
   const [loadingMap, setLoadingMap] = useState<
     Record<keyof ChartDataType, boolean>
   >({
@@ -79,28 +86,28 @@ export const DataWOutliersChartsPage: React.FC<Props> = ({ onLoaded }) => {
     sleep: true,
   });
 
-  // Флаг принудительного режима загрузки (для демонстрации)
   const [forceLoading, setForceLoading] = useState(false);
-
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     const fetchAllData = async () => {
-      const requests = Object.entries(DATA_TYPES).map(async ([key, type]) => {
-        try {
-          const response = await axios.get<BackendData>(
-            `${API_URL}/api/v1/get_data/data_with_outliers/${type}`,
-            { params: { data_type: type } }
-          );
-          const { data, outliers } = transformData(response.data);
-          return { key, data, outliers };
-        } catch (error) {
-          enqueueSnackbar(`Ошибка загрузки данных для ${key}`, {
-            variant: "error",
-          });
-          return { key, data: [], outliers: [] };
+      const requests = Object.entries(DATA_TYPES).map(
+        async ([key, type]) => {
+          try {
+            const response = await axios.get<BackendData>(
+              `${API_URL}/api/v1/get_data/data_with_outliers/${type}`,
+              { params: { data_type: type } }
+            );
+            const { data, outliers } = transformData(response.data);
+            return { key, data, outliers };
+          } catch (error) {
+            enqueueSnackbar(`Ошибка загрузки данных для ${key}`, {
+              variant: "error",
+            });
+            return { key, data: [], outliers: [] };
+          }
         }
-      });
+      );
 
       const results = await Promise.all(requests);
 
@@ -123,7 +130,7 @@ export const DataWOutliersChartsPage: React.FC<Props> = ({ onLoaded }) => {
       setChartData(newChartData);
       setOutliers(newOutliers);
 
-      // После завершения всех запросов для каждого графика ставим флаг загрузки в false
+      // Отключаем флаги загрузки
       setLoadingMap({
         pulse: false,
         oxygen: false,
@@ -142,9 +149,12 @@ export const DataWOutliersChartsPage: React.FC<Props> = ({ onLoaded }) => {
     }
   }, [loadingMap, onLoaded]);
 
+  // 2) Исправляем getInitialRange:
+  //    Парсим x из ISO в миллисекунды, чтобы найти min/max
   const getInitialRange = (data: DataPoint[]) => {
     if (data.length === 0) return { min: 0, max: 0 };
-    const xValues = data.map((d) => parseInt(d.x));
+    // Преобразуем x: string (ISO) → Date → .getTime()
+    const xValues = data.map((d) => new Date(d.x).getTime());
     return {
       min: Math.min(...xValues),
       max: Math.max(...xValues),
@@ -187,7 +197,6 @@ export const DataWOutliersChartsPage: React.FC<Props> = ({ onLoaded }) => {
         🚨 Графики с выбросами
       </Typography>
 
-
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
         {Object.entries(chartData).map(([key, data]) => {
           const chartKey = key as keyof ChartDataType;
@@ -199,14 +208,14 @@ export const DataWOutliersChartsPage: React.FC<Props> = ({ onLoaded }) => {
                 title={config.title}
                 data={data}
                 unit={config.unit}
+                // verticalLines теперь — массив строк с millisecond timestamp,
+                // внутри CustomChart будет вызов Number(line) → число
                 verticalLines={outliers[chartKey]}
                 highlightIntervals={[]}
                 initialRange={getInitialRange(data)}
                 lineColor={config.color}
                 selectionColor={selectionColor}
                 showStatus={true}
-                // Если включён принудительный режим или данные для данного графика ещё не загрузились,
-                // отображается анимация загрузки вместо графика.
                 simulateLoading={forceLoading || loadingMap[chartKey]}
               />
             </Box>
