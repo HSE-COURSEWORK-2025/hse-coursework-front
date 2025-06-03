@@ -102,7 +102,9 @@ export const Navigation: React.FC<NavigationProps> = ({
   useEffect(() => {
     if (!token) return;
     // Пример: ws://localhost:8000
-    const WS_BASE = process.env.REACT_APP_WS_BASE_URL || window.location.origin.replace(/^http/, "ws");
+    const WS_BASE =
+      process.env.REACT_APP_WS_BASE_URL ||
+      window.location.origin.replace(/^http/, "ws");
     const ws = new WebSocket(
       `${WS_BASE}/notifications-api/api/v1/notifications/has_unchecked?token=${token}`
     );
@@ -154,6 +156,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               color: theme.palette.primary.contrastText,
               width: 40,
               height: 40,
+              border: `3px solid #16a180`, // вот здесь синяя обводка
             }}
           >
             {!userLogo && userName[0]}
