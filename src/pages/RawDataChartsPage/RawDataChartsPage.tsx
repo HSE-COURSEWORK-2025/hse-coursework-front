@@ -3,27 +3,46 @@ import {
   Container,
   Typography,
   Box,
-  CircularProgress,
-  FormControlLabel,
-  Switch,
 } from "@mui/material";
 import { CustomChart } from "../../components/customChart/CustomChart";
 import axios from "axios";
 import { useSnackbar } from "notistack";
+import React from "react";
+import {
+  Chart as ChartJS,
+  LinearScale,
+  PointElement,
+  LineElement,
+  TimeScale,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import "chartjs-adapter-date-fns"; // чтобы Chart.js понимал Date()
 
-interface DataPoint {
-  x: string;
+ChartJS.register(
+  LinearScale,
+  PointElement,
+  LineElement,
+  TimeScale,
+  Tooltip,
+  Legend
+);
+
+// Локальный тип для удобных вычислений внутри компонента:
+interface MyDataPoint {
+  x: Date;
   y: number;
 }
 
+// Тип для стейта: у нас три массива MyDataPoint
 type ChartDataType = {
-  pulse: DataPoint[];
-  oxygen: DataPoint[];
-  sleep: DataPoint[];
+  pulse: MyDataPoint[];
+  oxygen: MyDataPoint[];
+  sleep: MyDataPoint[];
 };
 
 type BackendDataElement = {
-  X: number;
+  X: string; // ISO-строка
   Y: number;
 };
 
@@ -31,14 +50,13 @@ const API_URL = process.env.REACT_APP_DATA_COLLECTION_API_URL || "";
 const DATA_TYPES = {
   pulse: "HeartRateRecord",
   oxygen: "BloodOxygenData",
-  // stress: "STRESS_LVL",
-  // breathing: "RESPIRATORY_RATE",
   sleep: "SleepSessionTimeData",
 };
 
-const transformData = (backendData: BackendDataElement[]): DataPoint[] => {
+// Преобразуем ответ бэкенда ({ X: string; Y: number }) → MyDataPoint ({ x: Date; y: number })
+const transformData = (backendData: BackendDataElement[]): MyDataPoint[] => {
   return backendData.map((item) => ({
-    x: String(item.X),
+    x: new Date(item.X),
     y: Number(item.Y),
   }));
 };
@@ -56,9 +74,7 @@ export const RawDataChartsPage: React.FC<RawDataChartsPageProps> = ({
     sleep: []
   });
 
-  const [loadingMap, setLoadingMap] = useState<
-    Record<keyof ChartDataType, boolean>
-  >({
+  const [loadingMap, setLoadingMap] = useState<Record<keyof ChartDataType, boolean>>({
     pulse: true,
     oxygen: true,
     sleep: true
@@ -85,7 +101,6 @@ export const RawDataChartsPage: React.FC<RawDataChartsPageProps> = ({
         .finally(() => {
           setLoadingMap((prev) => {
             const updated = { ...prev, [key]: false };
-            // Если все загрузки завершены, вызываем onLoaded
             if (Object.values(updated).every((v) => v === false)) {
               onLoaded?.();
             }
@@ -93,11 +108,12 @@ export const RawDataChartsPage: React.FC<RawDataChartsPageProps> = ({
           });
         });
     });
-  }, [enqueueSnackbar]);
+  }, [enqueueSnackbar, onLoaded]);
 
-  const getInitialRange = (data: DataPoint[]) => {
+  // Для вычисления начального диапазона (в миллисекундах)
+  const getInitialRange = (data: MyDataPoint[]) => {
     if (data.length === 0) return { min: 0, max: 0 };
-    const xValues = data.map((d) => parseInt(d.x));
+    const xValues = data.map((d) => d.x.getTime());
     return {
       min: Math.min(...xValues),
       max: Math.max(...xValues),
@@ -106,7 +122,7 @@ export const RawDataChartsPage: React.FC<RawDataChartsPageProps> = ({
 
   const selectionColor = "#FF9800";
 
-  const chartConfigs = {
+  const chartConfigs: Record<keyof ChartDataType, { title: string; unit: string; color: string }> = {
     pulse: {
       title: "Пульс",
       unit: "уд/мин",
@@ -117,22 +133,15 @@ export const RawDataChartsPage: React.FC<RawDataChartsPageProps> = ({
       unit: "SpO2%",
       color: "#00897B",
     },
-    stress: {
-      title: "Оценка уровня стресса",
-      unit: "баллы",
-      color: "#512DA8",
-    },
-    breathing: {
-      title: "Частота дыхания",
-      unit: "дых/мин",
-      color: "#424242",
-    },
     sleep: {
       title: "Время сна",
       unit: "часы",
       color: "#00695C",
     },
   };
+
+  // Локальный тип, совпадающий с тем, что ждет CustomChart
+  type ChartDataPoint = { x: string; y: number };
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -144,7 +153,13 @@ export const RawDataChartsPage: React.FC<RawDataChartsPageProps> = ({
         {Object.entries(DATA_TYPES).map(([key]) => {
           const chartKey = key as keyof ChartDataType;
           const config = chartConfigs[chartKey];
-          const data = chartData[chartKey];
+          const rawData: MyDataPoint[] = chartData[chartKey];
+
+          // Конвертируем из MyDataPoint (Date) → ChartDataPoint (ISO-строка)
+          const dataForChart: ChartDataPoint[] = rawData.map((dp) => ({
+            x: dp.x.toISOString(),
+            y: dp.y,
+          }));
 
           return (
             <Box
@@ -159,11 +174,11 @@ export const RawDataChartsPage: React.FC<RawDataChartsPageProps> = ({
             >
               <CustomChart
                 title={config.title}
-                data={data}
+                data={dataForChart}                   
                 unit={config.unit}
                 verticalLines={[]}
                 highlightIntervals={[]}
-                initialRange={getInitialRange(data)}
+                initialRange={getInitialRange(rawData)}
                 lineColor={config.color}
                 selectionColor={selectionColor}
                 showStatus={false}
