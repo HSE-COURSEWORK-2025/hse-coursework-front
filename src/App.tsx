@@ -21,6 +21,7 @@ import {
   MLPredictionsPage,
   GenerateReportPage,
   GetFHIRDataQRPage,
+  AppRatingPage
 } from "./pages";
 import { Box, Button } from "@mui/material";
 import axios from "axios";
@@ -55,6 +56,7 @@ const menuItems: INavigationItem[] = [
   },
   { text: "ML-прогнозы", path: "/MLPredictionsPage", icon: <>🤖</> },
   { text: "Сгенерировать отчет", path: "/GenerateReportPage", icon: <>📄</> },
+  { text: "Оценить приложение", path: "/AppRatingPage", icon: <>✨</> },
 ];
 
 const pageComponents: Record<string, React.FC<any>> = {
@@ -253,6 +255,15 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <GetFHIRDataQRPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/AppRatingPage"
+            element={
+              <ProtectedRoute>
+                <AppRatingPage />
               </ProtectedRoute>
             }
           />
