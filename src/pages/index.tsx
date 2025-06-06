@@ -10,3 +10,4 @@ export { IntegrationStatusPage } from "./IntegrationStatusPage/IntegrationStatus
 export { MLPredictionsPage } from "./MLPredictionsPage/MLPredictionsPage";
 export { GenerateReportPage } from "./GenerateReportPage/GenerateReportPage" 
 export { GetFHIRDataQRPage } from "./GetFHIRDataQRPage/GetFHIRDataQRPage"
+export { AppRatingPage } from "./AppRatingPage/AppRatingPage"
