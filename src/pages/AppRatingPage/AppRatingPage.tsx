@@ -10,7 +10,7 @@ import {
 import { motion } from "framer-motion";
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_RATING_API_URL || "";
+const API_URL = process.env.REACT_APP_RATINGS_API_URL || "";
 
 export const AppRatingPage: React.FC = () => {
   const [rating, setRating] = useState<number | null>(null);
