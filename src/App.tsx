@@ -9,12 +9,10 @@ import {
   useAuth,
 } from "./components";
 import {
-  TestPage,
   RawDataChartsPage,
   MainPage,
   DataWOutliersChartsPage,
   NotificationsPage,
-  LoginPage,
   GoogleFitnessAuthPage,
   QRAuthPage,
   IntegrationStatusPage,
