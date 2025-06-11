@@ -16,9 +16,11 @@ import {
   IconButton,
   Badge,
 } from "@mui/material";
-import { Link, useLocation, LinkProps } from "react-router-dom";
+import { Link, useLocation, LinkProps, useNavigate } from "react-router-dom";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import { INavigationItem } from "../type";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import { useAuth } from "../auth/AuthContext";
 
 // Декодер JWT, как у вас
 const parseJwt = (token: string) => {
@@ -89,6 +91,8 @@ export const Navigation: React.FC<NavigationProps> = ({
 }) => {
   const theme = useTheme();
   const location = useLocation();
+  const navigate = useNavigate(); // ← хук навигации
+  const { logout } = useAuth();
 
   // JWT + пользовательские данные
   const token = localStorage.getItem("accessToken") || "";
@@ -135,6 +139,11 @@ export const Navigation: React.FC<NavigationProps> = ({
       ws.close();
     };
   }, [token]);
+
+  const handleLogout = () => {
+    logout(); // очищаем токены и стейт
+    navigate("/auth"); // переходим на страницу логина
+  };
 
   return (
     <StyledDrawer variant="permanent" open={open} onClose={onClose}>
@@ -224,6 +233,50 @@ export const Navigation: React.FC<NavigationProps> = ({
             </Tooltip>
           </ListItem>
         ))}
+
+        <ListItem disablePadding sx={{ mt: 2 }}>
+          <Tooltip title={!open ? "Выйти из аккаунта" : ""} placement="right">
+            <ListItemButton
+              onClick={handleLogout}
+              sx={{
+                borderRadius: "28px",
+                margin: (theme) => theme.spacing(0, 1.5),
+                padding: (theme) => theme.spacing(1.5, 2),
+                minHeight: "56px",
+                transition: (theme) =>
+                  theme.transitions.create(["background-color", "box-shadow"], {
+                    duration: theme.transitions.duration.short,
+                  }),
+                "&:hover": {
+                  backgroundColor: (theme) => theme.palette.action.hover,
+                },
+                "&:active": {
+                  backgroundColor: (theme) => theme.palette.action.selected,
+                },
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: 0,
+                  color: theme.palette.text.primary,
+                  mr: open ? 2 : "auto",
+                }}
+              >
+                <ExitToAppIcon />
+              </ListItemIcon>
+              {open && (
+                <ListItemText
+                  primary="Выйти из аккаунта"
+                  primaryTypographyProps={{
+                    variant: "body1",
+                    fontWeight: 500,
+                    color: "text.primary",
+                  }}
+                />
+              )}
+            </ListItemButton>
+          </Tooltip>
+        </ListItem>
       </List>
 
       {/* Footer */}
