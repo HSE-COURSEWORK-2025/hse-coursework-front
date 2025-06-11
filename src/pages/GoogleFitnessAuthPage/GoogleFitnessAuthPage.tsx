@@ -121,6 +121,8 @@ export const GoogleFitnessAuthPage: React.FC = () => {
         );
         if (!res.ok) throw new Error(`Ошибка: ${res.status}`);
         const data: TestUser[] = await res.json();
+        data.sort((a, b) => extractNumber(a.name) - extractNumber(b.name));
+
         setTestUsers(data);
       } catch (error) {
         console.error(error);
@@ -224,6 +226,11 @@ export const GoogleFitnessAuthPage: React.FC = () => {
     } finally {
       setLoggingIn(false);
     }
+  };
+
+  const extractNumber = (str: string): number => {
+    const match = str.match(/\d+/);
+    return match ? parseInt(match[0], 10) : 0;
   };
 
   return (
