@@ -51,6 +51,8 @@ const scopes = [
   "https://www.googleapis.com/auth/fitness.oxygen_saturation.read",
   "https://www.googleapis.com/auth/fitness.reproductive_health.read",
   "https://www.googleapis.com/auth/fitness.sleep.read",
+  "https://www.googleapis.com/auth/user.birthday.read",
+  "https://www.googleapis.com/auth/user.gender.read"  
 ].join(" ");
 
 const API_URL = process.env.REACT_APP_AUTH_API_URL || "";
