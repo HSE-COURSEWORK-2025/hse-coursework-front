@@ -4,8 +4,6 @@ import {
   Container,
   Typography,
   Box,
-  FormControlLabel,
-  Switch,
 } from "@mui/material";
 import { CustomChart } from "../../components/customChart/CustomChart";
 import axios from "axios";
@@ -16,7 +14,6 @@ type Props = {
 };
 
 interface DataPoint {
-  // теперь x как ISO-строка, y как число
   x: string;
   y: number;
 }
@@ -30,8 +27,8 @@ type ChartDataType = {
 };
 
 type BackendData = {
-  data: Array<{ X: string; Y: number }>; // X приходит как ISO
-  outliersX: string[];                     // тоже ISO-строки
+  data: Array<{ X: string; Y: number }>;
+  outliersX: string[];
 };
 
 const API_URL = process.env.REACT_APP_DATA_COLLECTION_API_URL || "";
@@ -43,14 +40,11 @@ const DATA_TYPES = {
   sleep: "SleepSessionTimeData",
 };
 
-// 1) Исправляем transformData:
-//    Теперь просто передаём X как есть (ISO-строку). А для outliers сразу конвертим в таймстемпы.
 const transformData = (backendData: BackendData) => ({
   data: backendData.data.map((item) => ({
-    x: item.X,        // ISO-строка, например "2025-05-27T03:33:00Z"
+    x: item.X,
     y: Number(item.Y),
   })),
-  // Конвертируем каждый ISO-строку в миллисекунды:
   outliers: backendData.outliersX.map((iso) =>
     new Date(iso).getTime().toString()
   ),
@@ -75,7 +69,6 @@ export const DataWOutliersChartsPage: React.FC<Props> = ({ onLoaded }) => {
     sleep: [],
   });
 
-  // Состояния загрузки
   const [loadingMap, setLoadingMap] = useState<
     Record<keyof ChartDataType, boolean>
   >({
@@ -94,8 +87,12 @@ export const DataWOutliersChartsPage: React.FC<Props> = ({ onLoaded }) => {
       const requests = Object.entries(DATA_TYPES).map(
         async ([key, type]) => {
           try {
+            // выбираем endpoint для sleep
+            const path = key === 'sleep'
+              ? 'processed_data_with_outliers'
+              : 'raw_data_with_outliers';
             const response = await axios.get<BackendData>(
-              `${API_URL}/api/v1/get_data/data_with_outliers/${type}`,
+              `${API_URL}/api/v1/get_data/${path}/${type}`,
               { params: { data_type: type } }
             );
             const { data, outliers } = transformData(response.data);
@@ -130,7 +127,6 @@ export const DataWOutliersChartsPage: React.FC<Props> = ({ onLoaded }) => {
       setChartData(newChartData);
       setOutliers(newOutliers);
 
-      // Отключаем флаги загрузки
       setLoadingMap({
         pulse: false,
         oxygen: false,
@@ -149,11 +145,8 @@ export const DataWOutliersChartsPage: React.FC<Props> = ({ onLoaded }) => {
     }
   }, [loadingMap, onLoaded]);
 
-  // 2) Исправляем getInitialRange:
-  //    Парсим x из ISO в миллисекунды, чтобы найти min/max
   const getInitialRange = (data: DataPoint[]) => {
     if (data.length === 0) return { min: 0, max: 0 };
-    // Преобразуем x: string (ISO) → Date → .getTime()
     const xValues = data.map((d) => new Date(d.x).getTime());
     return {
       min: Math.min(...xValues),
@@ -208,8 +201,6 @@ export const DataWOutliersChartsPage: React.FC<Props> = ({ onLoaded }) => {
                 title={config.title}
                 data={data}
                 unit={config.unit}
-                // verticalLines теперь — массив строк с millisecond timestamp,
-                // внутри CustomChart будет вызов Number(line) → число
                 verticalLines={outliers[chartKey]}
                 highlightIntervals={[]}
                 initialRange={getInitialRange(data)}

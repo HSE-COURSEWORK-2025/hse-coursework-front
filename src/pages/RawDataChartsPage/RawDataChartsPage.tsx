@@ -85,9 +85,11 @@ export const RawDataChartsPage: React.FC<RawDataChartsPageProps> = ({
 
   useEffect(() => {
     Object.entries(DATA_TYPES).forEach(([key, type]) => {
+      // используем разные эндпоинты для сырых и обработанных данных
+      const dataCategory = key === 'sleep' ? 'processed_data' : 'raw_data';
       axios
         .get<BackendDataElement[]>(
-          `${API_URL}/api/v1/get_data/raw_data/${type}`
+          `${API_URL}/api/v1/get_data/${dataCategory}/${type}`
         )
         .then((response) => {
           const data = transformData(response.data);
