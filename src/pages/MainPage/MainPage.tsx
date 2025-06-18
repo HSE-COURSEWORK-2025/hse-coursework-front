@@ -50,9 +50,7 @@ export const MainPage: React.FC = () => {
           }}
         >
           <Box textAlign="left">
-            <Typography variant="subtitle1" color="text.secondary">
-              Шаг за шагом от подключения до отображения результатов анализа
-            </Typography>
+            
           </Box>
         </Box>
 
@@ -79,9 +77,8 @@ export const MainPage: React.FC = () => {
                   Подключите мобильное приложение
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Откройте раздел «Выгрузка с мобильного устройства»,
-                  отсканируйте QR-код в Android-приложении и подтвердите
-                  разрешения.
+                  Откройте мобильное приложение, нажмите на кнопку «Открыть камеру»,
+                  отсканируйте QR-код. Начнется выгрузка данных из Google Health Connect
                 </Typography>
               </TimelineContent>
             </TimelineItem>
@@ -106,7 +103,7 @@ export const MainPage: React.FC = () => {
                   Автоматическая выгрузка
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Данные из Google Fitness API подтягиваются каждый час (недоступно для тестовых аккаунтов). 
+                  Данные автоматически выгружаются из Google Fitness API подтягиваются каждый час (недоступно для тестовых аккаунтов). 
                   Данные из Google Health Connect подтягиваются каждый раз, когда 
                   вы сканируете QR с мобильного устройства. 
                   Статус выгрузки доступен на странице «Статус выгрузки данных».
@@ -134,8 +131,8 @@ export const MainPage: React.FC = () => {
                   Просмотр графиков
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  В разделе «Графики исходных данных» — интерактивные
-                  визуализации пульса, кислорода, активности и сна.
+                  В разделе «Графики исходных данных» представлены графики с
+                  визуализациями ваших данных, собранных из Google Fitness API и Google Health Connect.
                 </Typography>
               </TimelineContent>
             </TimelineItem>
@@ -160,8 +157,12 @@ export const MainPage: React.FC = () => {
                   Анализ выбросов и прогнозы
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Откройте «Графики с выбросами» для просмотра найденных аномалий и 
-                  «ML-прогнозы» для просмотра вероятностей рисков.
+                  В разделе «Графики с выбросами» представлены графики исходных данных с 
+                  отметками о найденных аномалиях. 
+                  В разделе «ML-прогнозы» представлены результаты работы ML-моделей, 
+                  представленные в виде вероятностей наличия различных диагнозов.
+
+                  Могут отображаться не самые актуальные данные о выбросах и прогнозах, так как они обновляются раз в час.
                 </Typography>
               </TimelineContent>
             </TimelineItem>
@@ -183,11 +184,11 @@ export const MainPage: React.FC = () => {
               </TimelineSeparator>
               <TimelineContent sx={{ py: "12px", px: 2 }}>
                 <Typography variant="h6" component="span">
-                  Получите уведомления
+                  Получение уведомлений
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  О завершении выгрузки, обнаружении выбросов и результатах ML
-                  обработки вы получите уведомления в веб-приложении и на почту (недоступно для
+                  Вы получите уведомления о завершении выгрузки, обнаружении выбросов и результатах ML
+                  обработки в веб-приложении и на почту (недоступно для
                   тестовых аккаунтов).
                 </Typography>
               </TimelineContent>
