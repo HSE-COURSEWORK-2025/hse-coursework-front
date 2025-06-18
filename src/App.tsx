@@ -19,7 +19,8 @@ import {
   MLPredictionsPage,
   GenerateReportPage,
   GetFHIRDataQRPage,
-  AppRatingPage
+  AppRatingPage,
+  AppDisclaimerPage
 } from "./pages";
 import { Box, Button } from "@mui/material";
 import axios from "axios";
@@ -262,6 +263,15 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <AppRatingPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/AppDisclaimerPage"
+            element={
+              <ProtectedRoute>
+                <AppDisclaimerPage />
               </ProtectedRoute>
             }
           />

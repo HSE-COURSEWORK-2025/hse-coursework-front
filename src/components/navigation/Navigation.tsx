@@ -282,13 +282,39 @@ export const Navigation: React.FC<NavigationProps> = ({
       {/* Footer */}
       <Box sx={{ p: theme.spacing(2) }}>
         <Divider sx={{ mb: 2 }} />
+
+        {/* Версия */}
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ textAlign: "center" }}
+          align="center"
+          sx={{ mb: 1 }}
         >
           Version 1.0.0
         </Typography>
+
+        {/* Ссылка на дисклеймер */}
+        <Box sx={{ textAlign: "center" }}>
+          <Link to="/app-disclaimer" style={{ textDecoration: "none" }}>
+            <Typography
+              variant="body2"
+              component={Link}
+              to="/AppDisclaimerPage"
+              sx={{
+                textAlign: "center",
+                color: "primary.main",
+                textDecoration: "none",
+                fontWeight: 500,
+                "&:hover": {
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                },
+              }}
+            >
+              Дисклеймер
+            </Typography>
+          </Link>
+        </Box>
       </Box>
     </StyledDrawer>
   );
