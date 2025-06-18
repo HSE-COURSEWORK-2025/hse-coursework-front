@@ -7,17 +7,18 @@ import {
   Typography,
   useTheme,
   CircularProgress,
-  Stack,
-  Divider,
+  Stack
 } from "@mui/material";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 import NightsStayIcon from "@mui/icons-material/NightsStay";
-import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
+import SpeedIcon from '@mui/icons-material/Speed';
+import MoodIcon from '@mui/icons-material/Mood';
 
 const iconMap: Record<string, React.ElementType> = {
-  "Риск бессонницы": NightsStayIcon,
-  "Нарушения ритма сердца": MonitorHeartIcon,
+  insomnia_apnea: NightsStayIcon,
+  hypertension: SpeedIcon,
+  depression: MoodIcon
 };
 
 interface PredictionItem {
@@ -29,9 +30,7 @@ interface MLPredictionsPageProps {
   onLoaded?: () => void;
 }
 
-export const MLPredictionsPage: React.FC<MLPredictionsPageProps> = ({
-  onLoaded,
-}) => {
+export const MLPredictionsPage: React.FC<MLPredictionsPageProps> = ({ onLoaded }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
@@ -39,18 +38,13 @@ export const MLPredictionsPage: React.FC<MLPredictionsPageProps> = ({
   const [predictions, setPredictions] = useState<PredictionItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Цвет по вероятности
   const getColor = (p: number): "error" | "warning" | "success" => {
     if (p > 0.7) return "error";
     if (p > 0.4) return "warning";
     return "success";
   };
 
-  // Круговой прогресс с цифрой
-  const CircularProgressWithLabel: React.FC<{
-    value: number;
-    color: "error" | "warning" | "success";
-  }> = ({ value, color }) => {
+  const CircularProgressWithLabel: React.FC<{ value: number; color: "error" | "warning" | "success"; }> = ({ value, color }) => {
     const strokeColor =
       color === "error"
         ? theme.palette.error.main
@@ -104,12 +98,7 @@ export const MLPredictionsPage: React.FC<MLPredictionsPageProps> = ({
     return (
       <Box
         ref={containerRef}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "60vh",
-        }}
+        sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: "60vh" }}
       >
         <CircularProgress />
       </Box>
@@ -124,88 +113,55 @@ export const MLPredictionsPage: React.FC<MLPredictionsPageProps> = ({
 
       <Stack spacing={3}>
         {predictions.map((item, idx) => {
-          if (item.diagnosisName === "insomnia_apnea") {
-            let parsed: Record<string, number> = {};
-            try {
-              parsed = JSON.parse(item.result);
-            } catch {
-              parsed = {};
-            }
-            const labels: Record<string, string> = {
-              Insomnia: "Вероятность наличия бессонницы",
-              Sleep_Apnea: "Вероятность наличия апноэ",
-              nan: "Вероятность отсутствия обоих",
-            };
-
-            return (
-              <Card
-                key={idx}
-                sx={{
-                  borderRadius: 4,
-                  boxShadow: 3,
-                  border: `2px solid ${theme.palette.primary.main}`,
-                }}
-              >
-                <CardContent>
-                  <Typography variant="h6" sx={{ mb: 2 }}>
-                    Insomnia & Sleep Apnea
-                  </Typography>
-                  <Stack spacing={2}>
-                    {Object.entries(parsed).map(([key, val]) => {
-                      const pct = val * 100;
-                      const colorKey = getColor(val);
-                      return (
-                        <Box
-                          key={key}
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 2,
-                          }}
-                        >
-                          <CircularProgressWithLabel
-                            value={pct}
-                            color={colorKey}
-                          />
-                          <Typography variant="body2" color="text.secondary">
-                            {labels[key]}
-                          </Typography>
-                        </Box>
-                      );
-                    })}
-                  </Stack>
-                </CardContent>
-              </Card>
-            );
+          let parsed: Record<string, number> = {};
+          try {
+            parsed = JSON.parse(item.result);
+          } catch {
+            parsed = {};
           }
 
-          // Все остальные диагнозы как прежде
-          const pct = parseFloat(item.result) * 100;
-          const colorKey = getColor(parseFloat(item.result));
+          const labelsMap: Record<string, Record<string, string>> = {
+            insomnia_apnea: {
+              Insomnia: "Вероятность наличия бессонницы",
+              Sleep_Apnea: "Вероятность наличия апноэ"
+            },
+            hypertension: {
+              High: "Риск наличия гипертонии"
+            },
+            depression: {
+              '1': "Вероятность наличия депрессии"
+            }
+          };
+
+          const labels = labelsMap[item.diagnosisName] || {};
           const Icon = iconMap[item.diagnosisName] || React.Fragment;
 
           return (
             <Card key={idx} sx={{ borderRadius: 4, boxShadow: 2 }}>
               <CardContent>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: { xs: "column", sm: "row" },
-                    alignItems: "center",
-                    gap: 3,
-                  }}
-                >
-                  <CircularProgressWithLabel value={pct} color={colorKey} />
-                  <Box>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Icon />
-                      <Typography variant="h6">{item.diagnosisName}</Typography>
-                    </Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Вероятность: <strong>{pct.toFixed(1)}%</strong>
-                    </Typography>
-                  </Box>
-                </Box>
+                <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Icon /> {item.diagnosisName.replace('_', ' ')}
+                </Typography>
+                <Stack spacing={2}>
+                  {Object.entries(parsed)
+                    .filter(([key]) =>
+                      !(item.diagnosisName === 'hypertension' && key === 'Low') &&
+                      !(item.diagnosisName === 'depression' && key === '0') &&
+                      !(item.diagnosisName === 'insomnia_apnea' && key === 'nan')
+                    )
+                    .map(([key, val]) => {
+                      const pct = val * 100;
+                      const colorKey = getColor(val);
+                      return (
+                        <Box key={key} sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                          <CircularProgressWithLabel value={pct} color={colorKey} />
+                          <Typography variant="body2" color="text.secondary">
+                            {labels[key] || key}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+                </Stack>
               </CardContent>
             </Card>
           );
