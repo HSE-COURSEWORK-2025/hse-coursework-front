@@ -102,7 +102,7 @@ export const QRAuthPage: React.FC = () => {
               sx={{ mb: 3 }}
             >
               Отсканируйте <strong>левый</strong> QR-код в мобильном приложении
-              для авторизации. Если у вас ещё нет приложения, используйте{" "}
+              для выгрузки данных с него. Если у вас ещё нет приложения, используйте{" "}
               <strong>правый</strong> QR-код для установки.
             </Typography>
 
@@ -115,7 +115,7 @@ export const QRAuthPage: React.FC = () => {
               {/* QR код для авторизации */}
               <Box>
                 <Typography variant="bodyMedium" sx={{ mb: 1 }}>
-                  Для авторизации
+                  Для выгрузки данных
                 </Typography>
                 {isLoading ? (
                   <CircularProgress />
@@ -125,7 +125,7 @@ export const QRAuthPage: React.FC = () => {
                   <Box
                     component="img"
                     src={qrCodeUrl}
-                    alt="QR Code для авторизации"
+                    alt="QR Code для выгрузки данных"
                     sx={{
                       width: 250,
                       height: 250,
@@ -173,7 +173,7 @@ export const QRAuthPage: React.FC = () => {
                 },
               }}
             >
-              Обновить QR код для авторизации
+              Обновить QR код для выгрузки данных
             </Button>
           </Box>
         </motion.div>
