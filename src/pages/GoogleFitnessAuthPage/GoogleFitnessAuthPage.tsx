@@ -230,6 +230,25 @@ export const GoogleFitnessAuthPage: React.FC = () => {
     }
   };
 
+  // Новый метод для входа в демо-аккаунт
+  const handleDemoLogin = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/v1/auth/auth-demo-account`, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) throw new Error(`Ошибка: ${res.status}`);
+      const data = await res.json();
+
+      setTokens(data.access_token, data.refresh_token);
+      enqueueSnackbar("Вход в демо-аккаунт выполнен!", { variant: "success" });
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+      enqueueSnackbar("Не удалось войти в демо-аккаунт", { variant: "error" });
+    }
+  };
+
   const extractNumber = (str: string): number => {
     const match = str.match(/\d+/);
     return match ? parseInt(match[0], 10) : 0;
@@ -300,7 +319,6 @@ export const GoogleFitnessAuthPage: React.FC = () => {
                 textTransform: "none",
                 color: "#fff",
                 boxShadow: "0 3px 5px 2px rgba(58,24,143, .3)",
-                // hover-анимация убрана
               }}
             >
               Войти через Google
@@ -320,15 +338,33 @@ export const GoogleFitnessAuthPage: React.FC = () => {
                 textTransform: "none",
                 color: "#fff",
                 boxShadow: "0 3px 5px 2px rgba(255,95,109, .3)",
-                // hover-анимация убрана
               }}
             >
               Создать нового тестового пользователя и войти
             </Button>
 
+            <Button
+              variant="contained"
+              onClick={handleDemoLogin}
+              fullWidth
+              startIcon={<PersonIcon />}
+              sx={{
+                background: "linear-gradient(45deg, #FFD54F 30%, #FF8A65 90%)",
+                borderRadius: "20px",
+                py: 1.5,
+                px: 3,
+                fontSize: 16,
+                textTransform: "none",
+                color: "#fff",
+                boxShadow: "0 3px 5px 2px rgba(255,165,0, .3)",
+              }}
+            >
+              Войти в демо-аккаунт
+            </Button>
+
             <Divider sx={{ width: "100%", my: 2 }} />
 
-            {/* Создать нового тестового пользователя и вход */}
+            {/* Селектор тестовых пользователей */}
             <FormControl fullWidth disabled={loadingUsers} sx={{ mb: 2 }}>
               <InputLabel id="gf-test-user-select-label">
                 Выберите тестового пользователя
@@ -376,7 +412,6 @@ export const GoogleFitnessAuthPage: React.FC = () => {
                 textTransform: "none",
                 color: "#fff",
                 boxShadow: "0 3px 5px 2px rgba(58,142,255, .3)",
-                // hover-анимация убрана
               }}
             >
               Войти как существующий тестовый пользователь
