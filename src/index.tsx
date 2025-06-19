@@ -7,7 +7,7 @@ import { SnackbarProvider } from "notistack";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
+  document.getElementById("root") as HTMLElement,
 );
 root.render(
   <SnackbarProvider
@@ -17,12 +17,14 @@ root.render(
       horizontal: "right",
     }}
   >
-    <GoogleOAuthProvider clientId={ process.env.REACT_APP_GOOGLE_OAUTH_CLIENT_ID || '' }>
+    <GoogleOAuthProvider
+      clientId={process.env.REACT_APP_GOOGLE_OAUTH_CLIENT_ID || ""}
+    >
       <React.StrictMode>
         <App />
       </React.StrictMode>
     </GoogleOAuthProvider>
-  </SnackbarProvider>
+  </SnackbarProvider>,
 );
 
 // If you want to start measuring performance in your app, pass a function

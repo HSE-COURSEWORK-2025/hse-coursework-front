@@ -20,7 +20,7 @@ import {
   GenerateReportPage,
   GetFHIRDataQRPage,
   AppRatingPage,
-  AppDisclaimerPage
+  AppDisclaimerPage,
 } from "./pages";
 import { Box, Button } from "@mui/material";
 import axios from "axios";
@@ -82,7 +82,7 @@ axios.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 const AppContent = () => {
@@ -176,7 +176,6 @@ const AppContent = () => {
               </ProtectedRoute>
             }
           />
-
 
           <Route
             path="/rawDataPage"

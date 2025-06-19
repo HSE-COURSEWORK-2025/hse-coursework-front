@@ -52,7 +52,7 @@ const scopes = [
   "https://www.googleapis.com/auth/fitness.reproductive_health.read",
   "https://www.googleapis.com/auth/fitness.sleep.read",
   "https://www.googleapis.com/auth/user.birthday.read",
-  "https://www.googleapis.com/auth/user.gender.read"  
+  "https://www.googleapis.com/auth/user.gender.read",
 ].join(" ");
 
 const API_URL = process.env.REACT_APP_AUTH_API_URL || "";
@@ -119,7 +119,7 @@ export const GoogleFitnessAuthPage: React.FC = () => {
           `${API_URL}/api/v1/internal/users/get_all_users?test_users=true&real_users=false`,
           {
             headers: { Accept: "application/json" },
-          }
+          },
         );
         if (!res.ok) throw new Error(`Ошибка: ${res.status}`);
         const data: TestUser[] = await res.json();
@@ -147,7 +147,7 @@ export const GoogleFitnessAuthPage: React.FC = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ code }),
-        }
+        },
       );
       if (!response.ok) throw new Error("Ошибка обмена кода на токены");
       const data = await response.json();
@@ -205,12 +205,12 @@ export const GoogleFitnessAuthPage: React.FC = () => {
     try {
       const res = await fetch(
         `${API_URL}/api/v1/auth/auth-test-account?test_account_login=${encodeURIComponent(
-          selectedUserEmail
+          selectedUserEmail,
         )}`,
         {
           method: "GET",
           headers: { Accept: "application/json" },
-        }
+        },
       );
       if (!res.ok) throw new Error(`Ошибка: ${res.status}`);
       const data = await res.json();

@@ -14,7 +14,6 @@ import { useTheme, alpha } from "@mui/material";
 import { FitnessCenter, HealthAndSafety, Sync } from "@mui/icons-material";
 import axios from "axios";
 
-
 const AUTH_API_URL = process.env.REACT_APP_AUTH_API_URL || "";
 const DATA_COLLECTION_WS_URL =
   process.env.REACT_APP_DATA_COLLECTION_WS_URL || "";
@@ -35,7 +34,7 @@ const parseJwt = (token: string) => {
       atob(base64)
         .split("")
         .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
+        .join(""),
     );
     return JSON.parse(jsonPayload);
   } catch {
@@ -49,7 +48,7 @@ export const IntegrationStatusPage: React.FC = () => {
   const primaryContainer = alpha(theme.palette.primary.main, 0.1);
 
   const [fitnessConnected, setFitnessConnected] = useState<boolean | null>(
-    null
+    null,
   );
   const [healthConnected, setHealthConnected] = useState<boolean | null>(null);
   const [fitnessProgress, setFitnessProgress] = useState<number>(0);
@@ -129,10 +128,10 @@ export const IntegrationStatusPage: React.FC = () => {
   useEffect(() => {
     if (!token) return;
     const fitnessWs = new WebSocket(
-      `${DATA_COLLECTION_WS_URL}/api/v1/processing_status/google_fitness_api_progress?token=${token}`
+      `${DATA_COLLECTION_WS_URL}/api/v1/processing_status/google_fitness_api_progress?token=${token}`,
     );
     const healthWs = new WebSocket(
-      `${DATA_COLLECTION_WS_URL}/api/v1/processing_status/google_health_api_progress?token=${token}`
+      `${DATA_COLLECTION_WS_URL}/api/v1/processing_status/google_health_api_progress?token=${token}`,
     );
 
     fitnessWs.onmessage = (e) => {
@@ -172,8 +171,8 @@ export const IntegrationStatusPage: React.FC = () => {
         color: disabled
           ? theme.palette.text.disabled
           : isError
-          ? theme.palette.error.main
-          : theme.palette.success.main,
+            ? theme.palette.error.main
+            : theme.palette.success.main,
         px: 2,
         py: 0.5,
         borderRadius: 28,
@@ -195,8 +194,8 @@ export const IntegrationStatusPage: React.FC = () => {
           bgcolor: disabled
             ? theme.palette.text.disabled
             : isError
-            ? theme.palette.error.main
-            : theme.palette.success.main,
+              ? theme.palette.error.main
+              : theme.palette.success.main,
         }}
       />
       {disabled ? "Недоступно" : isError ? "Не подключено" : "Подключено"}
@@ -307,10 +306,7 @@ export const IntegrationStatusPage: React.FC = () => {
                   </Typography>
                 </Box>
               </Box>
-              <StatusBadge
-                isError={!healthConnected}
-                toggle={toggleHealth}
-              />
+              <StatusBadge isError={!healthConnected} toggle={toggleHealth} />
             </Box>
 
             <Typography variant="subtitle2" gutterBottom>
@@ -326,5 +322,4 @@ export const IntegrationStatusPage: React.FC = () => {
       </Stack>
     </Container>
   );
-
 };

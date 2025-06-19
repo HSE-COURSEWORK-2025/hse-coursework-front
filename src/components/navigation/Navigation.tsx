@@ -31,7 +31,7 @@ const parseJwt = (token: string) => {
       atob(base64)
         .split("")
         .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
+        .join(""),
     );
     return JSON.parse(jsonPayload);
   } catch {
@@ -110,7 +110,7 @@ export const Navigation: React.FC<NavigationProps> = ({
       process.env.REACT_APP_WS_BASE_URL ||
       window.location.origin.replace(/^http/, "ws");
     const ws = new WebSocket(
-      `${WS_BASE}/notifications-api/api/v1/notifications/has_unchecked?token=${token}`
+      `${WS_BASE}/notifications-api/api/v1/notifications/has_unchecked?token=${token}`,
     );
 
     ws.onopen = () => {
@@ -147,7 +147,6 @@ export const Navigation: React.FC<NavigationProps> = ({
 
   return (
     <StyledDrawer variant="permanent" open={open} onClose={onClose}>
-
       <Box
         sx={{
           display: "flex",

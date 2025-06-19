@@ -14,13 +14,15 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const API_URL = process.env.REACT_APP_AUTH_API_URL || "";
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const navigate = useNavigate();
   const [accessToken, setAccessToken] = useState<string | null>(
-    localStorage.getItem("accessToken")
+    localStorage.getItem("accessToken"),
   );
   const [refreshToken, setRefreshToken] = useState<string | null>(
-    localStorage.getItem("refreshToken")
+    localStorage.getItem("refreshToken"),
   );
 
   const setTokens = (access: string, refresh: string) => {
@@ -79,7 +81,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider
-      value={{ accessToken, refreshToken, setTokens, logout, refreshAccessToken }}
+      value={{
+        accessToken,
+        refreshToken,
+        setTokens,
+        logout,
+        refreshAccessToken,
+      }}
     >
       {children}
     </AuthContext.Provider>

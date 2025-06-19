@@ -1,10 +1,6 @@
 // … импорты оставляем без изменений
 import { useState, useEffect } from "react";
-import {
-  Container,
-  Typography,
-  Box,
-} from "@mui/material";
+import { Container, Typography, Box } from "@mui/material";
 import { CustomChart } from "../../components/customChart/CustomChart";
 import axios from "axios";
 import { useSnackbar } from "notistack";
@@ -26,7 +22,7 @@ ChartJS.register(
   LineElement,
   TimeScale,
   Tooltip,
-  Legend
+  Legend,
 );
 
 // Локальный тип для удобных вычислений внутри компонента:
@@ -83,15 +79,17 @@ export const RawDataChartsPage: React.FC<RawDataChartsPageProps> = ({
   const [chartData, setChartData] = useState<ChartDataType>(
     Object.keys(DATA_TYPES).reduce(
       (acc, key) => ({ ...acc, [key]: [] }),
-      {} as ChartDataType
-    )
+      {} as ChartDataType,
+    ),
   );
 
-  const [loadingMap, setLoadingMap] = useState<Record<keyof ChartDataType, boolean>>(
+  const [loadingMap, setLoadingMap] = useState<
+    Record<keyof ChartDataType, boolean>
+  >(
     Object.keys(DATA_TYPES).reduce(
       (acc, key) => ({ ...acc, [key]: true }),
-      {} as Record<keyof ChartDataType, boolean>
-    )
+      {} as Record<keyof ChartDataType, boolean>,
+    ),
   );
 
   const { enqueueSnackbar } = useSnackbar();
@@ -102,13 +100,11 @@ export const RawDataChartsPage: React.FC<RawDataChartsPageProps> = ({
       ([key, type]) => {
         // Для pulse и oxygen используем raw_data, остальные — processed_data
         const dataCategory =
-          key === "pulse" || key === "oxygen"
-            ? "raw_data"
-            : "processed_data";
+          key === "pulse" || key === "oxygen" ? "raw_data" : "processed_data";
 
         axios
           .get<BackendDataElement[]>(
-            `${API_URL}/api/v1/get_data/${dataCategory}/${type}`
+            `${API_URL}/api/v1/get_data/${dataCategory}/${type}`,
           )
           .then(({ data }) => {
             const transformed = transformData(data);
@@ -128,7 +124,7 @@ export const RawDataChartsPage: React.FC<RawDataChartsPageProps> = ({
               return updated;
             });
           });
-      }
+      },
     );
   }, [enqueueSnackbar, onLoaded]);
 
@@ -148,10 +144,18 @@ export const RawDataChartsPage: React.FC<RawDataChartsPageProps> = ({
     pulse: { title: "Пульс", unit: "уд/мин", color: "#1565C0" },
     oxygen: { title: "Уровень кислорода", unit: "SpO2%", color: "#00897B" },
     sleep: { title: "Время сна", unit: "мин", color: "#00695C" },
-    activeMinutes: { title: "Минуты активности", unit: "мин", color: "#FBC02D" },
+    activeMinutes: {
+      title: "Минуты активности",
+      unit: "мин",
+      color: "#FBC02D",
+    },
     distance: { title: "Пройденная дистанция", unit: "км", color: "#388E3C" },
     steps: { title: "Количество шагов", unit: "шт", color: "#1976D2" },
-    totalCalories: { title: "Всего сожжено калорий", unit: "ккал", color: "#D81B60" },
+    totalCalories: {
+      title: "Всего сожжено калорий",
+      unit: "ккал",
+      color: "#D81B60",
+    },
     speed: { title: "Средняя скорость", unit: "км/ч", color: "#5E35B1" },
   };
 
@@ -190,7 +194,7 @@ export const RawDataChartsPage: React.FC<RawDataChartsPageProps> = ({
                 />
               </Box>
             );
-          }
+          },
         )}
       </Box>
     </Container>

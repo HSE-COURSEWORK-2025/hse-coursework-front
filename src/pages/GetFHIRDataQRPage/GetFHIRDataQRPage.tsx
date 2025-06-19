@@ -32,7 +32,7 @@ export const GetFHIRDataQRPage: React.FC<Props> = ({ onLoaded }) => {
       setError(null);
       const response = await axios.get<QrResponse>(
         `${API_URL}/api/v1/get_data/fhir/get_all_data_qr`,
-        { responseType: "blob" }
+        { responseType: "blob" },
       );
       const blobUrl = URL.createObjectURL(response.data);
       setQrCodeUrl(blobUrl);
@@ -129,7 +129,6 @@ export const GetFHIRDataQRPage: React.FC<Props> = ({ onLoaded }) => {
             <Typography variant="bodyMedium" sx={{ mb: 1 }}>
               QR-код для получения данных в формате FHIR
             </Typography>
-
           </Box>
         </motion.div>
       </Container>

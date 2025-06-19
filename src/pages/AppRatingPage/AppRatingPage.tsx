@@ -24,7 +24,7 @@ export const AppRatingPage: React.FC = () => {
     try {
       setError(null);
       const response = await axios.get<{ rating: number }>(
-        `${API_URL}/api/v1/ratings/my`
+        `${API_URL}/api/v1/ratings/my`,
       );
       setRating(response.data.rating);
       setInitialRating(response.data.rating);
@@ -124,7 +124,9 @@ export const AppRatingPage: React.FC = () => {
                     ? `Вы уже оценили приложение на ${initialRating} ${
                         initialRating === 1 ? "звезду" : "звёзд"
                       }. Чтобы обновить оценку, выберите новое число и нажмите «${
-                        initialRating != null ? "Обновить оценку" : "Проставить оценку"
+                        initialRating != null
+                          ? "Обновить оценку"
+                          : "Проставить оценку"
                       }».`
                     : "Поставьте оценку от 1 до 5, чтобы мы могли стать лучше."}
                 </Typography>

@@ -32,7 +32,6 @@ export const GenerateReportPage: React.FC<GenerateReportPageProps> = ({
         </Typography>
       </Container>
       <Container maxWidth="sm" sx={{ textAlign: "center", py: 6 }}>
-
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
           Нажмите кнопку ниже, чтобы сформировать PDF отчёт. В отчёт войдут
           страницы с графиками и ML прогнозы.

@@ -38,7 +38,7 @@ export const MainPage: React.FC = () => {
         </Typography>
       </Container>
 
-      <Container maxWidth="md" >
+      <Container maxWidth="md">
         <Box
           sx={{
             display: "flex",
@@ -48,9 +48,7 @@ export const MainPage: React.FC = () => {
             gap: 2, // отступ между аватаркой и текстом
           }}
         >
-          <Box textAlign="left">
-            
-          </Box>
+          <Box textAlign="left"></Box>
         </Box>
 
         <Paper sx={{ p: 4, borderRadius: 2, boxShadow: 3 }}>
@@ -74,8 +72,9 @@ export const MainPage: React.FC = () => {
                   Подключите мобильное приложение
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Откройте мобильное приложение, нажмите на кнопку «Открыть камеру»,
-                  отсканируйте QR-код. Начнется выгрузка данных из Google Health Connect
+                  Откройте мобильное приложение, нажмите на кнопку «Открыть
+                  камеру», отсканируйте QR-код. Начнется выгрузка данных из
+                  Google Health Connect
                 </Typography>
               </TimelineContent>
             </TimelineItem>
@@ -99,10 +98,11 @@ export const MainPage: React.FC = () => {
                   Автоматическая выгрузка
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Данные автоматически выгружаются из Google Fitness API подтягиваются каждый час (недоступно для тестовых аккаунтов). 
-                  Данные из Google Health Connect подтягиваются каждый раз, когда 
-                  вы сканируете QR с мобильного устройства. 
-                  Статус выгрузки доступен на странице «Статус выгрузки данных».
+                  Данные автоматически выгружаются из Google Fitness API
+                  подтягиваются каждый час (недоступно для тестовых аккаунтов).
+                  Данные из Google Health Connect подтягиваются каждый раз,
+                  когда вы сканируете QR с мобильного устройства. Статус
+                  выгрузки доступен на странице «Статус выгрузки данных».
                 </Typography>
               </TimelineContent>
             </TimelineItem>
@@ -127,7 +127,8 @@ export const MainPage: React.FC = () => {
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   В разделе «Графики исходных данных» представлены графики с
-                  визуализациями ваших данных, собранных из Google Fitness API и Google Health Connect.
+                  визуализациями ваших данных, собранных из Google Fitness API и
+                  Google Health Connect.
                 </Typography>
               </TimelineContent>
             </TimelineItem>
@@ -151,12 +152,12 @@ export const MainPage: React.FC = () => {
                   Анализ выбросов и прогнозы
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  В разделе «Графики с выбросами» представлены графики исходных данных с 
-                  отметками о найденных аномалиях. 
-                  В разделе «ML-прогнозы» представлены результаты работы ML-моделей, 
-                  представленные в виде вероятностей наличия различных диагнозов.
-
-                  Могут отображаться не самые актуальные данные о выбросах и прогнозах, так как они обновляются раз в час.
+                  В разделе «Графики с выбросами» представлены графики исходных
+                  данных с отметками о найденных аномалиях. В разделе
+                  «ML-прогнозы» представлены результаты работы ML-моделей,
+                  представленные в виде вероятностей наличия различных
+                  диагнозов. Могут отображаться не самые актуальные данные о
+                  выбросах и прогнозах, так как они обновляются раз в час.
                 </Typography>
               </TimelineContent>
             </TimelineItem>
@@ -180,9 +181,9 @@ export const MainPage: React.FC = () => {
                   Получение уведомлений
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Вы получите уведомления о завершении выгрузки, обнаружении выбросов и результатах ML
-                  обработки в веб-приложении и на почту (недоступно для
-                  тестовых аккаунтов).
+                  Вы получите уведомления о завершении выгрузки, обнаружении
+                  выбросов и результатах ML обработки в веб-приложении и на
+                  почту (недоступно для тестовых аккаунтов).
                 </Typography>
               </TimelineContent>
             </TimelineItem>

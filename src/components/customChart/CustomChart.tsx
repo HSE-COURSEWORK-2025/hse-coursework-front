@@ -62,7 +62,7 @@ Chart.register(
   Tooltip,
   Legend,
   zoomPlugin,
-  annotationPlugin
+  annotationPlugin,
 );
 
 interface DataPoint {

@@ -63,10 +63,10 @@ export const NotificationsPage: React.FC = () => {
       try {
         const [uncheckedRes, allRes] = await Promise.all([
           axios.get<Notification[]>(
-            "http://hse-coursework-health.ru/notifications-api/api/v1/notifications/get_unchecked_notifications"
+            "http://hse-coursework-health.ru/notifications-api/api/v1/notifications/get_unchecked_notifications",
           ),
           axios.get<Notification[]>(
-            "http://hse-coursework-health.ru/notifications-api/api/v1/notifications/get_all_notifications"
+            "http://hse-coursework-health.ru/notifications-api/api/v1/notifications/get_all_notifications",
           ),
         ]);
 

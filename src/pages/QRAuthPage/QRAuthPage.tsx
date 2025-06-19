@@ -29,7 +29,7 @@ export const QRAuthPage: React.FC = () => {
       setError(null);
       const response = await axios.get<QrResponse>(
         `${API_URL}/api/v1/qr_auth/get_auth_qr_code`,
-        { responseType: "blob" }
+        { responseType: "blob" },
       );
       const blobUrl = URL.createObjectURL(response.data);
       setQrCodeUrl(blobUrl);
@@ -46,7 +46,7 @@ export const QRAuthPage: React.FC = () => {
       setAppQrError(null);
       const response = await axios.get<QrResponse>(
         `${API_URL}/api/v1/qr_auth/get_app_qr_code`,
-        { responseType: "blob" }
+        { responseType: "blob" },
       );
       const blobUrl = URL.createObjectURL(response.data);
       setAppQrCodeUrl(blobUrl);
@@ -101,8 +101,8 @@ export const QRAuthPage: React.FC = () => {
               sx={{ mb: 3 }}
             >
               Отсканируйте <strong>левый</strong> QR-код в мобильном приложении
-              для выгрузки данных с него. Если у вас ещё нет приложения, используйте{" "}
-              <strong>правый</strong> QR-код для установки.
+              для выгрузки данных с него. Если у вас ещё нет приложения,
+              используйте <strong>правый</strong> QR-код для установки.
             </Typography>
 
             <Stack

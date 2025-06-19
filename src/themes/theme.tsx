@@ -1,7 +1,7 @@
 // theme.ts
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from "@mui/material/styles";
 
-declare module '@mui/material/styles' {
+declare module "@mui/material/styles" {
   interface TypographyVariants {
     displayLarge: React.CSSProperties;
     displayMedium: React.CSSProperties;
@@ -39,7 +39,7 @@ declare module '@mui/material/styles' {
   }
 }
 
-declare module '@mui/material/Typography' {
+declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
     displayLarge: true;
     displayMedium: true;
@@ -61,80 +61,80 @@ declare module '@mui/material/Typography' {
 
 const theme = createTheme({
   typography: {
-    fontFamily: 'Roboto, sans-serif',
+    fontFamily: "Roboto, sans-serif",
     displayLarge: {
-      fontSize: '3.5rem',
+      fontSize: "3.5rem",
       fontWeight: 400,
-      lineHeight: 1.16
+      lineHeight: 1.16,
     },
     displayMedium: {
-      fontSize: '2.8rem',
+      fontSize: "2.8rem",
       fontWeight: 400,
-      lineHeight: 1.2
+      lineHeight: 1.2,
     },
     displaySmall: {
-      fontSize: '2.25rem',
+      fontSize: "2.25rem",
       fontWeight: 400,
-      lineHeight: 1.25
+      lineHeight: 1.25,
     },
     headlineLarge: {
-      fontSize: '2rem',
+      fontSize: "2rem",
       fontWeight: 500,
-      lineHeight: 1.25
+      lineHeight: 1.25,
     },
     headlineMedium: {
-      fontSize: '1.75rem',
+      fontSize: "1.75rem",
       fontWeight: 500,
-      lineHeight: 1.3
+      lineHeight: 1.3,
     },
     headlineSmall: {
-      fontSize: '1.5rem',
+      fontSize: "1.5rem",
       fontWeight: 500,
-      lineHeight: 1.35
+      lineHeight: 1.35,
     },
     titleLarge: {
-      fontSize: '1.375rem',
+      fontSize: "1.375rem",
       fontWeight: 500,
-      lineHeight: 1.4
+      lineHeight: 1.4,
     },
     titleMedium: {
-      fontSize: '1.1rem',
+      fontSize: "1.1rem",
       fontWeight: 500,
-      lineHeight: 1.45
+      lineHeight: 1.45,
     },
     titleSmall: {
-      fontSize: '1rem',
+      fontSize: "1rem",
       fontWeight: 500,
-      lineHeight: 1.5
+      lineHeight: 1.5,
     },
     bodyLarge: {
-      fontSize: '1rem',
-      lineHeight: 1.5
+      fontSize: "1rem",
+      lineHeight: 1.5,
     },
     bodyMedium: {
-      fontSize: '0.875rem',
-      lineHeight: 1.55
+      fontSize: "0.875rem",
+      lineHeight: 1.55,
     },
     bodySmall: {
-      fontSize: '0.75rem',
-      lineHeight: 1.6
+      fontSize: "0.75rem",
+      lineHeight: 1.6,
     },
     labelLarge: {
-      fontSize: '0.875rem',
+      fontSize: "0.875rem",
       fontWeight: 500,
-      lineHeight: 1.65
+      lineHeight: 1.65,
     },
     labelMedium: {
-      fontSize: '0.75rem',
+      fontSize: "0.75rem",
       fontWeight: 500,
-      lineHeight: 1.7
+      lineHeight: 1.7,
     },
     labelSmall: {
-      fontSize: '0.625rem',
+      fontSize: "0.625rem",
       fontWeight: 500,
-      lineHeight: 1.75
-    }
-  }
+      lineHeight: 1.75,
+    },
+  },
 });
 
 export default theme;

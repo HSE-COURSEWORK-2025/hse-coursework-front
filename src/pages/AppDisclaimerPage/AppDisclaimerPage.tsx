@@ -25,18 +25,25 @@ export const AppDisclaimerPage: React.FC = () => {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
-          sx={{ backgroundColor: "background.paper", p: 5, borderRadius: 3, boxShadow: 4 }}
+          sx={{
+            backgroundColor: "background.paper",
+            p: 5,
+            borderRadius: 3,
+            boxShadow: 4,
+          }}
         >
           <Typography variant="body1" paragraph>
-            Это приложение разработано как минимальный жизнеспособный продукт (MVP) в рамках учебного проекта.
-            Все функции и интерфейсы носят демонстрационный характер.
+            Это приложение разработано как минимальный жизнеспособный продукт
+            (MVP) в рамках учебного проекта. Все функции и интерфейсы носят
+            демонстрационный характер.
           </Typography>
 
           <Divider sx={{ my: 3 }} />
 
           <Typography variant="body1" paragraph>
             <strong>• </strong> Автор не предоставляет никаких гарантий
-            безопасности, надёжности или конфиденциальности обработки медицинских данных.
+            безопасности, надёжности или конфиденциальности обработки
+            медицинских данных.
           </Typography>
 
           <Typography variant="body1" paragraph>
@@ -46,7 +53,8 @@ export const AppDisclaimerPage: React.FC = () => {
 
           <Typography variant="body1" paragraph>
             <strong>• </strong>Автор не несёт ответственности за любые убытки,
-            ущерб или негативные последствия, связанные с использованием данного ПО.
+            ущерб или негативные последствия, связанные с использованием данного
+            ПО.
           </Typography>
 
           <Box sx={{ textAlign: "center", mt: 4 }}>
@@ -60,7 +68,7 @@ export const AppDisclaimerPage: React.FC = () => {
                 py: 1.5,
                 fontSize: "1rem",
                 backgroundColor: "error.main",
-                '&:hover': { backgroundColor: 'error.dark' },
+                "&:hover": { backgroundColor: "error.dark" },
                 borderRadius: 2,
                 boxShadow: 3,
               }}
