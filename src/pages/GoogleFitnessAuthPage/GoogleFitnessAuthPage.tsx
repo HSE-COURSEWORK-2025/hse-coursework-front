@@ -296,7 +296,6 @@ export const GoogleFitnessAuthPage: React.FC = () => {
             возможностями без регистрации.
           </Typography>
 
-          {/* Основные кнопки */}
           <Box
             sx={{
               display: "flex",
@@ -364,7 +363,6 @@ export const GoogleFitnessAuthPage: React.FC = () => {
 
             <Divider sx={{ width: "100%", my: 2 }} />
 
-            {/* Селектор тестовых пользователей */}
             <FormControl fullWidth disabled={loadingUsers} sx={{ mb: 2 }}>
               <InputLabel id="gf-test-user-select-label">
                 Выберите тестового пользователя

@@ -39,7 +39,6 @@ export const MainPage: React.FC = () => {
       </Container>
 
       <Container maxWidth="md" >
-        {/* Заголовок страницы */}
         <Box
           sx={{
             display: "flex",
@@ -54,10 +53,8 @@ export const MainPage: React.FC = () => {
           </Box>
         </Box>
 
-        {/* Инструкция в виде временной шкалы */}
         <Paper sx={{ p: 4, borderRadius: 2, boxShadow: 3 }}>
           <Timeline position="alternate">
-            {/* Шаг 1 */}
             <TimelineItem>
               <TimelineOppositeContent
                 sx={{ flex: 0.2, m: "auto 0" }}
@@ -83,7 +80,6 @@ export const MainPage: React.FC = () => {
               </TimelineContent>
             </TimelineItem>
 
-            {/* Шаг 2 */}
             <TimelineItem>
               <TimelineOppositeContent
                 sx={{ flex: 0.2, m: "auto 0" }}
@@ -111,7 +107,6 @@ export const MainPage: React.FC = () => {
               </TimelineContent>
             </TimelineItem>
 
-            {/* Шаг 3 */}
             <TimelineItem>
               <TimelineOppositeContent
                 sx={{ flex: 0.2, m: "auto 0" }}
@@ -137,7 +132,6 @@ export const MainPage: React.FC = () => {
               </TimelineContent>
             </TimelineItem>
 
-            {/* Шаг 4 */}
             <TimelineItem>
               <TimelineOppositeContent
                 sx={{ flex: 0.2, m: "auto 0" }}
@@ -167,7 +161,6 @@ export const MainPage: React.FC = () => {
               </TimelineContent>
             </TimelineItem>
 
-            {/* Шаг 5 */}
             <TimelineItem>
               <TimelineOppositeContent
                 sx={{ flex: 0.2, m: "auto 0" }}
@@ -196,7 +189,6 @@ export const MainPage: React.FC = () => {
           </Timeline>
         </Paper>
 
-        {/* Контакты */}
         <Box sx={{ mt: 6, textAlign: "center" }}>
           <Typography variant="body2" color="text.secondary">
             Есть вопросы? Пишите в Telegram:{" "}

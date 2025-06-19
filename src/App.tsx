@@ -246,7 +246,6 @@ const AppContent = () => {
             }
           />
 
-          {/* Публичный роут */}
           <Route path="/auth" element={<GoogleFitnessAuthPage />} />
 
           <Route

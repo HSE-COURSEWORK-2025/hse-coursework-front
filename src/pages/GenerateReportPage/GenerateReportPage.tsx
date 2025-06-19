@@ -32,13 +32,12 @@ export const GenerateReportPage: React.FC<GenerateReportPageProps> = ({
         </Typography>
       </Container>
       <Container maxWidth="sm" sx={{ textAlign: "center", py: 6 }}>
-        {/* Подсказка пользователю */}
+
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
           Нажмите кнопку ниже, чтобы сформировать PDF отчёт. В отчёт войдут
           страницы с графиками и ML прогнозы.
         </Typography>
 
-        {/* Прогрессбар */}
         {showProgress && (
           <Box sx={{ width: "100%", mb: 3 }}>
             <LinearProgress variant="determinate" value={progress!} />
@@ -48,7 +47,6 @@ export const GenerateReportPage: React.FC<GenerateReportPageProps> = ({
           </Box>
         )}
 
-        {/* Кнопка генерации отчёта */}
         <Box>
           <Button
             variant="contained"

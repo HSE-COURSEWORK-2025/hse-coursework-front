@@ -95,7 +95,6 @@ export const QRAuthPage: React.FC = () => {
               textAlign: "center",
             }}
           >
-            {/* Мини-инструкция */}
             <Typography
               variant="subtitle1"
               color="text.secondary"
@@ -112,7 +111,6 @@ export const QRAuthPage: React.FC = () => {
               justifyContent="center"
               sx={{ mb: 4 }}
             >
-              {/* QR код для авторизации */}
               <Box>
                 <Typography variant="bodyMedium" sx={{ mb: 1 }}>
                   Для выгрузки данных
@@ -136,7 +134,6 @@ export const QRAuthPage: React.FC = () => {
                 )}
               </Box>
 
-              {/* QR код для загрузки приложения */}
               <Box>
                 <Typography variant="bodyMedium" sx={{ mb: 1 }}>
                   Для загрузки приложения

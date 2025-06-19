@@ -209,7 +209,6 @@ export const IntegrationStatusPage: React.FC = () => {
         <Typography variant="h4">⏳ Статус выгрузки данных</Typography>
       </Box>
 
-      {/* Ошибки */}
       {error && (
         <Typography color="error" sx={{ mb: 2 }}>
           {error}
@@ -217,7 +216,6 @@ export const IntegrationStatusPage: React.FC = () => {
       )}
 
       <Stack spacing={3}>
-        {/* Google Fitness API */}
         <Card sx={{ borderRadius: 4, boxShadow: 2 }}>
           <CardContent>
             <Box
@@ -275,7 +273,6 @@ export const IntegrationStatusPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Google Health Connect */}
         <Card sx={{ borderRadius: 4, boxShadow: 2 }}>
           <CardContent>
             <Box

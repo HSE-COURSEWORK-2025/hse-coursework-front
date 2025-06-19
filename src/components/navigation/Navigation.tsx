@@ -147,7 +147,7 @@ export const Navigation: React.FC<NavigationProps> = ({
 
   return (
     <StyledDrawer variant="permanent" open={open} onClose={onClose}>
-      {/* Header */}
+
       <Box
         sx={{
           display: "flex",
@@ -197,7 +197,6 @@ export const Navigation: React.FC<NavigationProps> = ({
         </IconButton>
       </Box>
 
-      {/* Navigation Items */}
       <List sx={{ p: theme.spacing(0, 1.5), flex: 1 }}>
         {items.map((item) => (
           <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
@@ -279,11 +278,9 @@ export const Navigation: React.FC<NavigationProps> = ({
         </ListItem>
       </List>
 
-      {/* Footer */}
       <Box sx={{ p: theme.spacing(2) }}>
         <Divider sx={{ mb: 2 }} />
 
-        {/* Версия */}
         <Typography
           variant="body2"
           color="text.secondary"
@@ -293,7 +290,6 @@ export const Navigation: React.FC<NavigationProps> = ({
           Version 1.0.0
         </Typography>
 
-        {/* Ссылка на дисклеймер */}
         <Box sx={{ textAlign: "center" }}>
           <Link to="/app-disclaimer" style={{ textDecoration: "none" }}>
             <Typography

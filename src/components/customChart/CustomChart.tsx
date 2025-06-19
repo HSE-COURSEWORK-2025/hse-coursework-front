@@ -870,7 +870,6 @@ export const CustomChart = ({
       }}
     >
       <CardContent sx={{ p: 3 }}>
-        {/* Header Section */}
         <Box
           sx={{
             display: "flex",
@@ -924,7 +923,6 @@ export const CustomChart = ({
             </IconButton>
           </Box>
         </Box>
-        {/* Chart Canvas */}
         <Box
           sx={{
             position: "relative",
@@ -943,8 +941,6 @@ export const CustomChart = ({
             onWheel={handleMainWheel}
           />
         </Box>
-
-        {/* Mini Map */}
         <Box
           sx={{
             mt: 2,
@@ -964,8 +960,6 @@ export const CustomChart = ({
             onMouseLeave={handleMiniMouseUp}
           />
         </Box>
-
-        {/* Footer */}
         <Box
           sx={{
             mt: 2,
@@ -982,8 +976,6 @@ export const CustomChart = ({
           </Typography>
         </Box>
       </CardContent>
-
-      {/* Help Popover */}
       <Popover
         open={Boolean(anchorEl)}
         anchorEl={anchorEl}
@@ -1000,7 +992,6 @@ export const CustomChart = ({
         }}
       >
         <Box sx={{ p: 2 }}>
-          {/* Заголовок */}
           <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
             <HelpOutlineIcon
               fontSize="small"
@@ -1011,9 +1002,7 @@ export const CustomChart = ({
             </Typography>
           </Box>
 
-          {/* Секции */}
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            {/* Масштабирование */}
             <Box>
               <Typography
                 variant="labelLarge"
@@ -1080,7 +1069,6 @@ export const CustomChart = ({
               </Box>
             </Box>
 
-            {/* Перемещение */}
             <Divider sx={{ borderColor: "outlineVariant.main" }} />
             <Box>
               <Typography
@@ -1120,7 +1108,6 @@ export const CustomChart = ({
               </Box>
             </Box>
 
-            {/* Область просмотра */}
             <Divider sx={{ borderColor: "outlineVariant.main" }} />
             <Box>
               <Typography
@@ -1160,7 +1147,6 @@ export const CustomChart = ({
               </Box>
             </Box>
 
-            {/* Подсказки */}
             <Divider sx={{ borderColor: "outlineVariant.main" }} />
             <Typography
               variant="bodySmall"
