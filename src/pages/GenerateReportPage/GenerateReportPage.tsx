@@ -5,6 +5,7 @@ import {
   Typography,
   Button,
   LinearProgress,
+  CircularProgress,
 } from "@mui/material";
 
 interface GenerateReportPageProps {
@@ -39,6 +40,12 @@ export const GenerateReportPage: React.FC<GenerateReportPageProps> = ({
 
         {showProgress && (
           <Box sx={{ width: "100%", mb: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+              <CircularProgress />
+            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Генерация отчёта может занимать до 5 минут.
+            </Typography>
             <LinearProgress variant="determinate" value={progress!} />
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
               {`Генерация отчёта: ${Math.round(progress!)}%`}
